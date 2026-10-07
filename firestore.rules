@@ -21,6 +21,11 @@ service cloud.firestore {
       allow write: if isOwner();
     }
 
+    // Lath Diary: each person's diary, photos and voice notes are theirs alone
+    match /diaries/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
     // the books
     match /{col}/{id} {
       allow read, write: if isMember()
