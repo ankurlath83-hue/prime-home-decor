@@ -1,0 +1,30 @@
+rules_version = '2';
+// Prime Home Decor: only the owner and the emails the owner allows can read or change the books.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+    function email() {
+      return request.auth.token.email.lower();
+    }
+    function isOwner() {
+      return signedIn() && email() == 'ankurlath83@gmail.com';
+    }
+    function isMember() {
+      return isOwner() || (signedIn() && exists(/databases/$(database)/documents/members/$(email())));
+    }
+
+    // the list of allowed emails: only the owner changes it; each person can check their own entry
+    match /members/{memberEmail} {
+      allow read: if isOwner() || (signedIn() && email() == memberEmail);
+      allow write: if isOwner();
+    }
+
+    // the books
+    match /{col}/{id} {
+      allow read, write: if isMember()
+        && col in ['products', 'purchases', 'sales', 'parties', 'ledger', 'expenses', 'ideas', 'config', 'photos'];
+    }
+  }
+}
