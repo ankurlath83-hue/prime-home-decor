@@ -621,7 +621,7 @@ function partnersV(V,C){
       ${members.sort((a,b)=>a.id.localeCompare(b.id)).map(m=>`<div class="li"><span>${esc(m.id)}<div class="sub">Added ${dmy(m.added)}</div></span><button type="button" class="btn small danger" data-mem-rm="${esc(m.id)}">Remove</button></div>`).join('')}
     </div>
     <div class="controls" style="margin-top:12px"><input class="search" id="memEmail" type="email" inputmode="email" placeholder="partner@gmail.com" aria-label="Email to allow" style="flex:1;min-width:200px"><button type="button" class="btn primary" id="memAdd">Allow this email</button></div>
-    <p class="sub" style="margin:8px 0 0">Add Anita's and Neha's emails here. They then open the app, tap "Create an account" with the same email, and confirm it from their inbox.</p>`
+    <p class="sub" style="margin:8px 0 0">Add Anita's and Neha's emails here, then ask them to open the app straight away and tap "Create an account" with the same email.</p>`
     : `<p class="sub" style="margin:0">Ankur manages who can sign in.</p>`}
   </div>`;
 }
@@ -1242,7 +1242,7 @@ gate.addEventListener('submit', async e => {
   if (!email || pass.length < 6){ err.textContent = 'Enter your email and a password of at least 6 characters.'; err.hidden = false; return; }
   go.disabled = true; err.hidden = true;
   try {
-    if (f.dataset.mode==='signup'){ const c = await createUserWithEmailAndPassword(auth, email, pass); await sendEmailVerification(c.user); }
+    if (f.dataset.mode==='signup'){ await createUserWithEmailAndPassword(auth, email, pass); }
     else await signInWithEmailAndPassword(auth, email, pass);
   } catch(x){ err.textContent = AUTH_MSG[x.code] || 'Something went wrong. Try again.'; err.hidden = false; go.disabled = false; }
 });
@@ -1273,7 +1273,7 @@ function startBooks(){
 async function enter(user, fromVerify){
   if (!user){ stopBooks(); me = null; COLS.forEach(c=>data[c]=[]); showGate('signin'); return; }
   me = (user.email||'').toLowerCase();
-  if (!user.emailVerified){ showGate('verify', user.email); if (fromVerify) toast('Not verified yet. Tap the link in the email first.'); return; }
+  // No email confirmation: verification emails weren't arriving. Access is controlled by the owner's allowed-email list.
   isOwnerUser = me === OWNER;
   if (!isOwnerUser){
     showGate('loading');
