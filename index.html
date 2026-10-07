@@ -224,6 +224,7 @@ html,body{height:100%}
       <div><h1>Prime Home Decor</h1><small>German silver decor &amp; gifting · Anita Lath &amp; Neha Lath</small></div>
     </div>
     <div class="top-actions">
+      <span id="syncPill" class="pill plain" style="align-self:center" title="Cloud sync status">Connecting…</span>
       <button class="btn primary" id="quickSale">+ Sale</button>
       <button class="btn" id="quickPurchase">+ Purchase</button>
       <button class="btn" id="backupBtn" hidden>Backup</button>
@@ -242,7 +243,7 @@ html,body{height:100%}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { initializeFirestore, getFirestore, persistentLocalCache, persistentMultipleTabManager, collection, doc, setDoc, deleteDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { initializeFirestore, getFirestore, persistentLocalCache, persistentMultipleTabManager, collection, doc, setDoc, deleteDoc, getDoc, getDocFromServer, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 (() => {
 const PARTNERS = [
   {key:'Anita', name:'Anita Lath', phone:'94396 37396'},
@@ -1133,14 +1134,35 @@ try { fs = initializeFirestore(fbApp, {localCache: persistentLocalCache({tabMana
 catch(e){ fs = getFirestore(fbApp); }
 let me = null, isOwnerUser = false, members = [], unsubs = [];
 
+// cloud sync light: green = saved to the cloud, amber = waiting, red = refused (with the reason)
+let pendingW = 0, lastErr = null, waitT = null;
+function syncLight(){
+  const el = document.getElementById('syncPill'); if (!el) return;
+  if (lastErr){ el.className = 'pill bad'; el.textContent = 'Not syncing: ' + lastErr; return; }
+  if (!navigator.onLine){ el.className = 'pill warn'; el.textContent = 'Offline, will sync later'; return; }
+  if (pendingW > 0){ el.className = 'pill warn'; el.textContent = 'Saving to cloud…'; return; }
+  el.className = 'pill good'; el.textContent = 'Synced';
+}
+function track(p){
+  pendingW++; syncLight();
+  clearTimeout(waitT); waitT = setTimeout(() => { if (pendingW > 0 && !lastErr){ const el = document.getElementById('syncPill'); if (el){ el.className='pill warn'; el.textContent='Still waiting for the cloud…'; } } }, 15000);
+  return p.then(r => { pendingW--; lastErr = null; syncLight(); return r; }, e => { pendingW--; lastErr = (e && e.code) || 'error'; syncLight(); throw e; });
+}
+async function checkCloud(){
+  try { await getDocFromServer(doc(fs,'config','settings')); lastErr = null; }
+  catch(e){ lastErr = e.code === 'unavailable' ? null : (e.code || 'error'); if (e.code === 'unavailable'){ const el=document.getElementById('syncPill'); if(el){el.className='pill warn';el.textContent='Can\'t reach the cloud';} return; } }
+  syncLight();
+}
+window.addEventListener('online', syncLight); window.addEventListener('offline', syncLight);
+
 // the small interface the rest of the app uses
 db = {
   collection: c => ({
-    doc: id => ({ set: o => setDoc(doc(fs,c,id), o), delete: () => deleteDoc(doc(fs,c,id)) }),
+    doc: id => ({ set: o => track(setDoc(doc(fs,c,id), o)), delete: () => track(deleteDoc(doc(fs,c,id))) }),
     onSnapshot: (next, err) => onSnapshot(collection(fs,c), s => next({docs: s.docs.map(d=>({id:d.id, data:()=>d.data()}))}), err)
   }),
   doc: path => { const r = doc(fs, ...path.split('/')); return {
-    set: o => setDoc(r, o),
+    set: o => track(setDoc(r, o)),
     onSnapshot: (next, err) => onSnapshot(r, s => next({exists: s.exists(), data: () => s.data()}), err) }; }
 };
 
@@ -1163,7 +1185,7 @@ assets = {
     const dataUrl = await fitPhoto(blob);
     const id = uid();
     photoCache.set(id, Promise.resolve(dataUrl));
-    setDoc(doc(fs,'photos',id), {data: dataUrl, created: new Date().toISOString()}).catch(fail);
+    track(setDoc(doc(fs,'photos',id), {data: dataUrl, created: new Date().toISOString()})).catch(fail);
     return {id, url: dataUrl};
   }
 };
@@ -1265,7 +1287,7 @@ function startBooks(){
   stopBooks(); mode = 'db'; loadedCount = 0;
   const seen = new Set();
   const done = () => { if (seen.size >= COLS.length+1 && loadedCount===0){ loadedCount=1; demo = COLS.every(c=>!data[c].length); } render(); };
-  const onErr = c => e => { seen.add(c); if (e && e.code==='permission-denied'){ stopBooks(); showGate('notmember', me); } else done(); };
+  const onErr = c => e => { seen.add(c); lastErr = (e && e.code) || 'error'; syncLight(); if (e && e.code==='permission-denied' && !isOwnerUser){ stopBooks(); showGate('notmember', me); } else done(); };
   COLS.forEach(c => unsubs.push(db.collection(c).onSnapshot(snap=>{ data[c]=snap.docs.map(d=>({...d.data(),id:d.id})); if (data[c].length) demo=false; seen.add(c); done(); }, onErr(c))));
   unsubs.push(db.doc('config/settings').onSnapshot(s=>{ if(s.exists) settings={shareAnita:50,...s.data()}; seen.add('settings'); done(); }, onErr('settings')));
   if (isOwnerUser) unsubs.push(onSnapshot(collection(fs,'members'), s=>{ members = s.docs.map(d=>({id:d.id,...d.data()})); render(); }, ()=>{}));
@@ -1280,7 +1302,7 @@ async function enter(user, fromVerify){
     try { const m = await getDoc(doc(fs,'members',me)); if (!m.exists()){ showGate('notmember', me); return; } }
     catch(e){ if (e.code==='permission-denied'){ showGate('notmember', me); return; } /* offline: try the saved copy */ }
   }
-  hideGate(); startBooks(); render();
+  hideGate(); startBooks(); render(); checkCloud();
 }
 render();
 showGate('loading');

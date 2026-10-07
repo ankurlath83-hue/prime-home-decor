@@ -1,5 +1,5 @@
 // Keeps the app opening without internet. The books themselves are kept offline by Firebase.
-const CACHE = 'diary-v1';
+const CACHE = 'diary-v2';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png', 'media/krishna.jpg', 'media/saraswati.jpg'];
 const LIBS = ['www.gstatic.com', 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 

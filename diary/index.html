@@ -1563,7 +1563,7 @@ async function push(){
     if(parts<=1)await remote.set({json,updatedAt:state.updatedAt,parts:0});
     else{for(let i=0;i<parts;i++)await remotePart(i).set({json:json.slice(i*SYNC_CHUNK,(i+1)*SYNC_CHUNK),updatedAt:state.updatedAt});
       await remote.set({json:'',parts,updatedAt:state.updatedAt})}
-    setSync('ok')}catch(e){setSync('err')}
+    window.DIARY_SYNC_ERR=null;setSync('ok')}catch(e){window.DIARY_SYNC_ERR=(e&&e.code)||'error';setSync('err')}
   writing=false; if(pending){pending=false;push()}
 }
 function save(){state.updatedAt=Date.now();savedAt=Date.now();saveLocal();paintSync();clearTimeout(saveT);saveT=setTimeout(push,900)}
@@ -1581,7 +1581,7 @@ function paintSync(){
   el.className='sync'+(syncMode==='ok'?' ok':'');
   const s=Math.round((Date.now()-savedAt)/1000);
   const ago=s<10?'saved just now':s<60?`saved ${s}s ago`:s<3600?`saved ${Math.round(s/60)} min ago`:`saved ${Math.round(s/3600)} hr ago`;
-  el.querySelector('span').textContent=(syncMode==='ok'?'Account':syncMode==='big'?'This device only — too large to sync':'This device')+' · '+ago;
+  el.querySelector('span').textContent=(syncMode==='ok'?'Account':syncMode==='big'?'This device only — too large to sync':syncMode==='err'?'Not syncing'+(window.DIARY_SYNC_ERR?': '+window.DIARY_SYNC_ERR:''):'This device')+' · '+ago;
 }
 window.addEventListener('pagehide',()=>{saveLocal();push()});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){saveLocal();push()}});
@@ -4343,7 +4343,7 @@ paintSync();
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { initializeFirestore, getFirestore, persistentLocalCache, persistentMultipleTabManager, doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { initializeFirestore, getFirestore, persistentLocalCache, persistentMultipleTabManager, doc, setDoc, getDoc, getDocFromServer, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyDN0IIF1sE59WoAskNYzeyLq2aTacgHPQs",
@@ -4479,15 +4479,17 @@ onAuthStateChanged(auth, async user => {
   remote = { set: o => setDoc(mainRef(), o) };
   remotePart = i => ({ set: o => setDoc(partRef(i), o) });
   try {
-    const snap = await getDoc(mainRef());
+    let snap;
+    try { snap = await getDocFromServer(mainRef()); }
+    catch(e){ if (e.code !== 'unavailable') throw e; snap = await getDoc(mainRef()); }
     const got = await pull(snap);
+    window.DIARY_SYNC_ERR = null; setSync('ok');
     if (!got && (state.updatedAt || 0) > ((snap.exists() && snap.data().updatedAt) || 0)) push();
-    setSync('ok');
-  } catch(e){ setSync('err'); }
+  } catch(e){ window.DIARY_SYNC_ERR = (e && e.code) || 'error'; setSync('err'); toast('Not syncing to your account: ' + window.DIARY_SYNC_ERR); }
   gate.style.display = 'none';
   try { render(); } catch(e){}
   // changes made on another phone or computer appear here by themselves
-  unsub = onSnapshot(mainRef(), s => { if (!s.metadata.hasPendingWrites) pull(s).then(ch => { if (ch) toast('Updated from your other device'); }); });
+  unsub = onSnapshot(mainRef(), s => { if (!s.metadata.hasPendingWrites) pull(s).then(ch => { if (ch) toast('Updated from your other device'); }); }, e => { window.DIARY_SYNC_ERR = (e && e.code) || 'error'; setSync('err'); });
 });
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
