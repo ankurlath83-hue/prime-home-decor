@@ -290,6 +290,7 @@ try { const t = localStorage.getItem('phd-tab'); if (t && TABS.some(x=>x[0]===t)
 if (location.hash && TABS.some(x=>x[0]===location.hash.slice(1))) tab = location.hash.slice(1);
 let period = 'month', partyFilter = 'all', stockQ = '';
 let supFilter = 'all', payFilter = 'all', purchPeriod = 'all', purchView = 'bills';
+let fixPending = false, isOwnerUser = false;
 try { if (localStorage.getItem('phd-pview')==='sheet') purchView = 'sheet'; } catch(e){}
 
 /* ---------- example data (shown only while books are empty) ---------- */
@@ -425,6 +426,11 @@ function renderTabs(){
 function renderBanner(){
   const el = document.getElementById('bannerSlot');
   if (mode==='loading'){ el.innerHTML=''; return; }
+  if (fixPending && isOwnerUser){
+    if (!el.querySelector('#fixBox')) el.innerHTML = `<div class="banner" id="fixBox"><p><b>Corrected Shri Krishna bills are ready.</b> Type the code Claude gave you to put them into the books (11, 15, 23 and 30 Sept).</p>
+      <div class="controls"><input class="search" id="fixCode" placeholder="Code" autocomplete="off" autocapitalize="characters" style="width:130px;text-transform:uppercase" aria-label="Code"><button class="btn small primary" id="fixGo">Apply</button></div></div>`;
+    return;
+  }
   if (demo){
     el.innerHTML = `<div class="banner"><p><b>You're looking at example figures.</b> Nothing here is your real business yet. Add your first product or sale and the example goes away.</p><button class="btn small" id="startOwn">Start my own books</button></div>`;
   } else if (mode==='local'){
@@ -1231,12 +1237,40 @@ const firebaseConfig = {
   appId: "1:858531311161:web:bb88ec8b1ebcd2ea8767e8"
 };
 const OWNER = 'ankurlath83@gmail.com';
+/* One-time corrections prepared by Claude, locked with a code so the figures are not readable in this public file. */
+const PENDING_FIX = {"id": "krishna-2026-10-08", "salt": "EZlNbfdG/i0d+Qw5U/934w==", "iv": "MgvB9fq0mp6VPIkB", "ct": "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"};
+async function checkFix(){
+  if (!isOwnerUser) return;
+  try { const f = await getDoc(doc(fs,'config','fixes')); const done = (f.exists() && f.data().applied) || []; fixPending = !done.includes(PENDING_FIX.id); } catch(e){ fixPending = false; }
+  render();
+}
+async function applyFix(btn){
+  const code = (document.getElementById('fixCode').value || '').toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if (!code){ toast('Type the code first.'); return; }
+  btn.disabled = true; btn.textContent = 'Applying…';
+  try {
+    const b64 = x => Uint8Array.from(atob(x), c => c.charCodeAt(0));
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(code), 'PBKDF2', false, ['deriveKey']);
+    const key = await crypto.subtle.deriveKey({name:'PBKDF2', salt:b64(PENDING_FIX.salt), iterations:200000, hash:'SHA-256'}, base, {name:'AES-GCM', length:256}, false, ['decrypt']);
+    const plain = await crypto.subtle.decrypt({name:'AES-GCM', iv:b64(PENDING_FIX.iv)}, key, b64(PENDING_FIX.ct));
+    const bills = JSON.parse(new TextDecoder().decode(plain));
+    for (const bill of bills) await saveDoc('purchases', bill);
+    const f = await getDoc(doc(fs,'config','fixes')).catch(()=>null);
+    const done = (f && f.exists() && f.data().applied) || [];
+    await track(setDoc(doc(fs,'config','fixes'), {applied:[...done, PENDING_FIX.id], at:new Date().toISOString()}));
+    fixPending = false; tab = 'purchases'; supFilter = 'shri krishna'; purchView = 'sheet';
+    render(); toast(`Shri Krishna bills updated (${bills.length} bills)`);
+  } catch(e){
+    btn.disabled = false; btn.textContent = 'Apply';
+    toast(e && e.name === 'OperationError' ? "That code isn't right. Check it and try again." : 'Could not apply. Check the internet and try again.');
+  }
+}
 const fbApp = initializeApp(firebaseConfig);
 const auth = getAuth(fbApp);
 let fs;
 try { fs = initializeFirestore(fbApp, {localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})}); }
 catch(e){ fs = getFirestore(fbApp); }
-let me = null, isOwnerUser = false, members = [], unsubs = [];
+let me = null, members = [], unsubs = [];
 
 // cloud sync light: green = saved to the cloud, amber = waiting, red = refused (with the reason)
 let pendingW = 0, lastErr = null, waitT = null;
@@ -1406,7 +1440,7 @@ async function enter(user, fromVerify){
     try { const m = await getDoc(doc(fs,'members',me)); if (!m.exists()){ showGate('notmember', me); return; } }
     catch(e){ if (e.code==='permission-denied'){ showGate('notmember', me); return; } /* offline: try the saved copy */ }
   }
-  hideGate(); startBooks(); render(); checkCloud();
+  hideGate(); startBooks(); render(); checkCloud(); checkFix();
 }
 render();
 showGate('loading');
@@ -1428,6 +1462,7 @@ window.addEventListener('click', e => {
     removeMember(t.dataset.memRm);
   }
   if (t.id==='signOutBtn') signOut(auth);
+  if (t.id==='fixGo') applyFix(t);
 });
 window.addEventListener('online', () => toast('Back online. Changes are syncing.'));
 window.addEventListener('offline', () => toast('Offline. You can keep working; changes save when you\'re back online.'));
