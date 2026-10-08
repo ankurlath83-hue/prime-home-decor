@@ -1,5 +1,5 @@
 // Keeps the app opening without internet. The books themselves are kept offline by Firebase.
-const CACHE = 'phd-v5';
+const CACHE = 'phd-v6';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png'];
 const LIBS = ['www.gstatic.com', 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 

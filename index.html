@@ -564,7 +564,7 @@ function statementRows(bills, C){
   const out = []; // {kind, ...}
   [...bills].sort((a,b)=>(a.date||'').localeCompare(b.date||'')).forEach(u=>{
     const pc = purchCalc(u), p = u.payments||{};
-    out.push({kind:'head', date:u.date, supplier:u.supplier||'', billNo:u.billNo||''});
+    out.push({kind:'head', id:u.id, date:u.date, supplier:u.supplier||'', billNo:u.billNo||''});
     (u.items||[]).forEach((it,i)=>out.push({kind:'item', no:i+1, name:prodName(C,it.productId), qty:n(it.qty), rate:n(it.rate), amt:n(it.qty)*n(it.rate)}));
     out.push({kind:'sub', amt:pc.itemsVal});
     CHARGE_LINES.forEach(([k,l])=>{ if (n(u[k])) out.push({kind:'charge', name:l, amt:n(u[k])}); });
@@ -577,7 +577,7 @@ function statementHTML(bills, C, S){
   if (!bills.length) return `<div class="panel empty">No purchase bills match these filters.</div>`;
   const r = statementRows(bills, C);
   const body = r.map(x=>{
-    if (x.kind==='head') return `<tr class="sh-head"><td colspan="5"><b>${dmy(x.date)}</b> · ${esc(x.supplier)}${x.billNo?` · Bill ${esc(x.billNo)}`:''}</td></tr>`;
+    if (x.kind==='head') return `<tr class="sh-head"><td colspan="5"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span><b>${dmy(x.date)}</b> · ${esc(x.supplier)}${x.billNo?` · Bill ${esc(x.billNo)}`:''}</span><button type="button" class="btn small" data-edit="purchases" data-id="${x.id}">Edit bill</button></div></td></tr>`;
     if (x.kind==='item') return `<tr><td class="n sub">${x.no}</td><td>${esc(x.name)}</td><td class="n">${x.qty}</td><td class="n">${fmt.format(x.rate)}</td><td class="n">${fmt.format(x.amt)}</td></tr>`;
     if (x.kind==='sub') return `<tr class="sh-sub"><td></td><td colspan="3">Items total</td><td class="n">${fmt.format(x.amt)}</td></tr>`;
     if (x.kind==='charge') return `<tr><td></td><td colspan="3" class="sub">${esc(x.name)}</td><td class="n">${fmt.format(x.amt)}</td></tr>`;
