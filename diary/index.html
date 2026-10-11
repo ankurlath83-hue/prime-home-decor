@@ -1265,6 +1265,17 @@ html.scifi .sf-deco{display:block;position:fixed;inset:0;z-index:0;pointer-event
 html.scifi .top{padding-top:26px}
 @media (min-width:1100px){html.scifi body{padding-left:130px}.sf-rail.l{left:102px}}
 @media (max-width:440px){html.scifi .seg button{font-size:.9rem;padding:9px 6px;letter-spacing:0}}
+
+/* 12 laws */
+.laws-grid{display:grid;gap:10px}
+@media (min-width:620px){.laws-grid{grid-template-columns:1fr 1fr}}
+@media (min-width:780px){.laws-grid{column-span:all}}
+@media (min-width:1000px){.laws-grid{grid-template-columns:repeat(3,1fr)}}
+.laws-grid .card+.card{margin-top:0}
+.law{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:start}
+.law-ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:1.4rem;background:var(--surface-2)}
+.law.today{outline:2px solid var(--saffron);outline-offset:-2px}
+html.scifi .law-ic{background:rgba(244,196,48,.1);box-shadow:inset 0 0 0 1px rgba(244,196,48,.35),0 0 12px -4px rgba(244,196,48,.5)}
 </style>
 </head>
 <body>
@@ -1388,6 +1399,8 @@ const CARRY=[
  ['Protect your bandwidth','Say no more often. Rest without guilt.']
 ];
 const NOT_CARRY=['Mental reminders — write them down','Over-planning — good enough beats perfect','Too many options — limit your choices',"Other people's expectations — not yours to carry",'Guilt and "shoulds" — release the noise'];
+const MONK_BOOK={id:'bkmonk',title:'Think Like a Monk',author:'Jay Shetty',pages:352,level:'Beginner',days:'5–6 days',problem:'Your mind is noisy and restless',color:'#1E4FA3',read:0,status:'want',
+  ideas:['Train your mind for peace, purpose and a better life — think like a monk without leaving the world.','Control your mind: your thoughts shape your reality.','Let go of the past, find your purpose, and practise gratitude.','Real success comes from serving and lifting others.']};
 const DEFAULT_BOOKS=[
  {id:'bk1',title:'The Power of Now',author:'Eckhart Tolle',pages:236,level:'Intermediate',days:'4–5 days',problem:'You overthink everything',color:'#3E8E41',read:0,status:'want',
   ideas:['You are not your thoughts — learn to watch them without being dragged along.','Most suffering lives in regret about the past or worry about the future.','Come back to now through your breath and your body.']},
@@ -1535,7 +1548,9 @@ function defaults(){
     parties:[],ledger:[],cash:[],fun:[],counter:{},counts:[],
     sacred:clone(DEFAULT_SACRED),japa:{},bilva:{},trinity:{a:60,v:25,i:15},maps:[],track:{mode:'month',start:null,len:30},media:{}};
 }
-function migrate(s){const d=defaults();for(const k in d) if(s[k]===undefined) s[k]=d[k];return s}
+function migrate(s){const d=defaults();for(const k in d) if(s[k]===undefined) s[k]=d[k];
+  if(!s.monkBook&&Array.isArray(s.books)){s.monkBook=1;if(!s.books.some(b=>/think like a monk/i.test(b.title||'')))s.books.push(clone(MONK_BOOK))}
+  return s}
 
 /* ---------- storage: this device ---------- */
 const LS='lathdiary.v1';
@@ -2676,7 +2691,7 @@ function vMind(){
   }
   if(ui.mSub==='wisdom'){
     html+=saraswatiScene();
-    const W=[['japanese','Japanese'],['atomic','Atomic Habits'],['carry','Carry less'],['gita','Gita'],['shiv','Shiv Puran'],['voices','Voices']];
+    const W=[['japanese','Japanese'],['atomic','Atomic Habits'],['carry','Carry less'],['monk','Think like a monk'],['laws','12 Laws'],['gita','Gita'],['shiv','Shiv Puran'],['voices','Voices']];
     html+=`<div class="cats" style="margin-top:14px">${W.map(([k,l])=>`<button class="${ui.wSub===k?'on':''}" data-a="sub" data-g="wSub" data-v="${k}">${l}</button>`).join('')}</div>`;
     if(['gita','shiv','voices'].includes(ui.wSub))
       html+=`<input class="field" id="wq" style="margin-top:12px" value="${ui.wSub==='gita'?esc(ui.gQ||''):''}" placeholder="Search ${ui.wSub==='gita'?'all 700 verses — try 2.47, karma, yoga':ui.wSub==='shiv'?'teachings — try japa, giving, fear':'quotes — try Tesla, strength, truth'}" autocomplete="off">`;
@@ -2689,6 +2704,7 @@ function vMind(){
       ATOMIC.map(([t,d],i)=>`<div class="lesson"><span class="n">${i+1}</span><div><b>${t}</b><p class="small muted">${d}</p></div></div>`).join('')+`</div>
       <section class="quote"><h3>Remember</h3><p>Habits are the compound interest of self-improvement. Start small, stay consistent.</p></section>`;
     }
+    html+=wisdomExtra();
     if(ui.wSub==='carry'){
       html+=`<div class="sec-head"><h2>Carry less, live more</h2></div><div class="card">`+
       CARRY.map(([t,d],i)=>`<div class="lesson"><span class="n" style="color:var(--saffron)">${i+1}</span><div><b>${t}</b><p class="small muted">${d}</p></div></div>`).join('')+`</div>
@@ -3721,6 +3737,55 @@ const FUN_A={
   funRate:el=>{const x=state.fun.find(i=>i.id===el.dataset.id);if(!x)return;const v=Number(el.dataset.v);x.rating=x.rating===v?0:v;commit()}
 };
 
+
+/* ---------- Wisdom: Think Like a Monk + 12 Laws of the Universe ---------- */
+const MONK_MINDSET=[['👁️','Awareness','Be present. Notice the little things — life is happening now.'],['🌿','Discipline','Do what is right even when it is hard. Build good habits.'],
+  ['☀️','Detachment','Let go of what you cannot control. That is where freedom lives.'],['⛰️','Simplicity','Less clutter, less stress, more peace.'],['♾️','Compassion','Be kind to yourself and others — everyone is on the same journey.']];
+const MONK_LESSONS=[['🧠','Control your mind','Your thoughts shape your reality. Put your energy on what you can control.'],['💗','Let go of the past','Stop replaying old stories — they steal your present and future.'],
+  ['🎯','Find your purpose','Do what feels meaningful, not only what feels easy or pays well.'],['🪷','Practise gratitude','Appreciation changes how you see things and brings more joy.'],['🤝','Be kind & serve','Real success comes from lifting others up, not only yourself.']];
+const MONK_WHY=['Less stress and overthinking','Better mental and emotional well-being','Clearer decisions','Stronger relationships','A more meaningful, fulfilling life'];
+const MONK_EX=['Instead of worrying about the future, act on what you can do today','Choose peace over being right','Spend time in nature and silence','Replace comparison with self-growth','Help others without expecting anything back'];
+const MONK_START=[['breath','Take a few deep breaths and be present'],['notice','Notice your thoughts — don’t just react to them'],['kind','Do one small act of kindness'],['phone','Less phone, more time on what matters'],['show','Keep showing up for yourself and your goals']];
+const LAWS=[
+ ['🌌','Divine Oneness','Everything and everyone is connected. Every thought, action and event affects the whole.','Who did my actions touch today?'],
+ ['〰️','Vibration','Everything is in motion and vibrates at a frequency — thoughts, emotions and things alike.','What energy am I carrying into this room?'],
+ ['🔁','Correspondence','Patterns repeat at every scale — as above, so below; as within, so without. The outer world mirrors the inner.','What in my surroundings reflects my mind right now?'],
+ ['🪷','Attraction','Like attracts like. Positive thoughts and feelings draw positive outcomes.','What am I giving my attention to most?'],
+ ['🎯','Inspired Action','To achieve, we must act — follow intuition and take real steps toward the goal.','What one step can I take today?'],
+ ['⚡','Perpetual Transmutation of Energy','Energy is always changing form. We can change ours through thoughts, actions and emotions.','Which low mood can I turn into action?'],
+ ['🌀','Cause and Effect','Every action has a reaction. Thoughts, words and deeds create effects in our lives.','What am I sowing today that I will reap later?'],
+ ['☯️','Compensation','The universe returns what we give — effort and contribution come back as karmic return.','What did I give today without keeping count?'],
+ ['⚖️','Relativity','Everything is understood in comparison. Challenges are chances for growth and perspective.','Compared to what? What is this teaching me?'],
+ ['🧲','Polarity','Everything has an opposite. Opposites are needed for balance and growth.','What is the other side of this problem?'],
+ ['🌊','Rhythm','Life moves in cycles — natural highs and lows. Recognising them helps us ride the changes.','Am I in a high or a low — and what does this season ask of me?'],
+ ['🕉️','Gender','Masculine and feminine energies exist in everyone and everything — both are needed to create and balance.','Do I need more doing (Shiv) or more receiving (Shakti) today?']];
+function wisdomExtra(){
+  const T=today(),doy=Math.floor((new Date()-new Date(new Date().getFullYear(),0,0))/864e5);let h='';
+  if(ui.wSub==='monk'){
+    state.monk=state.monk||{};const d=state.monk[T]||{},done=MONK_START.filter(([k])=>d[k]).length;
+    h+=`<section class="quote"><h3>Think Like a Monk · Jay Shetty</h3><p>Less noise. More clarity. A better you.</p>
+      <p class="small" style="font-family:var(--body);font-weight:400;opacity:.9;margin-top:8px">Build inner peace, clarity and purpose by adopting the mindset and habits of a monk — not by becoming one, but by thinking like one in everyday life.</p></section>
+    <div class="sec-head"><h2>How to start today</h2><span class="pill ${done===5?'':'o'}">${done}/5 done</span></div><div class="card">`+
+    MONK_START.map(([k,t],i)=>`<div class="item ${d[k]?'done':''}"><button class="check ${d[k]?'on':''}" data-a="monkTick" data-k="${k}" aria-label="Mark done">${d[k]?'✓':''}</button><div class="t"><div class="ttl">${i+1}. ${t}</div></div></div>`).join('')+`</div>
+    <div class="sec-head"><h2>The monk mindset</h2></div><div class="card">`+MONK_MINDSET.map(([i,t,x])=>`<div class="lesson"><span class="n" style="font-size:1.2rem">${i}</span><div><b>${t}</b><p class="small muted">${x}</p></div></div>`).join('')+`</div>
+    <div class="sec-head"><h2>Key lessons</h2></div><div class="card">`+MONK_LESSONS.map(([i,t,x],n)=>`<div class="lesson"><span class="n" style="color:var(--saffron)">${n+1}</span><div><b>${i} ${t}</b><p class="small muted">${x}</p></div></div>`).join('')+`</div>
+    <section class="quote"><h3>Peace</h3><p>Peace comes from within. Don’t seek it outside.</p></section>
+    <div class="sec-head"><h2>Why it matters</h2></div><div class="card">${MONK_WHY.map(t=>`<p class="idea">${t}</p>`).join('')}</div>
+    <div class="sec-head"><h2>In real life</h2></div><div class="card">${MONK_EX.map(t=>`<p class="idea">✓ ${t}</p>`).join('')}</div>
+    <section class="quote"><h3>The big takeaway</h3><p>You don’t need to escape the world. You just need to change the way you see it.</p>
+      <p class="small" style="font-family:var(--body);opacity:.85;margin-top:8px">A calmer mind doesn’t mean a less ambitious life. It means a more intentional one.</p></section>`;
+  }
+  if(ui.wSub==='laws'){
+    const L=LAWS[doy%12];
+    h+=`<section class="quote"><h3>Law for today · ${doy%12+1} of 12</h3><p>${L[0]} The Law of ${L[1]}</p>
+      <p class="small" style="font-family:var(--body);font-weight:400;opacity:.9;margin-top:8px">${L[2]}</p>
+      <p class="small" style="font-family:var(--body);color:#FFB547;margin-top:8px;font-weight:600">Ask yourself: ${L[3]}</p></section>
+    <div class="sec-head"><h2>The 12 laws of the universe</h2></div><section class="laws-grid">`+
+    LAWS.map(([i,n,x,q],k)=>`<div class="card law ${k===doy%12?'today':''}"><div class="law-ic">${i}</div><div><span class="small muted">Law ${k+1}</span><h3>${n}</h3><p class="small" style="margin-top:4px">${x}</p><p class="small" style="color:var(--leaf);font-weight:600;margin-top:6px">${q}</p></div></div>`).join('')+`</section>`;
+  }
+  return h;
+}
+
 const VIEWS={today:vToday,god:vGod,exercise:vExercise,habits:vHabits,plan:vPlan,money:vMoney,media:vMedia,mind:vMind};
 let lastViewKey=null;
 const revealIO=window.IntersectionObserver?new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){en.target.classList.add('in');revealIO.unobserve(en.target)}}),{rootMargin:'0px 0px -8% 0px'}):null;
@@ -3935,6 +4000,7 @@ const A={
   deityPhoto:el=>{const k=el.dataset.k;state.deityMode=state.deityMode||{};state.deityMode[k]=DEITY_VIDEO[k]?'photo':undefined;if(!DEITY_VIDEO[k])delete state.deityMode[k];commit()},
   deityVideo:el=>{const k=el.dataset.k;state.deityMode=state.deityMode||{};state.deityMode[k]='video';commit()},
   belOffer:()=>belOffer(),
+  monkTick:el=>{const T=today();state.monk=state.monk||{};const d=state.monk[T]=state.monk[T]||{};d[el.dataset.k]=!d[el.dataset.k];commit();if(MONK_START.every(([k])=>d[k])){try{SFX.play('fanfare')}catch(e){}toast('All 5 done — a calmer mind today 🪷')}},
   altFx:el=>{const on=altPref('altarfx','1')!=='1';altSet('altarfx',on?'1':'0');el.setAttribute('aria-pressed',on);const a=document.getElementById('altar');a&&a.classList.toggle('still',!on);
     const lb=el.previousElementSibling;if(lb)lb.textContent=`Bel Patra Sadhana Animation (${on?'On':'Off'})`;if(!on)ALT.sparks=[];altKick()},
   goWho:()=>{ui.tab='mind';ui.mSub='reflect';render();window.scrollTo(0,0)},
