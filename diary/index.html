@@ -1276,6 +1276,53 @@ html.scifi .top{padding-top:26px}
 .law-ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:1.4rem;background:var(--surface-2)}
 .law.today{outline:2px solid var(--saffron);outline-offset:-2px}
 html.scifi .law-ic{background:rgba(244,196,48,.1);box-shadow:inset 0 0 0 1px rgba(244,196,48,.35),0 0 12px -4px rgba(244,196,48,.5)}
+
+/* panchang */
+.pan h3{margin-top:2px}
+.pan-moon{flex:none;width:46px;height:46px;border-radius:50%;background:#1C2A30;position:relative;overflow:hidden;box-shadow:0 0 14px rgba(255,214,130,.35),inset 0 0 0 1px rgba(255,214,130,.4)}
+.pan-moon::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 35% 35%,#FFF6DA,#F4D58A);
+  clip-path:inset(0 calc((1 - min(var(--ph)*2,1)) * 100%) 0 calc(max(var(--ph)*2 - 1,0) * 100%))}
+.pan-flags{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.pan-f{display:flex;flex-direction:column;padding:8px 12px;border-radius:12px;background:var(--peach);color:var(--saffron);font-weight:800;font-size:.9rem}
+.pan-f small{font-weight:500;color:var(--muted);font-size:.74rem}
+.pan-f.shivratri,.pan-f.pradosh{background:rgba(0,200,90,.14);color:var(--leaf)}
+.pan-up{margin-top:10px;display:grid;gap:6px}
+.pan-up div{display:flex;justify-content:space-between;gap:10px;font-size:.88rem;border-top:1px dashed var(--line);padding-top:6px}
+.pan-up span{color:var(--muted)}
+.alt-spec{display:inline-block;margin-top:8px;padding:4px 12px;border-radius:99px;background:rgba(0,230,118,.14);color:#00E676;border:1px solid rgba(0,230,118,.5);font:700 .82rem/1.3 "Rajdhani",sans-serif;letter-spacing:.06em;text-transform:uppercase}
+/* numerology */
+.numc{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
+.numc .row{grid-column:1/-1}
+.num-big{width:58px;height:58px;border-radius:16px;display:grid;place-items:center;font:800 2rem/1 var(--display);color:#fff;background:linear-gradient(135deg,var(--saffron),#C2410C);box-shadow:0 0 18px -4px rgba(238,122,18,.6)}
+/* japa year */
+.jy{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,1fr);gap:3px;overflow-x:auto;padding-bottom:4px}
+.jy i,.jy-key i{width:11px;height:11px;border-radius:3px;background:var(--surface-2);display:block}
+.jy-key{display:flex;gap:3px}
+.jy .l1,.jy-key .l1{background:#FFD29E}.jy .l2,.jy-key .l2{background:#FFB547}.jy .l3,.jy-key .l3{background:#7DBB5A}.jy .l4,.jy-key .l4{background:#2E9E4F;box-shadow:0 0 6px rgba(0,230,118,.5)}
+.badges-m{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.badge-m{font-size:.78rem;font-weight:700;padding:4px 10px;border-radius:99px;background:var(--surface-2);color:var(--muted)}
+.badge-m.on{background:var(--peach);color:var(--saffron);box-shadow:inset 0 0 0 1px var(--saffron)}
+.ms{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.ms b{display:block;font:800 1.3rem var(--display);margin:2px 0 4px}
+/* tamil */
+.ta-w{font-family:"Noto Sans Tamil","Latha",sans-serif;font-size:1.4rem;font-weight:700;color:var(--forest)}
+.ta-card{text-align:center;margin-top:12px}
+.ta-big{display:block;font-family:"Noto Sans Tamil","Latha",sans-serif;font-size:clamp(1.8rem,8vw,2.6rem);color:var(--forest);margin:10px 0 4px;line-height:1.3}
+.ta-ro{font-style:italic;color:var(--saffron);font-weight:700;font-size:1.1rem;margin-top:8px}
+/* weekly */
+.wk-bars{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;height:120px;align-items:end}
+.wk-bars div{height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px}
+.wk-bars i{width:100%;max-width:30px;border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,var(--leaf),var(--marigold))}
+.wk-bars span{font-size:.72rem;color:var(--muted);font-weight:700}
+/* who blocks */
+.who-blocks{display:grid;gap:8px;margin-top:8px}
+.who-b{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04)}
+.who-b small{color:#9DB0A1;margin-left:4px}
+.who-chips{display:flex;gap:4px}
+.who-chips button{border:1px solid rgba(255,255,255,.18);background:transparent;color:#EDE3D3;border-radius:99px;padding:4px 10px;font-family:"Noto Serif Devanagari",serif;font-size:.82rem}
+.who-chips button.on{background:var(--c);border-color:var(--c);color:#0B1410;font-weight:700}
+/* voice */
+.mic-btn{font-size:1.05rem}
+@media (min-width:780px){.pan,.numc,.bk-n,.ta-mini{break-inside:avoid-column}}
 </style>
 </head>
 <body>
@@ -1300,6 +1347,7 @@ html.scifi .law-ic{background:rgba(244,196,48,.1);box-shadow:inset 0 0 0 1px rgb
       <div><b>Lath <span>Diary</span></b><div class="sync" id="sync" data-a="saveNow" role="button" tabindex="0" title="Save now"><i></i><span>This device</span></div></div>
     </div>
     <div class="row">
+    <button class="icon-btn mic-btn" data-a="vxOpen" aria-label="Speak to add">🎙</button>
     <button class="icon-btn snd-btn" id="sndBtn" data-a="soundToggle" aria-label="Sounds" aria-pressed="true"></button>
     <button class="icon-btn" data-a="settings" aria-label="Settings">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
@@ -2050,6 +2098,7 @@ function vToday(){
   const tCash=state.cash.filter(c=>c.date===T),inT=cashIn(tCash),outT=cashOut(tCash);
   const recvT=state.parties.map(p=>partyBal(p.id)).filter(b=>b>0).reduce((s,b)=>s+b,0);
   html+=`<button class="money-line" data-a="goMoney" data-v="${tCash.length?'cash':'parties'}"><span>💰</span><span>${tCash.length?`Today <b class="pos">+${INR(inT)}</b> <b class="neg">−${INR(outT)}</b> · `:''}To receive <b>${INR(recvT)}</b></span><span class="go">›</span></button>`;
+  html+=panCard()+numCard()+(new Date().getDay()===0?`<section class="card row between slim"><div><h3>📊 Weekly review</h3><p class="small muted">Your week in one page — and next week's top 3</p></div><button class="btn primary sm" data-a="goWeek">Open</button></section>`:'')+taCardMini()+backupNudge();
   html+=`<section class="quote"><h3>Thought for today</h3><p>${esc(th[0])}</p><p class="small" style="font-family:var(--body);opacity:.85;margin-top:6px;font-weight:400">${esc(th[1])}</p></section>`;
   if(h>=17||state.refl[T])html+=`<section class="card row between slim"><div><h3>Tonight's reflection</h3><p class="small muted">${state.refl[T]?'Done — tap to edit':'Three questions, two minutes'}</p></div><button class="btn green sm" data-a="goReflect">${state.refl[T]?'Edit':'Start'}</button></section>`;
   return html;
@@ -2631,8 +2680,10 @@ function gitaListHTML(){
   const ch=ui.gCh||2,[nm,sub]=GITA_CH[ch-1],vs=GITA_ALL.filter(x=>x[0]===ch);
   return `<div class="card"><p class="small muted">Chapter ${ch} · ${vs.length} verses</p><h3 style="margin-top:2px">${nm}</h3><p class="small">${sub}</p></div><div class="card">${vs.map(x=>gitaVerse(...x)).join('')}</div>`}
 function vMind(){
-  let html=`<div class="seg mind-seg">${[['goals','🎯 Goals'],['ideas','💡 Ideas'],['dump','🧺 Brain dump'],['reflect','🌙 Reflect'],['library','📚 Library'],['wisdom','🪷 Wisdom'],['lab','🔬 Lab']].map(([k,l])=>`<button class="${ui.mSub===k?'on':''}" data-a="sub" data-g="mSub" data-v="${k}">${l}</button>`).join('')}</div>`;
+  let html=`<div class="seg mind-seg">${[['goals','🎯 Goals'],['ideas','💡 Ideas'],['dump','🧺 Brain dump'],['reflect','🌙 Reflect'],['week','📊 Week'],['library','📚 Library'],['wisdom','🪷 Wisdom'],['lab','🔬 Lab'],['tamil','🗣 Tamil']].map(([k,l])=>`<button class="${ui.mSub===k?'on':''}" data-a="sub" data-g="mSub" data-v="${k}">${l}</button>`).join('')}</div>`;
   if(ui.mSub==='lab')html+=vLab();
+  if(ui.mSub==='week')html+=vWeek();
+  if(ui.mSub==='tamil')html+=vTamil();
   if(ui.mSub==='goals')html+=saraswatiScene()+vGoals();
   if(ui.mSub==='ideas')html+=vIdeas();
   if(ui.mSub==='dump'){
@@ -2757,7 +2808,7 @@ function monthCash(off){const d=new Date();d.setDate(1);d.setMonth(d.getMonth()+
 
 function vMoney(){
   let html=`<div class="seg">${[['parties','Party ledger'],['cash','Cash book'],['counter','Note counter']].map(([k,l])=>`<button class="${ui.moSub===k?'on':''}" data-a="sub" data-g="moSub" data-v="${k}">${l}</button>`).join('')}</div>`;
-  if(ui.moSub==='parties') html+=ui.openParty?vParty():vParties();
+  if(ui.moSub==='parties') html+=ui.openParty?vParty():dueCard()+vParties();
   if(ui.moSub==='cash') html+=vCash();
   if(ui.moSub==='counter') html+=vCounter();
   return html;
@@ -2793,6 +2844,7 @@ function vParty(){
   <p class="date">${p.place?esc(p.place):''}${p.phone?' · '+esc(p.phone):''}</p></div>
   <div style="text-align:right"><div class="amt ${b>0?'pos':b<0?'neg':''}" style="font-size:1.5rem">${INR(Math.abs(b))}</div><div class="small muted">${b>0?'to receive':b<0?'to pay':'settled'}</div></div></div>
   <div class="row" style="gap:16px;margin-top:10px"><span class="small muted">You gave ${INR(gave)}</span><span class="small muted">You got ${INR(got)}</span>${p.open?`<span class="small muted">Opening ${INR(p.open)}</span>`:''}</div></section>
+  <div class="card"><div class="row" style="gap:8px;flex-wrap:wrap;align-items:flex-end"><label style="flex:1;min-width:150px"><span class="small muted">Payment due on</span><input class="field" id="pDue" type="date" value="${p.due||''}"></label><button class="btn sm" data-a="partyDue" data-id="${p.id}">Set</button>${b>0?`<button class="btn green sm" data-a="remindParty" data-id="${p.id}">WhatsApp reminder</button>`:''}</div></div>
   <div class="sec-head"><h2>New entry</h2></div>
   <div class="card"><div class="row"><input class="field" id="lgAmt" type="number" inputmode="decimal" placeholder="Amount ₹"><input class="field" id="lgDate" type="date" value="${today()}" style="max-width:160px" aria-label="Date"></div>
   <input class="field" id="lgNote" style="margin-top:8px" placeholder="Bill no., goods, remark">
@@ -2872,6 +2924,7 @@ function vGod(){
   if(ui.gSub==='log'){
     const days=[];for(let i=13;i>=0;i--)days.push(dk(addDays(new Date(),-i)));
     const max=Math.max(1,...days.map(beadsDay));
+    html+=japaYear();
     html+=`<div class="sec-head"><h2>Last two weeks</h2><span class="small muted">${beadsTotal()} beads in all</span></div>
     <div class="card"><div class="logbar">${days.map(d=>`<div class="${beadsDay(d)?'':'z'}" style="height:${Math.max(2,beadsDay(d)/max*70)}px" title="${d}"></div>`).join('')}</div>
     <div class="row between small muted" style="margin-top:6px"><span>${prettyDate(days[0])}</span><span>Today</span></div></div>`;
@@ -3540,7 +3593,7 @@ function vAltar(){
     <span class="sig">${[5,8,11,14].map((h,i)=>`<i style="height:${h}px;opacity:${i<3?.9:.35}"></i>`).join('')}</span></div>
   <div class="alt-grid">
     <div class="alt-left">
-      <div class="alt-title"><h2>Shiv Ling &amp; Bilva Patra Sadhana</h2><p>Bel leaf offering</p></div>
+      <div class="alt-title"><h2>Shiv Ling &amp; Bilva Patra Sadhana</h2><p>Bel leaf offering</p>${(()=>{const f=panchang(today()).flags.filter(x=>x.k!=="ekadashi"&&x.k!=="amavasya");return f.length?`<br><span class="alt-spec">${f.map(x=>x.icon+" "+x.n).join(" · ")}</span>`:""})()}</div>
       <div class="alt-stage" id="altStage">${altStageSVG(s.n)}<canvas class="alt-cv" id="altCv"></canvas>
         <div class="alt-inv" id="altInv" role="button" tabindex="0" aria-label="Offer a bel patra — tap, or drag it onto the Shivling">Bel Patra Inventory<small>Tap to offer</small></div>
         <div class="alt-hint">Tap / drag to offer patra<b id="altPts">${s.pts} pts</b></div>
@@ -3786,6 +3839,268 @@ function wisdomExtra(){
   return h;
 }
 
+
+/* =================== Panchang (computed on the device, IST, approximate) =================== */
+const PAN_R=Math.PI/180,pn360=x=>((x%360)+360)%360;
+function panLons(ms){const JD=ms/864e5+2440587.5,T=(JD-2451545)/36525,s=a=>Math.sin(a*PAN_R);
+  const Lp=218.3164477+481267.88123421*T,D=297.8501921+445267.1114034*T,M=357.5291092+35999.0502909*T,Mp=134.9633964+477198.8675055*T,F=93.2720950+483202.0175233*T;
+  const l=6.288774*s(Mp)+1.274027*s(2*D-Mp)+0.658314*s(2*D)+0.213618*s(2*Mp)-0.185116*s(M)-0.114332*s(2*F)+0.058793*s(2*D-2*Mp)+0.057066*s(2*D-M-Mp)+0.053322*s(2*D+Mp)+0.045758*s(2*D-M)-0.040923*s(M-Mp)-0.034720*s(D)-0.030383*s(M+Mp)+0.015327*s(2*D-2*F)-0.012528*s(Mp+2*F)+0.010980*s(Mp-2*F)+0.010675*s(4*D-Mp)+0.010034*s(3*Mp)+0.008548*s(4*D-2*Mp)-0.007888*s(2*D+M-Mp)-0.006766*s(2*D+M)-0.005163*s(D-Mp)+0.004987*s(D+M)+0.004036*s(2*D-M+Mp);
+  const L0=280.46646+36000.76983*T,C=(1.914602-0.004817*T)*s(M)+0.019993*s(2*M)+0.000289*s(3*M);
+  return {moon:pn360(Lp+l),sun:pn360(L0+C-0.00569),T}}
+const panTithi=ms=>{const o=panLons(ms);return Math.floor(pn360(o.moon-o.sun)/12)+1};
+const TITHI_EN=['Pratipada','Dwitiya','Tritiya','Chaturthi','Panchami','Shashthi','Saptami','Ashtami','Navami','Dashami','Ekadashi','Dwadashi','Trayodashi','Chaturdashi','Purnima'];
+const TITHI_HI=['प्रतिपदा','द्वितीया','तृतीया','चतुर्थी','पंचमी','षष्ठी','सप्तमी','अष्टमी','नवमी','दशमी','एकादशी','द्वादशी','त्रयोदशी','चतुर्दशी','पूर्णिमा'];
+const NAKSHATRA=['Ashwini','Bharani','Krittika','Rohini','Mrigashira','Ardra','Punarvasu','Pushya','Ashlesha','Magha','Purva Phalguni','Uttara Phalguni','Hasta','Chitra','Swati','Vishakha','Anuradha','Jyeshtha','Mula','Purva Ashadha','Uttara Ashadha','Shravana','Dhanishta','Shatabhisha','Purva Bhadrapada','Uttara Bhadrapada','Revati'];
+const PAN_CACHE={};
+function panchang(key){
+  if(PAN_CACHE[key])return PAN_CACHE[key];
+  const [y,m,d]=key.split('-').map(Number),at=h=>Date.UTC(y,m-1,d)-5.5*36e5+h*36e5;
+  const t=panTithi(at(6)),ev=panTithi(at(18.5)),mid=panTithi(at(23.9)),o=panLons(at(6));
+  const ayan=23.853+(o.T*100)*0.01397,nak=NAKSHATRA[Math.floor(pn360(o.moon-ayan)/(360/27))];
+  const shukla=t<=15,i=(t-1)%15,name=t===30?'Amavasya':TITHI_EN[i],hi=t===30?'अमावस्या':TITHI_HI[i];
+  const wd=new Date(y,m-1,d).getDay(),flags=[];
+  if(mid===29||(t===29&&mid!==30))flags.push({k:'shivratri',icon:'🔱',n:'Masik Shivratri',hi:'मासिक शिवरात्रि',tip:'Night puja and jal abhishek for Shiv ji'});
+  if(ev===13||ev===28)flags.push({k:'pradosh',icon:'🪔',n:wd===1?'Som Pradosh':wd===6?'Shani Pradosh':'Pradosh vrat',hi:'प्रदोष',tip:'Shiv puja at sunset (pradosh kaal)'});
+  if(t===11||t===26)flags.push({k:'ekadashi',icon:'🌿',n:'Ekadashi',hi:'एकादशी',tip:'Fast or eat light; Vishnu naam japa'});
+  if(t===15)flags.push({k:'purnima',icon:'🌕',n:'Purnima',hi:'पूर्णिमा',tip:'Full moon — Satyanarayan katha, daan'});
+  if(t===30)flags.push({k:'amavasya',icon:'🌑',n:'Amavasya',hi:'अमावस्या',tip:'New moon — pitru tarpan, quiet day'});
+  if(wd===1)flags.push({k:'somvar',icon:'🕉️',n:'Somvar',hi:'सोमवार',tip:'Shiv ji’s day — bel patra and jal'});
+  return PAN_CACHE[key]={t,paksha:shukla?'Shukla':'Krishna',pakshaHi:shukla?'शुक्ल':'कृष्ण',name,hi,nak,flags};
+}
+function panUpcoming(days,skipSomvar){const out=[];for(let i=1;i<=days;i++){const k=dk(addDays(new Date(),i)),p=panchang(k);p.flags.filter(f=>!skipSomvar||f.k!=='somvar').forEach(f=>out.push({k,i,f}))}return out}
+function panCard(){
+  const T=today(),p=panchang(T),tm=panchang(dk(addDays(new Date(),1))),up=panUpcoming(ui.panAll?30:14,true),show=ui.panAll?up:up.slice(0,3);
+  const tmF=tm.flags.filter(f=>f.k!=='somvar');
+  return `<section class="card pan"><div class="row between" style="align-items:flex-start"><div><span class="small muted">Panchang · today</span>
+    <h3>${p.paksha} ${p.name} <span class="dev" style="font-size:1rem">${p.pakshaHi} ${p.hi}</span></h3><p class="small muted">Nakshatra ${p.nak}</p></div><span class="pan-moon" style="--ph:${((p.t-1)/30).toFixed(3)}" aria-hidden="true"></span></div>
+    ${p.flags.length?`<div class="pan-flags">${p.flags.map(f=>`<span class="pan-f ${f.k}">${f.icon} ${f.n}<small>${f.tip}</small></span>`).join('')}</div>`:''}
+    ${tmF.length?`<p class="small" style="margin-top:8px;color:var(--saffron);font-weight:700">Tomorrow: ${tmF.map(f=>f.icon+' '+f.n).join(', ')}</p>`:''}
+    <div class="pan-up">${show.map(u=>`<div><b>${u.f.icon} ${u.f.n}</b><span>${u.i===1?'tomorrow':`in ${u.i} days`} · ${prettyDate(u.k)}</span></div>`).join('')}</div>
+    <button class="link small" data-a="panAll">${ui.panAll?'Show less':'Next 30 days'}</button>
+    <p class="small muted" style="margin-top:4px;font-size:.72rem">Calculated on your phone for Indian time — can differ by a day from your local calendar near tithi changes.</p></section>`;
+}
+
+/* =================== Numerology =================== */
+const CHALD={a:1,b:2,c:3,d:4,e:5,f:8,g:3,h:5,i:1,j:1,k:2,l:3,m:4,n:5,o:7,p:8,q:1,r:2,s:3,t:4,u:6,v:6,w:6,x:5,y:1,z:7};
+const numRoot=n=>{n=Math.abs(n);while(n>9)n=String(n).split('').reduce((s,c)=>s+ +c,0);return n};
+const NUM_DAY={1:['New beginnings','Start things, take the lead, decide.'],2:['Partnership','Cooperate, negotiate, be patient with people.'],3:['Expression','Talk, market, create, meet people.'],
+  4:['Foundation','Hard work, systems, accounts, order.'],5:['Change & deals','Travel, sales calls, new ideas — stay flexible.'],6:['Home & care','Family, responsibility, beauty, service.'],
+  7:['Inner day','Study, meditate, research — avoid big risks.'],8:['Money & authority','Business decisions, collections, firm action.'],9:['Completion','Finish, give, clear old dues, let go.']};
+function numCard(){
+  const dob=state.dob,full=state.fullName||((state.name||'')+' Lath').trim();
+  const nm=full.toLowerCase().replace(/[^a-z]/g,'').split('').reduce((s,c)=>s+(CHALD[c]||0),0);
+  if(!dob)return `<section class="card numc"><div class="row between"><div><span class="small muted">Numerology</span><h3>🔢 Your number for today</h3><p class="small muted">Add your birth date once to see your personal day number.</p></div></div>
+    <div class="row" style="gap:8px;margin-top:8px"><input class="field" type="date" id="numDob" aria-label="Birth date"><button class="btn green" data-a="numSet">Save</button></div></section>`;
+  const [by,bm,bd]=dob.split('-').map(Number),d=new Date(),py=numRoot(bd+bm+d.getFullYear()),pm=numRoot(py+d.getMonth()+1),pd=numRoot(pm+d.getDate()),m=NUM_DAY[pd];
+  return `<section class="card numc"><div class="num-big">${pd}</div><div><span class="small muted">Personal day · year ${py} · month ${pm}</span><h3>${m[0]}</h3><p class="small">${m[1]}</p>
+    <p class="small muted" style="margin-top:4px">Chaldean name number of “${esc(full)}”: <b>${nm}</b> → ${numRoot(nm)} <button class="link small" data-a="numEdit">edit</button></p></div></section>`;
+}
+
+/* =================== Japa year view & milestones =================== */
+function japaYear(){
+  const end=new Date(),start=addDays(end,-7*26-end.getDay());let cells='',days=0;
+  for(let d=new Date(start);d<=end;d=addDays(d,1)){const k=dk(d),b=beadsDay(k),bl=bilvaDay(k),lv=b>=216?4:b>=108?3:b>=27?2:b>0||bl?1:0;if(b||bl)days++;
+    cells+=`<i class="l${lv}" title="${prettyDate(k)} · ${b} beads${bl?' · '+bl+' patra':''}"></i>`}
+  const tb=beadsTotal(),tp=bilvaTotal(),st=japaStreak();
+  const marks=[[7,'7-day streak'],[21,'21 days'],[40,'40 days — a mandal'],[108,'108 days']].map(([n,l])=>`<span class="badge-m ${st>=n?'on':''}">${st>=n?'🏅':'🔒'} ${l}</span>`).join('');
+  const nextB=[108,1008,10008,100008,1000008].find(n=>n>tb)||tb+1,nextP=[11,108,1008,10008].find(n=>n>tp)||tp+1;
+  return `<div class="sec-head"><h2>Sadhana — last 6 months</h2><span class="small muted">${days} days of japa</span></div>
+  <div class="card"><div class="jy">${cells}</div><div class="row between small muted" style="margin-top:6px"><span>Less</span><span class="jy-key"><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i></span><span>2+ malas</span></div>
+  <div class="badges-m">${marks}</div>
+  <div class="ms"><div><span class="small muted">Lifetime beads</span><b>${tb.toLocaleString('en-IN')}</b><div class="bar"><i style="width:${Math.min(100,tb/nextB*100).toFixed(1)}%"></i></div><span class="small muted">next milestone ${nextB.toLocaleString('en-IN')}</span></div>
+  <div><span class="small muted">Bel patra offered</span><b>${tp.toLocaleString('en-IN')}</b><div class="bar"><i style="width:${Math.min(100,tp/nextP*100).toFixed(1)}%"></i></div><span class="small muted">next milestone ${nextP.toLocaleString('en-IN')}</span></div></div></div>`;
+}
+
+/* =================== Tamil word of the day =================== */
+const TAMIL=[['வணக்கம்','vanakkam','hello / greetings','नमस्ते'],['நன்றி','nandri','thank you','धन्यवाद'],['ஆம்','aam','yes','हाँ'],['இல்லை','illai','no / not','नहीं'],['சரி','sari','okay, right','ठीक है'],
+ ['தண்ணீர்','thanneer','water','पानी'],['சாப்பாடு','saappaadu','food, meal','खाना'],['வீடு','veedu','house, home','घर'],['பணம்','panam','money','पैसा'],['நேரம்','neram','time','समय'],
+ ['இன்று','indru','today','आज'],['நாளை','naalai','tomorrow','कल (आने वाला)'],['நேற்று','netru','yesterday','कल (बीता)'],['என்ன','enna','what','क्या'],['எங்கே','enge','where','कहाँ'],
+ ['ஏன்','yen','why','क्यों'],['எப்போது','eppodhu','when','कब'],['யார்','yaar','who','कौन'],['எப்படி','eppadi','how','कैसे'],['எவ்வளவு','evvalavu','how much','कितना'],
+ ['விலை','vilai','price','दाम'],['கடை','kadai','shop','दुकान'],['வியாபாரம்','viyaabaaram','business, trade','व्यापार'],['கணக்கு','kanakku','account, calculation','हिसाब'],['லாபம்','laabam','profit','लाभ'],
+ ['நஷ்டம்','nashtam','loss','नुकसान'],['துணி','thuni','cloth','कपड़ा'],['நூல்','nool','thread, yarn (also: book)','धागा'],['சாயம்','saayam','dye, colour','रंग'],['பெயர்','peyar','name','नाम'],
+ ['ஊர்','oor','town, hometown','गाँव/शहर'],['நண்பன்','nanban','friend','दोस्त'],['அம்மா','amma','mother','माँ'],['அப்பா','appa','father','पिताजी'],['கோவில்','kovil','temple','मंदिर'],
+ ['சிவன்','sivan','Shiva','शिव'],['வா','vaa','come','आओ'],['போ','po','go','जाओ'],['பார்','paar','see, look','देखो'],['கேள்','kel','ask, listen','पूछो / सुनो'],
+ ['சொல்','sol','say, tell','बोलो'],['பெரிய','periya','big','बड़ा'],['சின்ன','chinna','small','छोटा'],['நல்ல','nalla','good','अच्छा'],['கொஞ்சம்','konjam','a little','थोड़ा'],
+ ['நிறைய','niraiya','a lot','बहुत'],['வேண்டும்','vendum','want, need','चाहिए'],['வேண்டாம்','vendaam','don’t want','नहीं चाहिए'],['மெதுவாக','medhuvaaga','slowly','धीरे'],['ஒன்று','ondru','one','एक'],
+ ['இரண்டு','irandu','two','दो'],['மூன்று','moondru','three','तीन'],['நான்கு','naangu','four','चार'],['ஐந்து','aindhu','five','पाँच'],['பத்து','pathu','ten','दस'],
+ ['நூறு','nooru','hundred','सौ'],['ஆயிரம்','aayiram','thousand','हज़ार'],
+ ['உங்கள் பெயர் என்ன?','ungal peyar enna?','What is your name?','आपका नाम क्या है?'],['இது எவ்வளவு?','idhu evvalavu?','How much is this?','यह कितने का है?'],['எனக்கு தமிழ் கொஞ்சம் தெரியும்','enakku tamil konjam theriyum','I know a little Tamil','मुझे थोड़ी तमिल आती है'],
+ ['புரியவில்லை','puriyavillai','I don’t understand','समझ नहीं आया'],['மெதுவாக பேசுங்கள்','medhuvaaga pesungal','Please speak slowly','धीरे बोलिए'],['பணம் எப்போது தருவீர்கள்?','panam eppodhu tharuveergal?','When will you pay?','पैसे कब देंगे?']];
+const TA_GAP=[0,1,3,7,16,35];
+const doyNow=()=>{const d=new Date();return Math.floor((d-new Date(d.getFullYear(),0,0))/864e5)};
+const taWordToday=()=>doyNow()%TAMIL.length;
+function taSay(t){try{const u=new SpeechSynthesisUtterance(t);u.lang='ta-IN';u.rate=.8;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){toast('No Tamil voice on this device')}}
+function taDue(){state.tamil=state.tamil||{};const T=today(),seen=Object.keys(state.tamil).map(Number);
+  const due=seen.filter(i=>state.tamil[i].due<=T);const w=taWordToday();if(!state.tamil[w]&&!due.includes(w))due.unshift(w);return due}
+function taCardMini(){const [ta,ro,en]=TAMIL[taWordToday()];
+  return `<section class="card ta-mini"><span class="small muted">Tamil word of the day</span><div class="row between"><div><b class="ta-w">${ta}</b><p class="small"><i>${ro}</i> — ${en}</p></div>
+    <div class="acts"><button class="icon-btn" data-a="taSay" data-v="${taWordToday()}" aria-label="Hear it">🔊</button><button class="btn ghost sm" data-a="goTamil">Practise ${taDue().length}</button></div></div></section>`}
+function vTamil(){
+  const due=taDue(),i=due[0],learnt=Object.values(state.tamil||{}).filter(x=>x.box>=3).length,started=Object.keys(state.tamil||{}).length;
+  let h=`<div class="stats" style="margin-top:14px"><div class="stat"><span>Started</span><b>${started}</b></div><div class="stat"><span>Learnt</span><b>${learnt}</b></div><div class="stat"><span>Due today</span><b>${due.length}</b></div></div>`;
+  if(i!==undefined){const [ta,ro,en,hi]=TAMIL[i];
+    h+=`<section class="card ta-card"><span class="small muted">${i===taWordToday()&&!(state.tamil||{})[i]?'New word for today':'Revision'}</span><b class="ta-big">${ta}</b>
+      <button class="link" data-a="taSay" data-v="${i}">🔊 Hear it</button>
+      ${ui.taShow?`<p class="ta-ro">${ro}</p><p><b>${en}</b> · <span class="dev" style="font-size:1rem">${hi}</span></p>
+      <div class="yn" style="margin-top:12px"><button class="btn" data-a="taGrade" data-v="0">Again</button><button class="btn green" data-a="taGrade" data-v="1">I knew it</button></div>`
+      :`<button class="btn primary block" style="margin-top:12px" data-a="taReveal">Show meaning</button>`}</section>`}
+  else h+=`<div class="empty" style="margin-top:12px">All revisions done for today. வாழ்த்துக்கள் — well done! 🎉</div>`;
+  h+=`<div class="sec-head"><h2>All words & phrases</h2><span class="small muted">${TAMIL.length}</span></div><div class="card">`+TAMIL.map(([ta,ro,en,hi],k)=>{const s=(state.tamil||{})[k];
+    return `<div class="item"><div class="t"><div class="ttl"><span class="ta-w" style="font-size:1.05rem">${ta}</span> <i class="small muted">${ro}</i></div><div class="meta">${en} · ${hi}${s?` · <span class="badge g">box ${s.box}</span>`:''}</div></div><button class="x" data-a="taSay" data-v="${k}" aria-label="Hear">🔊</button></div>`}).join('')+`</div>`;
+  return h;
+}
+
+/* =================== Speak to add =================== */
+function vxParse(raw){
+  const s=' '+String(raw||'').trim()+' ',low=s.toLowerCase();
+  const numM=low.match(/(\d[\d,]*(?:\.\d+)?)\s*(hazaar|hazar|हज़ार|हजार|k\b|thousand|lakh|लाख)?/);
+  let amt=0;if(numM){amt=Number(numM[1].replace(/,/g,''));const u=numM[2]||'';if(/haz|हज|हज़|k|thou/.test(u))amt*=1000;if(/lakh|लाख/.test(u))amt*=100000}
+  const party=t=>{const n=t.replace(/\b(ji|जी|bhai|भाई|sahab|साहब)\b/gi,'').trim().toLowerCase();if(!n)return null;
+    return state.parties.find(p=>p.name.toLowerCase()===n)||state.parties.find(p=>p.name.toLowerCase().includes(n)||n.includes(p.name.toLowerCase().split(' ')[0]))||null};
+  let m=s.match(/^\s*(.+?)\s+(?:ko|को)\s+.*?(diye|diya|dena|दिए|दिया|bheje|भेजे|udhaar|उधार|maal|माल)/i);
+  if(m&&amt){const p=party(m[1]);return {type:'gave',amt,pname:p?p.name:m[1].trim(),pid:p?p.id:'',note:''}}
+  m=s.match(/^\s*(.+?)\s+(?:se|से)\s+.*?(liye|liya|लिए|लिया|mile|mila|मिले|मिला|aaye|aaya|आए|आया|received|payment)/i);
+  if(m&&amt){const p=party(m[1]);return {type:'got',amt,pname:p?p.name:m[1].trim(),pid:p?p.id:'',note:''}}
+  if(amt&&/kharch|खर्च|spent|expense|kharcha/.test(low))return {type:'out',amt,note:raw.replace(/\d[\d,]*(\.\d+)?/,'').replace(/(rupaye|rupees|रुपये|rs\.?|kharcha|kharch|खर्चा|खर्च|spent)/gi,'').trim()};
+  if(amt&&/(income|aamdani|आमदनी|kamaye|कमाए)/.test(low))return {type:'in',amt,note:raw.replace(/\d[\d,]*(\.\d+)?/,'').trim()};
+  let date='',title=raw.trim();
+  if(/\b(parso|परसों)\b/i.test(low))date=dk(addDays(new Date(),2));else if(/\b(kal|कल|tomorrow)\b/i.test(low))date=dk(addDays(new Date(),1));else if(/\b(aaj|आज|today)\b/i.test(low))date=today();
+  title=title.replace(/\b(parso|परसों|kal|कल|tomorrow|aaj|आज|today)\b/gi,'').replace(/\b(karna hai|karna|करना है|करना|hai|है)\s*$/i,'').replace(/\s+/g,' ').trim();
+  return {type:'task',title:title?title[0].toUpperCase()+title.slice(1):'',date};
+}
+let vxRec=null;
+function vxSheet(){
+  openModal(`<div class="grab"></div><h2>🎙 Speak to add</h2>
+  <p class="small muted">Say it in Hindi or English — e.g. “Jha ko 5000 diye”, “Pradeep se 2000 mile”, “500 kharcha petrol”, “kal GST file karna”.</p>
+  <div class="recwrap"><button class="recbtn" id="vxMic" aria-label="Start speaking"><span></span></button><span class="rect" id="vxSt">Tap to speak</span></div>
+  <label class="lbl" for="vxT">Or type it</label><input class="field" id="vxT" placeholder="Jha ko 5000 diye" autocomplete="off">
+  <div id="vxPrev" style="margin-top:12px"></div>`);
+  const inp=document.getElementById('vxT'),prev=()=>vxPreview(inp.value);inp.addEventListener('input',prev);
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition,btn=document.getElementById('vxMic'),st=document.getElementById('vxSt');
+  if(!SR){st.textContent='Voice not available here — type instead';btn.disabled=true;btn.style.opacity=.4;return}
+  btn.addEventListener('click',()=>{
+    if(vxRec){try{vxRec.stop()}catch(e){}return}
+    const r=new SR();vxRec=r;r.lang=state.vxLang||'hi-IN';r.interimResults=true;r.maxAlternatives=1;
+    btn.classList.add('on');st.textContent='Listening…';
+    r.onresult=e=>{let t='';for(const x of e.results)t+=x[0].transcript;inp.value=t;prev()};
+    r.onerror=e=>{st.textContent=e.error==='not-allowed'?'Allow the microphone, then try again':'Didn’t catch that — try again'};
+    r.onend=()=>{vxRec=null;btn.classList.remove('on');if(st.textContent==='Listening…')st.textContent='Tap to speak again'};
+    try{r.start()}catch(e){vxRec=null;btn.classList.remove('on')}
+  });
+}
+function vxBody(o){
+  if(o.type==='task')return `<input class="field" id="vxA" value="${esc(o.title||'')}" placeholder="Task"><input class="field" id="vxD" type="date" value="${o.date||''}" style="margin-top:8px" aria-label="Date">`;
+  if(o.type==='gave'||o.type==='got'){const ex=state.parties.find(x=>x.name.toLowerCase()===String(o.pname||'').toLowerCase());
+    return `<div class="row" style="gap:8px"><input class="field" id="vxA" list="vxParties" value="${esc(o.pname||'')}" placeholder="Party"><input class="field" id="vxAmt" type="number" inputmode="decimal" value="${o.amt||''}" style="max-width:130px" placeholder="₹"></div>
+    <datalist id="vxParties">${state.parties.map(x=>`<option value="${esc(x.name)}">`).join('')}</datalist>
+    <p class="small muted" style="margin-top:6px">${o.pname?(ex?'Existing party ✓':'New party — it will be created'):''} ${o.type==='gave'?'· they owe you':'· payment received'}</p>`}
+  return `<div class="row" style="gap:8px"><input class="field" id="vxA" value="${esc(o.note||'')}" placeholder="What for"><input class="field" id="vxAmt" type="number" inputmode="decimal" value="${o.amt||''}" style="max-width:130px" placeholder="₹"></div>`;
+}
+function vxRender(){const box=document.getElementById('vxPrev'),o=ui.vx;if(!box||!o)return;
+  const kinds=[['task','📋 Task'],['gave','↑ Khata: gave'],['got','↓ Khata: got'],['out','− Cash out'],['in','+ Cash in']];
+  box.innerHTML=`<div class="cats">${kinds.map(([k,l])=>`<button class="${o.type===k?'on':''}" data-a="vxType" data-v="${k}">${l}</button>`).join('')}</div><div style="margin-top:10px">${vxBody(o)}</div>
+  <button class="btn green block" style="margin-top:12px" data-a="vxSave">Save</button>`}
+function vxPreview(text){const box=document.getElementById('vxPrev');if(!box)return;if(!text.trim()){box.innerHTML='';ui.vx=null;return}ui.vx=vxParse(text);vxRender()}
+
+/* =================== Weekly review =================== */
+function weekStart(off){const d=new Date();d.setHours(0,0,0,0);const w=(d.getDay()+6)%7;return addDays(d,-w+7*(off||0))}
+function vWeek(){
+  const off=ui.wkOff||0,s=weekStart(off),days=[...Array(7)].map((_,i)=>dk(addDays(s,i))),wk=days[0],nx=dk(addDays(s,7));
+  const H=state.habits.length,hs=days.map(d=>dayScore(d)),hp=H?Math.round(hs.reduce((a,b)=>a+b,0)/(H*7)*100):0;
+  const per=state.habits.map(h=>[h,days.filter(d=>habitDone(d,h.id)).length]).sort((a,b)=>b[1]-a[1]);
+  const cash=state.cash.filter(c=>days.includes(c.date)),cin=cashIn(cash),cout=cashOut(cash);
+  const led=state.ledger.filter(e=>days.includes(e.date)),gave=led.filter(e=>e.type==='gave').reduce((x,e)=>x+ +e.amt,0),got=led.filter(e=>e.type==='got').reduce((x,e)=>x+ +e.amt,0);
+  const beadsW=days.reduce((x,d)=>x+beadsDay(d),0),bil=days.reduce((x,d)=>x+bilvaDay(d),0);
+  const tdone=state.tasks.filter(t=>t.done&&t.doneAt&&days.includes(dk(new Date(t.doneAt)))).length;
+  const moments=days.map(d=>[d,(state.refl[d]||{}).moment]).filter(x=>x[1]&&String(x[1]).trim());
+  const top=(state.weekTop||{})[nx]||{};
+  return `<div class="row between" style="margin-top:14px"><button class="icon-btn" data-a="wkMove" data-v="-1" aria-label="Previous week">‹</button>
+    <div style="text-align:center"><h2>Week of ${prettyDate(wk)}</h2><span class="small muted">${off===0?'This week':off===-1?'Last week':''}</span></div>
+    <button class="icon-btn" data-a="wkMove" data-v="1" ${off>=0?'disabled':''} aria-label="Next week">›</button></div>
+  <div class="stats" style="margin-top:12px"><div class="stat"><span>Habits</span><b>${hp}%</b></div><div class="stat"><span>Tasks done</span><b>${tdone}</b></div><div class="stat"><span>Japa</span><b>${Math.floor(beadsW/MALA)} malas</b></div></div>
+  <div class="sec-head"><h2>Habits day by day</h2></div><div class="card"><div class="wk-bars">${days.map((d,i)=>`<div><i style="height:${H?Math.max(4,hs[i]/H*100):4}%"></i><span>${DAYS[parseDk(d).getDay()].slice(0,2)}</span></div>`).join('')}</div>
+   ${per.length?`<p class="small" style="margin-top:10px">💪 Strongest: <b>${esc(per[0][0].name)}</b> (${per[0][1]}/7) · 🎯 Needs care: <b>${esc(per[per.length-1][0].name)}</b> (${per[per.length-1][1]}/7)</p>`:''}</div>
+  <div class="sec-head"><h2>Money</h2></div><div class="stats"><div class="stat"><span>Cash in</span><b class="pos">${INR(cin)}</b></div><div class="stat"><span>Cash out</span><b class="neg">${INR(cout)}</b></div><div class="stat"><span>Khata got</span><b class="pos">${INR(got)}</b></div></div>
+  <p class="small muted" style="margin-top:6px">Khata given out this week: ${INR(gave)}</p>
+  <div class="sec-head"><h2>Sadhana</h2></div><div class="card"><p>📿 ${beadsW.toLocaleString('en-IN')} beads · 🍃 ${bil} bel patra · ${days.filter(d=>beadsDay(d)).length}/7 days of japa</p></div>
+  ${moments.length?`<div class="sec-head"><h2>Moments worth remembering</h2></div><div class="card">${moments.map(([d,m])=>`<p class="idea"><b>${DAYS[parseDk(d).getDay()].slice(0,3)}:</b> ${esc(m)}</p>`).join('')}</div>`:''}
+  ${off===0?`<div class="sec-head"><h2>Next week’s top 3</h2></div><div class="card">${['a','b','c'].map((k,i)=>`<input class="field" style="margin-top:${i?8:0}px" data-bind="weekTop.${nx}.${k}" value="${esc(top[k]||'')}" placeholder="${i+1}. ${['The one thing that matters most','Second priority','Third priority'][i]}">`).join('')}
+    <button class="btn green block" style="margin-top:10px" data-a="wkTasks" data-v="${nx}">Add them as tasks for Monday</button></div>`:''}`;
+}
+
+/* =================== कौन हूं मैं — auto from time blocks =================== */
+function whoPct(){
+  if(state.whoAuto){const m={a:0,v:0,i:0};(state.blocks||[]).forEach(b=>{const r=(state.blockRole||{})[b.id];if(r)m[r]+=Number(b.dur)||0});
+    const sum=m.a+m.v+m.i;if(sum)return {a:Math.round(m.a/sum*100),v:Math.round(m.v/sum*100),i:Math.round(m.i/sum*100)}}
+  const t=state.trinity||{a:60,v:25,i:15},sum=WHO.reduce((s,r)=>s+(Number(t[r.k])||0),0)||1;
+  return Object.fromEntries(WHO.map(r=>[r.k,Math.round((Number(t[r.k])||0)/sum*100)]))}
+function whoCard(){
+  const auto=!!state.whoAuto,bl=[...(state.blocks||[])].sort((a,b)=>toMin(a.start)-toMin(b.start));
+  return `<section class="who"><h2>कौन हूं मैं</h2><p class="lead">Who am I — the three selves, and how my energy is split between them.</p>
+  <div class="who-grid">${WHO.map(r=>`<div class="who-role" style="--c:${r.c}"><h3><span lang="hi">${r.hi}</span><small>${r.en}</small></h3><ol lang="hi">${r.pts.map(x=>`<li>${x}</li>`).join('')}</ol></div>`).join('')}</div>
+  <div class="row between" style="margin-top:16px;gap:8px;flex-wrap:wrap"><h3 style="color:#FFB547;font-size:.95rem">⚖️ Balance</h3>
+    <div class="yn" style="flex:0 0 auto"><button class="btn sm ${auto?'':'on'}" data-a="whoMode" data-v="0">I set it</button><button class="btn sm ${auto?'on':''}" data-a="whoMode" data-v="1">From my time blocks</button></div></div>
+  ${whoBars(!auto)}
+  ${auto?`<p class="small" style="margin-top:12px;color:#B9C7BD">Tag each time block with the self it serves — the split is worked out from the minutes.</p>
+    <div class="who-blocks">${bl.map(b=>{const r=(state.blockRole||{})[b.id]||'';return `<div class="who-b"><span>${b.icon||''} ${esc(b.name)} <small>${b.start} · ${b.dur} min</small></span><span class="who-chips">${WHO.map(w=>`<button class="${r===w.k?'on':''}" style="--c:${w.c}" data-a="whoBlock" data-id="${b.id}" data-v="${w.k}">${w.hi}</button>`).join('')}</span></div>`}).join('')}</div>`:''}
+  </section>`;
+}
+
+/* =================== Weekly backup nudge =================== */
+function backupNudge(){
+  const last=state.lastBackup,days=last?Math.round((parseDk(today())-parseDk(last))/864e5):999;
+  if(days<7)return '';
+  return `<section class="card row between slim bk-n"><div><h3>🛡 Weekly backup</h3><p class="small muted">${last?`Last one ${days} days ago`:'No backup yet'} — save one to Google Drive in a tap (choose Drive in the share menu).</p></div><button class="btn green sm" data-a="exportData">Back up</button></section>`;
+}
+
+/* =================== Lab: seed drone & ESP32 projects once =================== */
+const LAB_SEED=[
+  {name:'Agri spray drone',status:'idea',theory:'Spraying drone for fields: carries a liquid tank and sprays through nozzles while flying a planned route.\n\nKey numbers to work out: take-off weight (frame + tank + liquid + batteries), thrust needed (about 2× take-off weight), flight time per battery, spray width and litres per acre.',
+   notes:'Started Oct 2026. Next: choose tank size (5 L / 10 L), then frame and motors to match.\nCheck the DGCA drone rules and registration before flying over fields.',
+   items:['Agri frame (quad / hexa, foldable arms)','Brushless motors','ESCs','Propellers','Flight controller (ArduPilot)','GPS module','RC transmitter + receiver','Telemetry radio','LiPo batteries','Battery charger','Spray tank','Brushless water pump','Spray nozzles','Power distribution board','Landing gear']},
+  {name:'ESP32 builds',status:'build',theory:'Common pins I use: MAX7219 on VSPI — DIN GPIO23, CS GPIO5, CLK GPIO18. CrowPanel IR receiver on GPIO16 (TFT DC is on GPIO2).',
+   notes:'Builds so far:\n• MAX7219 dot-matrix birthday clock for Mummy (ESP32 Mini, NTP, 3D-printed case)\n• DS3231 RTC clock firmware\n• ESP32-CAM streaming + SD recording\n• CrowPanel 2.8" BLE notification mirror, calculator, mmWave radar scope\n• AC remote decoder (IRremoteESP8266)\n• Cardputer LoRa chat (SX1278)',
+   items:['ESP32 dev boards','ESP32-CAM (AI Thinker)','CrowPanel 2.8" display','MAX7219 4-in-1 matrix','DS3231 RTC module','SX1278 LoRa modules','KY-022 IR receiver','C4001 mmWave radar','Jumper wires','USB cables']}];
+function labSeed(s){if(s.labSeed1)return;s.labSeed1=1;s.lab=s.lab||{projects:[],stock:[]};s.lab.projects=s.lab.projects||[];
+  LAB_SEED.forEach(x=>{const key=/drone/i.test(x.name)?'drone':'esp32';if(s.lab.projects.some(p=>labNorm(p.name).includes(key)))return;
+    s.lab.projects.push({id:uid(),name:x.name,status:x.status,created:Date.now(),images:[],sales:[],theory:x.theory,notes:x.notes,items:x.items.map(n=>({id:uid(),name:n,qty:1,unit:'',rate:0,used:0}))})})}
+
+const EXTRA_A={
+  panAll:()=>{ui.panAll=!ui.panAll;render()},
+  numSet:()=>{const v=document.getElementById('numDob').value;if(!v){toast('Pick your birth date');return}state.dob=v;commit()},
+  numEdit:()=>openModal(`<div class="grab"></div><h2>Numerology</h2><label class="lbl" for="nmD">Birth date</label><input class="field" type="date" id="nmD" value="${state.dob||''}">
+    <label class="lbl" for="nmN">Full name (as you spell it)</label><input class="field" id="nmN" value="${esc(state.fullName||((state.name||'')+' Lath').trim())}">
+    <button class="btn green block" style="margin-top:12px" data-a="numSave">Save</button>`),
+  numSave:()=>{state.dob=document.getElementById('nmD').value||state.dob;state.fullName=document.getElementById('nmN').value.trim();closeModal();commit()},
+  goTamil:()=>{ui.tab='mind';ui.mSub='tamil';render();window.scrollTo(0,0)},
+  taSay:el=>taSay(TAMIL[+el.dataset.v][0]),
+  taReveal:()=>{ui.taShow=true;render()},
+  taGrade:el=>{const i=taDue()[0];if(i===undefined)return;state.tamil=state.tamil||{};const c=state.tamil[i]||{box:0},ok=el.dataset.v==='1';
+    c.box=ok?Math.min(5,c.box+1):0;c.due=dk(addDays(new Date(),ok?TA_GAP[c.box]:1));state.tamil[i]=c;ui.taShow=false;commit();try{SFX.play(ok?'done':'tick')}catch(e){}},
+  vxOpen:()=>vxSheet(),
+  vxType:el=>{const o=ui.vx;if(!o)return;const a=document.getElementById('vxA'),amt=document.getElementById('vxAmt'),v=a?a.value:'';
+    if(amt&&+amt.value)o.amt=+amt.value;if(o.type==='task')o.title=v;else if(o.type==='gave'||o.type==='got')o.pname=v;else o.note=v;
+    const nt=el.dataset.v,txt=v||o.title||o.note||o.pname||'';o.type=nt;if(nt==='task')o.title=o.title||txt;else if(nt==='gave'||nt==='got')o.pname=o.pname||'';else o.note=o.note||txt;vxRender()},
+  vxSave:()=>{const p=ui.vx;if(!p)return;const a=(document.getElementById('vxA')||{}).value?.trim()||'',amt=Math.round(+((document.getElementById('vxAmt')||{}).value||0)*100)/100;
+    if(p.type==='task'){if(!a){toast('Say or type the task');return}state.tasks.push({id:uid(),title:a,date:(document.getElementById('vxD')||{}).value||'',time:'',deferred:0,done:false,created:Date.now()});closeModal();commit();toast('Task added');return}
+    if(!(amt>0)){toast('Add an amount');return}
+    if(p.type==='gave'||p.type==='got'){if(!a){toast('Which party?');return}let pt=state.parties.find(x=>x.name.toLowerCase()===a.toLowerCase());
+      if(!pt){pt={id:uid(),name:a,place:'',phone:'',open:0};state.parties.push(pt)}
+      state.ledger.push({id:uid(),pid:pt.id,type:p.type,amt,date:today(),note:'🎙 '+(document.getElementById('vxT').value||'').trim()});closeModal();commit();toast(p.type==='gave'?`${pt.name}: ${INR(amt)} given`:`${pt.name}: ${INR(amt)} received`);return}
+    state.cash.push({id:uid(),type:p.type,amt,date:today(),note:a,cat:p.type==='in'?'Business':'Other'});closeModal();commit();toast(p.type==='in'?'Money in recorded':'Expense recorded')},
+  wkMove:el=>{ui.wkOff=Math.min(0,(ui.wkOff||0)+Number(el.dataset.v));render()},
+  wkTasks:el=>{const k=el.dataset.v,t=(state.weekTop||{})[k]||{};let n=0;['a','b','c'].forEach(x=>{const v=String(t[x]||'').trim();if(v&&!state.tasks.some(q=>q.title===v&&q.date===k)){state.tasks.push({id:uid(),title:v,date:k,time:'',deferred:0,done:false,created:Date.now()});n++}});
+    commit();toast(n?`${n} task${n>1?'s':''} added for Monday`:'Nothing new to add')},
+  goWeek:()=>{ui.tab='mind';ui.mSub='week';ui.wkOff=0;render();window.scrollTo(0,0)},
+  whoMode:el=>{state.whoAuto=el.dataset.v==='1';commit()},
+  whoBlock:el=>{state.blockRole=state.blockRole||{};const id=el.dataset.id,v=el.dataset.v;state.blockRole[id]=state.blockRole[id]===v?'':v;commit()},
+  partyDue:el=>{const p=state.parties.find(x=>x.id===el.dataset.id);if(!p)return;const v=document.getElementById('pDue').value;p.due=v||'';commit();toast(v?`Due ${prettyDate(v)}`:'Due date cleared')}
+};
+function dueList(){const T=today();return state.parties.filter(p=>p.due&&partyBal(p.id)>0).map(p=>({p,b:partyBal(p.id),late:Math.round((parseDk(T)-parseDk(p.due))/864e5)})).sort((a,b)=>b.late-a.late)}
+function dueCard(){const L=dueList();if(!L.length)return '';
+  return `<div class="sec-head"><h2>Payment due dates</h2><span class="small muted">${L.filter(x=>x.late>0).length} overdue</span></div><div class="card">${L.map(({p,b,late})=>`<div class="item"><div class="t"><div class="ttl">${esc(p.name)}</div><div class="meta"><span>${INR(b)}</span><span class="${late>0?'neg':''}">${late>0?`overdue ${late} day${late>1?'s':''}`:late===0?'due today':`due ${prettyDate(p.due)}`}</span></div></div><div class="acts"><button class="btn green sm" data-a="remindParty" data-id="${p.id}">WhatsApp</button></div></div>`).join('')}</div>`}
+
+try{labSeed(state)}catch(e){}
 const VIEWS={today:vToday,god:vGod,exercise:vExercise,habits:vHabits,plan:vPlan,money:vMoney,media:vMedia,mind:vMind};
 let lastViewKey=null;
 const revealIO=window.IntersectionObserver?new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){en.target.classList.add('in');revealIO.unobserve(en.target)}}),{rootMargin:'0px 0px -8% 0px'}):null;
@@ -4302,7 +4617,7 @@ const SOUND={
   resetAll:(el,a,b)=>a.habits!==b.habits||!document.querySelector('.scrim:not(.out)')?'del':null
 };
 function flashEl(sel){requestAnimationFrame(()=>{const el=document.querySelector('#view '+sel);if(el){el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop')}})}
-Object.assign(A,FUN_A);
+Object.assign(A,FUN_A,EXTRA_A);if(!A.remindParty)A.remindParty=el=>{const p=state.parties.find(x=>x.id===el.dataset.id);if(!p)return;const b=partyBal(p.id),ph=String(p.phone||'').replace(/\D/g,''),num=ph.length===10?'91'+ph:ph,t=`Namaste ${p.name} ji 🙏\nA gentle reminder: ${INR(b)} is pending as per our khata (${prettyDate(today())}).\nKindly arrange payment at your convenience.\n— ${state.name||'Lath'}`;window.open(`https://wa.me/${num}?text=${encodeURIComponent(t)}`,'_blank')};
 document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el)return;const f=A[el.dataset.a];if(!f)return;
   const k=el.dataset.a,s=SOUND[k],before=s&&typeof s==='function'?snap():null,rect=el.getBoundingClientRect();
   const r=f(el,e);
