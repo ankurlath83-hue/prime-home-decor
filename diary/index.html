@@ -1792,7 +1792,7 @@ const MEDIA=(()=>{
     async url(id){if(!id)return null;if(urls[id])return urls[id];const b=await this.get(id);if(b)return urls[id]=URL.createObjectURL(b);const m=(state.media||{})[id];if(m&&m.aid&&window.DIARY_MEDIA){const b2=await window.DIARY_MEDIA(m.aid);if(b2){try{await run('readwrite',st=>st.put(b2,id))}catch(e){}return urls[id]=URL.createObjectURL(b2)}}return null},
     async del(id){if(!id)return;try{await run('readwrite',st=>st.delete(id))}catch(e){}if(urls[id]&&urls[id].startsWith('blob:'))URL.revokeObjectURL(urls[id]);delete urls[id];
       const m=(state.media||{})[id];if(m&&m.aid){try{const as=await assets();as&&as.delete(m.aid)}catch(e){}}if(state.media)delete state.media[id]},
-    async exportAll(){const out={};for(const id of Object.keys(state.media||{})){const b=await this.get(id);if(b)out[id]=await new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(b)})}return out},
+    async exportAll(){const out={};for(const id of Object.keys(state.media||{})){let b=await this.get(id);const m=state.media[id];if(!b&&m&&m.aid&&window.DIARY_MEDIA){b=await window.DIARY_MEDIA(m.aid);if(b)try{await run('readwrite',st=>st.put(b,id))}catch(e){}}if(b)out[id]=await new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(b)})}return out},
     async importAll(map){for(const [id,du] of Object.entries(map||{})){try{const b=await (await fetch(du)).blob();await run('readwrite',st=>st.put(b,id));if(state.media&&state.media[id]){delete state.media[id].aid;upload(id,b)}}catch(e){}}}
   };
 })();
