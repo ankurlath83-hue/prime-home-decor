@@ -133,6 +133,24 @@ tr.click:hover td{background:var(--surface2)}
 .pmeta{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted)}
 .pmeta b{color:var(--ink);font-weight:600}
 
+/* catalogue */
+.catsec{display:grid;gap:10px}
+.catsec h3{font-size:21px;display:flex;align-items:baseline;gap:10px}
+.catsec h3 em{font-style:normal;font-family:var(--body);font-size:13px;color:var(--muted)}
+.ccards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,160px),1fr));gap:12px}
+.ccard{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;text-align:left;padding:0}
+.ccard:hover{border-color:var(--faint)}
+.ccard .pimg{aspect-ratio:1/1}
+.ccard .pimg img{object-fit:contain;background:var(--surface)}
+.cbody{padding:9px 11px 11px;display:grid;gap:2px;flex:1}
+.cbody .code{font-size:11px;letter-spacing:.1em;color:var(--faint);font-variant-numeric:tabular-nums}
+.cbody .nm{font-weight:600;font-size:14px;line-height:1.3;overflow-wrap:anywhere}
+.cbody .rt{margin-top:auto;padding-top:4px;font-size:19px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+.cbody .rt.ask{font-size:13.5px;font-weight:600;color:var(--muted)}
+.cbody .was{font-size:12px;color:var(--faint)}
+.catset{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.catset label{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted);font-weight:600}
+
 /* chart */
 .chart{width:100%;height:auto;display:block}
 .chart text{fill:var(--muted);font-size:11px;font-family:var(--body)}
@@ -254,6 +272,7 @@ html,body{height:100%}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
@@ -265,7 +284,7 @@ const PARTNERS = [
 ];
 const COLS = ['products','purchases','sales','parties','ledger','expenses','ideas'];
 const TABS = [
-  ['dash','Dashboard'],['stock','Stock'],['purchases','Purchases'],['sales','Sales'],
+  ['dash','Dashboard'],['stock','Stock'],['catalogue','Catalogue'],['purchases','Purchases'],['sales','Sales'],
   ['parties','Customers & Resellers'],['partners','Partners'],['expenses','Expenses'],['promote','Promote']
 ];
 const CATS = ['Pooja set','Bowl set','Jaali box','Inlay table','Diwali hamper','Other'];
@@ -444,9 +463,9 @@ function render(){
   const main = document.getElementById('main');
   if (mode==='loading'){ main.innerHTML = `<section class="view"><div class="panel empty">Opening the books…</div></section>`; return; }
   const V = view(), C = calc(V);
-  const fn = {dash,stock,purchases:purchasesV,sales:salesV,parties:partiesV,partners:partnersV,expenses:expensesV,promote:promoteV}[tab];
+  const fn = {dash,stock,catalogue:catalogueV,purchases:purchasesV,sales:salesV,parties:partiesV,partners:partnersV,expenses:expensesV,promote:promoteV}[tab];
   main.innerHTML = `<section class="view">${fn(V,C)}</section>`;
-  if (tab==='stock') hydrateImages();
+  if (tab==='stock' || tab==='catalogue') hydrateImages();
 }
 
 function periodSelect(){ return `<select class="sel" id="periodSel" aria-label="Period">${Object.entries(PERIODS).map(([k,l])=>`<option value="${k}" ${k===period?'selected':''}>${l}</option>`).join('')}</select>`; }
@@ -545,6 +564,103 @@ function hydrateImages(){
     const show = url => { if(!url || !el.isConnected) return; const im=new Image(); im.alt=''; im.onload=()=>{el.textContent='';el.appendChild(im);}; im.src=url; };
     if (id) getPhotoUrl(id).then(show); else show(src);
   });
+}
+
+/* ---------- catalogue: built from the Stock list ---------- */
+const CAT_ORDER = ['Pooja set','Diwali hamper','Bowl set','Jaali box','Inlay table','Other'];
+const CAT_CODE = {'Pooja set':'PJ','Diwali hamper':'DG','Bowl set':'BS','Jaali box':'JB','Inlay table':'TD','Other':'OT'};
+const catMul = () => n(settings.catMarkup) > 0 ? n(settings.catMarkup) : 1.5;
+const catStep = () => [1,5,10,50].includes(n(settings.catRound)) ? n(settings.catRound) : 1;
+function catRate(p){
+  if (n(p.catRate) > 0) return n(p.catRate);
+  if (!(n(p.price) > 0)) return null;
+  const s = catStep(); return Math.ceil(n(p.price)*catMul()/s - 1e-9)*s;
+}
+function catGroups(V){
+  const shown = V.products.filter(p=>p.catalogue!=='No' && String(p.name||'').trim());
+  const cats = [...CAT_ORDER, ...new Set(shown.map(p=>p.category||'Other').filter(c=>!CAT_ORDER.includes(c)))];
+  return cats.map(c=>({cat:c, items:shown.filter(p=>(p.category||'Other')===c).sort((a,b)=>String(a.name).localeCompare(String(b.name)))})).filter(g=>g.items.length)
+    .map(g=>({...g, items:g.items.map((p,i)=>({...p, code:`${CAT_CODE[g.cat]||'OT'}-${String(i+1).padStart(2,'0')}`, rate:catRate(p)}))}));
+}
+function catalogueV(V){
+  const groups = catGroups(V);
+  const total = groups.reduce((a,g)=>a+g.items.length,0);
+  const hidden = V.products.length - total;
+  const noRate = groups.reduce((a,g)=>a+g.items.filter(p=>!p.rate).length,0);
+  const noPhoto = groups.reduce((a,g)=>a+g.items.filter(p=>!p.imageId && !p.img).length,0);
+  return `<div class="row-head"><div><h2>Catalogue</h2><p>${total} products from your Stock list${hidden?` · ${hidden} hidden`:''}. Change a product in Stock and this page changes with it.</p></div>
+  <div class="controls">${downloads && !demo ? `<button class="btn primary" id="catPdfBtn">Download PDF</button>`:''}</div></div>
+  <div class="panel catset">
+    <label for="catMarkup">Catalogue rate = retail price ×</label><input class="search" id="catMarkup" type="number" min="0.1" step="0.05" style="width:84px" value="${catMul()}">
+    <label for="catRound">rounded up to</label><select class="sel" id="catRound">${[[1,'₹1'],[5,'₹5'],[10,'₹10'],[50,'₹50']].map(([v,l])=>`<option value="${v}" ${v===catStep()?'selected':''}>${l}</option>`).join('')}</select>
+    <span class="sub">To set one product's rate by hand, or hide it from the catalogue, tap the product.</span>
+  </div>
+  ${(noRate||noPhoto)?`<p class="sub" style="margin:0">${noRate?`${noRate} product${noRate===1?' has':'s have'} no retail price and show “Rate on request”. `:''}${noPhoto?`${noPhoto} product${noPhoto===1?' has':'s have'} no photo yet.`:''}</p>`:''}
+  ${groups.length ? groups.map(g=>`<div class="catsec"><h3>${esc(g.cat)} <em>${g.items.length} item${g.items.length===1?'':'s'}</em></h3><div class="ccards">${g.items.map(p=>`
+    <button type="button" class="ccard" data-edit="products" data-id="${p.id}">
+      <div class="pimg" data-img="${esc(p.imageId||'')}" data-src="${esc(p.img||'')}">${esc((String(p.name).trim()||'?')[0])}</div>
+      <div class="cbody"><span class="code">${p.code}</span><span class="nm">${esc(p.name)}</span>
+      ${p.rate?`<span class="rt">${rs(p.rate)}</span>`:`<span class="rt ask">Rate on request</span>`}
+      <span class="was">${n(p.catRate)>0?'Rate set by hand':n(p.price)>0?`Retail ${rs(p.price)}`:'No retail price'}</span></div></button>`).join('')}</div></div>`).join('')
+  : `<div class="panel empty">No products to show. Add products in the Stock tab and they appear here.</div>`}`;
+}
+/* Catalogue PDF: A4, 4 cards a row, photos read from the app's own storage */
+function squareJpeg(src, size){
+  return new Promise(res=>{ const im=new Image(); im.onload=()=>{ const c=document.createElement('canvas'); c.width=c.height=size; const g=c.getContext('2d'); g.fillStyle='#ffffff'; g.fillRect(0,0,size,size);
+    const s=Math.min(size/im.naturalWidth,size/im.naturalHeight); const w=im.naturalWidth*s,h=im.naturalHeight*s; g.drawImage(im,(size-w)/2,(size-h)/2,w,h); try{res(c.toDataURL('image/jpeg',.82));}catch(e){res(null);} }; im.onerror=()=>res(null); im.src=src; });
+}
+async function catalogPdf(btn){
+  if (busy) return;
+  if (!window.jspdf){ toast('The PDF maker did not load. Check your connection and reload.'); return; }
+  busy = true; const label = btn.textContent;
+  try {
+    const groups = catGroups(data);
+    const all = groups.flatMap(g=>g.items); let k = 0;
+    const pics = {};
+    for (const p of all){ btn.textContent = `Reading photos ${++k}/${all.length}`; const d = await readPhoto(p); if (d) pics[p.id] = await squareJpeg(d, 360); }
+    btn.textContent = 'Making PDF…';
+    const {jsPDF} = window.jspdf; const doc = new jsPDF({unit:'mm',format:'a4'});
+    const W=210, H=297, M=12, cols=5, gap=3.5, cw=(W-2*M-gap*(cols-1))/cols, imgH=cw, ch=imgH+22;
+    const teal=[13,106,98], ink=[27,38,39], muted=[91,104,104], line=[216,222,219];
+    const rsT = v => 'Rs ' + fmt.format(v);
+    let y = M;
+    const header = first => {
+      doc.setTextColor(...teal); doc.setFont('times','normal'); doc.setFontSize(first?26:14);
+      doc.text('Prime Home Decor', M, y + (first?9:5));
+      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...muted);
+      doc.text('Anita Lath  94396 37396', W-M, y+(first?4:3), {align:'right'});
+      doc.text('Neha Lath  99370 53113', W-M, y+(first?9:7.5), {align:'right'});
+      y += first ? 13 : 9;
+      if (first){ doc.text('German silver decor, pooja and gifting. Call or WhatsApp to order. Rates per piece or per set.', M, y+2); y += 5; }
+      doc.setDrawColor(...line); doc.line(M, y, W-M, y); y += 6;
+    };
+    header(true);
+    for (const g of groups){
+      if (y + 8 + ch > H-M){ doc.addPage(); y = M; header(false); }
+      doc.setFont('times','normal'); doc.setFontSize(15); doc.setTextColor(...ink); doc.text(g.cat, M, y+4); const cw0 = doc.getTextWidth(g.cat);
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...muted); doc.text(`${g.items.length} items`, M + cw0 + 3, y+4);
+      y += 8;
+      g.items.forEach((p,i)=>{
+        const col = i % cols;
+        if (col===0 && i>0) y += ch + gap;
+        if (col===0 && y + ch > H-M){ doc.addPage(); y = M; header(false); }
+        const x = M + col*(cw+gap);
+        doc.setDrawColor(...line); doc.setFillColor(255,255,255); doc.roundedRect(x, y, cw, ch, 2, 2, 'FD');
+        if (pics[p.id]) doc.addImage(pics[p.id], 'JPEG', x+0.6, y+0.6, cw-1.2, imgH-1.2);
+        else { doc.setFillColor(220,237,234); doc.rect(x+0.6, y+0.6, cw-1.2, imgH-1.2, 'F'); doc.setFont('times','normal'); doc.setFontSize(26); doc.setTextColor(...teal); doc.text((String(p.name).trim()[0]||'?').toUpperCase(), x+cw/2, y+imgH/2+3, {align:'center'}); }
+        doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(...muted); doc.text(p.code, x+2.5, y+imgH+4);
+        doc.setFontSize(8.5); doc.setTextColor(...ink); doc.text(doc.splitTextToSize(String(p.name).trim(), cw-5).slice(0,2), x+2.5, y+imgH+8);
+        if (p.rate){ doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(...teal); doc.text(rsT(p.rate), x+2.5, y+ch-2.5); }
+        else { doc.setFontSize(8); doc.setTextColor(...muted); doc.text('Rate on request', x+2.5, y+ch-2.5); }
+      });
+      y += ch + 8;
+    }
+    const pages = doc.getNumberOfPages();
+    for (let i=1;i<=pages;i++){ doc.setPage(i); doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(...muted); doc.text(`Prime Home Decor catalogue · ${dmy(today())} · page ${i} of ${pages}`, W/2, H-5, {align:'center'}); }
+    await downloads.save({filename:`prime-home-decor-catalogue-${today()}.pdf`, data:doc.output('blob')});
+    toast('Catalogue PDF saved');
+  } catch(e){ toast(e?.code==='declined' ? 'PDF was not saved.' : 'PDF could not be made. Try again.'); }
+  finally { btn.textContent = label; busy = false; }
 }
 
 function supplierList(C){
@@ -876,6 +992,8 @@ function openForm(col, id){
       ${field('cost','Cost ₹ (used until first purchase)','number',rec.cost)}
       ${field('opening','Opening stock (pcs)','number',rec.opening??0)}
       ${field('reorder','Reorder when stock falls to','number',rec.reorder??3)}
+      ${field('catRate','Catalogue rate ₹ (blank = automatic)','number',rec.catRate)}
+      ${field('catalogue','Show in catalogue','select',rec.catalogue||'Yes',{options:['Yes','No']})}
       <label class="f wide">Product photo<div class="imgprev"><span id="imgPrev" data-img="${esc(rec.imageId||'')}">${rec.img?`<img src="${esc(rec.img)}" alt="">`:rec.imageId?'<span class="sub">Loading photo…</span>':''}</span><input type="file" id="f-photo" accept="image/*"></div></label>
       ${field('note','Notes','textarea',rec.note)}</div>`;
   } else if (col==='purchases'){ title = id?'Edit purchase bill':'New purchase bill';
@@ -1082,6 +1200,7 @@ document.addEventListener('click', async e=>{
   if (t.id==='quickPurchase') return openForm('purchases');
   if (t.id==='backupBtn') return backup();
   if (t.id==='photoZipBtn') return photoZip(t);
+  if (t.id==='catPdfBtn') return catalogPdf(t);
   if (t.dataset.pview){ purchView = t.dataset.pview; try{localStorage.setItem('phd-pview',purchView);}catch(er){} render(); return; }
   if (t.id==='xlsPurch') return purchasesExcel(t);
   if (t.dataset.add) return openForm(t.dataset.add);
@@ -1099,6 +1218,8 @@ document.addEventListener('change', e=>{
   if (e.target.id==='paySel'){ payFilter=e.target.value; render(); }
   if (e.target.id==='purchPeriodSel'){ purchPeriod=e.target.value; render(); }
   if (e.target.id==='importFile' && e.target.files[0]){ readImport(e.target.files[0]); e.target.value=''; }
+  if (e.target.id==='catMarkup'){ const v=n(e.target.value); if(v>0){ settings={...settings,catMarkup:v}; saveSettings(); } }
+  if (e.target.id==='catRound'){ settings={...settings,catRound:n(e.target.value)}; saveSettings(); }
   if (e.target.id==='shareInp'){ const v=Math.min(100,Math.max(0,n(e.target.value))); settings={...settings,shareAnita:v}; saveSettings(); }
 });
 let qT; document.addEventListener('input', e=>{ if(e.target.id==='stockQ'){ stockQ=e.target.value; clearTimeout(qT); qT=setTimeout(()=>{ render(); const el=document.getElementById('stockQ'); el.focus(); el.setSelectionRange(stockQ.length,stockQ.length); },250);} });

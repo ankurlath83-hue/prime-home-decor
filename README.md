@@ -8,7 +8,7 @@ On iPhone, open the link in Safari, tap Share, then **Add to Home Screen**. It o
 
 ## How it's built
 
-- `index.html` is the whole app.
+- `index.html` is the whole app. The Catalogue tab builds a customer catalogue (rates = retail × a markup you set) from the Stock list and saves it as a PDF.
 - Data and photos are kept in Firebase project `phdapp-937d7` (Firestore, Mumbai). Sign-in uses email and password.
 - `firestore.rules` allows only the owner (ankurlath83@gmail.com) and the emails the owner adds in the Partners tab. Paste it into Firebase console → Firestore → Rules → Publish after any change.
 - `sw.js` and `manifest.webmanifest` make it installable and let it open without internet.
