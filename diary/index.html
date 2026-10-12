@@ -2093,7 +2093,9 @@ function vToday(){
     html+=`<div class="sec-head"><h2>100 Days Hard</h2><span class="pill o">${allDone?'✓ ':''}Day ${hd}</span></div><div class="habit-chips">`+state.hard.tasks.map((t,i)=>`<button class="chip ${lg[i]?'on':''}" data-a="hardToggle" data-d="${T}" data-i="${i}"><span class="em">${['🏃','📘','🚰','📸'][i]}</span><span class="nm">${esc(t)}</span></button>`).join('')+`</div>`;
   }
   const fav=state.sacred.find(s=>s.kind==='mantra');
-  if(fav){const b=beads(T,fav.id),tg=Number(fav.target||0),ml=Math.floor(b/MALA),done=tg?ml>=tg:b>0;
+  if(fav&&isPath(fav)){const b=beads(T,fav.id),tg=Number(fav.target||0),done=tg?b>=tg:b>0;
+    html+=`<div class="card row between slim sadh${done?' done':''}"><div><h3>${done?'✓ ':''}${esc(fav.title)}</h3><p class="small muted"><b>${b}</b>${tg?'/'+tg:''} path${b===1?'':'s'} today · <b>${japaStreak()}</b> day streak</p></div><button class="btn ${done?'green':'primary'} sm" data-a="chant" data-id="${fav.id}">${b?'Update':'Log paths'}</button></div>`;}
+  else if(fav){const b=beads(T,fav.id),tg=Number(fav.target||0),ml=Math.floor(b/MALA),done=tg?ml>=tg:b>0;
     html+=`<div class="card row between slim sadh${done?' done':''}"><div><h3>${done?'✓ ':''}${esc(fav.title)}</h3><p class="small muted"><b>${ml}</b> mala · <b>${b}</b> beads · <b>${japaStreak()}</b> day streak</p></div><button class="btn ${done?'green':'primary'} sm" data-a="chant" data-id="${fav.id}">${b?'Continue':'Start japa'}</button></div>`;}
   const tCash=state.cash.filter(c=>c.date===T),inT=cashIn(tCash),outT=cashOut(tCash);
   const recvT=state.parties.map(p=>partyBal(p.id)).filter(b=>b>0).reduce((s,b)=>s+b,0);
@@ -2903,9 +2905,16 @@ function vCounter(){
 /* ---------- god ---------- */
 const MALA=108;
 function beads(date,mid){const d=state.japa[date];return d&&d[mid]?Number(d[mid]):0}
-function beadsDay(date){const d=state.japa[date];return d?Object.values(d).reduce((s,v)=>s+Number(v),0):0}
-function japaStreak(){let d=new Date();if(!beadsDay(dk(d)))d=addDays(d,-1);let n=0;while(beadsDay(dk(d))){n++;d=addDays(d,-1)}return n}
+/* long stotras (Hanuman Chalisa, Aditya Hridayam…) are counted as paths you type in, not 108-bead malas */
+function isPath(s){if(!s)return false;if(s.mode)return s.mode==='path';return String(s.text||'').split('\n').filter(l=>l.trim()).length>8}
+const pathIds=()=>new Set(state.sacred.filter(isPath).map(s=>s.id));
+function beadsDay(date){const d=state.japa[date];if(!d)return 0;const P=pathIds();return Object.entries(d).reduce((s,[k,v])=>P.has(k)?s:s+Number(v),0)}
+function pathsDay(date){const d=state.japa[date];if(!d)return 0;const P=pathIds();return Object.entries(d).reduce((s,[k,v])=>P.has(k)?s+Number(v):s,0)}
+function sadhanaDay(date){return beadsDay(date)+pathsDay(date)}
+function japaStreak(){let d=new Date();if(!sadhanaDay(dk(d)))d=addDays(d,-1);let n=0;while(sadhanaDay(dk(d))){n++;d=addDays(d,-1)}return n}
 function beadsTotal(){return Object.keys(state.japa).reduce((s,k)=>s+beadsDay(k),0)}
+function pathsTotal(){return Object.keys(state.japa).reduce((s,k)=>s+pathsDay(k),0)}
+function setPaths(mid,n){const T=today();n=Math.max(0,Math.floor(Number(n)||0));state.japa[T]=state.japa[T]||{};if(n)state.japa[T][mid]=n;else delete state.japa[T][mid];saveLazy()}
 
 function vGod(){
   const T=today(),tb=beadsDay(T),mantras=state.sacred.filter(s=>s.kind==='mantra'),prayers=state.sacred.filter(s=>s.kind==='prayer');
@@ -2918,6 +2927,7 @@ function vGod(){
     <p class="dev" lang="sa" style="font-size:1.3rem;margin-top:2px">ॐ</p>
     <div class="row"><div><b>${Math.floor(tb/MALA)}</b><span class="small">malas today</span></div>
     <div><b>${tb}</b><span class="small">beads today</span></div>
+    ${pathsDay(T)?`<div><b>${pathsDay(T)}</b><span class="small">paths today</span></div>`:''}
     <div><b>${japaStreak()}</b><span class="small">day streak</span></div></div></section>
   <div class="seg">${[['altar','🔱 Altar'],['mantras','Mantras'],['prayers','Prayers'],['log','Japa log']].map(([k,l])=>`<button class="${ui.gSub===k?'on':''}" data-a="sub" data-g="gSub" data-v="${k}">${l}</button>`).join('')}</div>`;
   if(ui.gSub==='altar')return html.replace(/^\s*<section class="shrine">[\s\S]*?<\/section>/,'')+vAltar();
@@ -2925,15 +2935,16 @@ function vGod(){
     const days=[];for(let i=13;i>=0;i--)days.push(dk(addDays(new Date(),-i)));
     const max=Math.max(1,...days.map(beadsDay));
     html+=japaYear();
-    html+=`<div class="sec-head"><h2>Last two weeks</h2><span class="small muted">${beadsTotal()} beads in all</span></div>
+    html+=`<div class="sec-head"><h2>Last two weeks</h2><span class="small muted">${beadsTotal()} beads${pathsTotal()?' · '+pathsTotal()+' paths':''} in all</span></div>
     <div class="card"><div class="logbar">${days.map(d=>`<div class="${beadsDay(d)?'':'z'}" style="height:${Math.max(2,beadsDay(d)/max*70)}px" title="${d}"></div>`).join('')}</div>
     <div class="row between small muted" style="margin-top:6px"><span>${prettyDate(days[0])}</span><span>Today</span></div></div>`;
-    const dates=Object.keys(state.japa).filter(d=>beadsDay(d)).sort().reverse().slice(0,30);
+    const dates=Object.keys(state.japa).filter(d=>sadhanaDay(d)).sort().reverse().slice(0,30);
     html+=`<div class="sec-head"><h2>By day</h2></div><div class="card">`+
     (dates.length?dates.map(d=>{const per=Object.entries(state.japa[d]).filter(([,v])=>v).map(([mid,v])=>{const m=state.sacred.find(s=>s.id===mid);const n=Number(v);
+      if(isPath(m))return `${esc(m.title)} — ${n} path${n===1?'':'s'}`;
       return `${m?esc(m.title):'Removed'} — ${n>=MALA?Math.floor(n/MALA)+' mala'+(Math.floor(n/MALA)===1?'':'s'):n+' beads'}`}).join(' · ');
-      const tot=beadsDay(d);
-      return `<div class="item"><div class="t"><div class="ttl">${prettyDate(d)}</div><div class="meta">${per}</div></div><div class="amt">${tot>=MALA?Math.floor(tot/MALA)+' malas':tot+' beads'}</div></div>`}).join('')
+      const tot=beadsDay(d),pt=pathsDay(d);
+      return `<div class="item"><div class="t"><div class="ttl">${prettyDate(d)}</div><div class="meta">${per}</div></div><div class="amt">${[tot?(tot>=MALA?Math.floor(tot/MALA)+' malas':tot+' beads'):'',pt?pt+' path'+(pt===1?'':'s'):''].filter(Boolean).join(' · ')}</div></div>`}).join('')
       :'<div class="empty">No japa recorded yet. Open a mantra and start the counter.</div>')+`</div>`;
     return html;
   }
@@ -2948,19 +2959,39 @@ function vGod(){
           :`<p class="dev" lang="sa">${lines.map(esc).join('<br>')}</p>`})()}
       ${s.meaning?`<p class="small muted clamp2">${esc(s.meaning)}</p>`:''}
       <div class="row" style="margin-top:12px">${s.kind==='mantra'
-        ?`<button class="btn primary" data-a="chant" data-id="${s.id}">Start japa</button>${b?`<span class="small muted">${Math.floor(b/MALA)}${tgt?'/'+tgt:''} mala · ${b} beads</span>`:''}`
+        ?(isPath(s)?`<button class="btn primary" data-a="chant" data-id="${s.id}">${b?'Update paths':'Log paths'}</button><span class="small muted">${b}${tgt?'/'+tgt:''} path${b===1?'':'s'} today</span><button class="btn ghost sm" data-a="readSacred" data-id="${s.id}">Read</button>`
+          :`<button class="btn primary" data-a="chant" data-id="${s.id}">Start japa</button>${b?`<span class="small muted">${Math.floor(b/MALA)}${tgt?'/'+tgt:''} mala · ${b} beads</span>`:''}`)
         :`<button class="btn green" data-a="readSacred" data-id="${s.id}">Read in big text</button>`}</div></div>`;
   }
   if(!list.length) html+=`<div class="empty">Nothing here yet. Add your first ${ui.gSub==='prayers'?'prayer':'mantra'} below.</div>`;
   html+=`</section><div class="sec-head"><h2>Add ${ui.gSub==='prayers'?'a prayer':'a mantra'}</h2></div>
   <div class="card"><input class="field" id="scT" placeholder="Name, e.g. Shiv Tandav Stotram">
   <div class="row" style="margin-top:8px"><input class="field" id="scD" placeholder="Deity (optional)">
-  ${ui.gSub==='prayers'?'':'<input class="field" id="scG" type="number" min="0" max="108" inputmode="numeric" placeholder="Malas / day" style="max-width:130px">'}</div>
+  ${ui.gSub==='prayers'?'':'<input class="field" id="scG" type="number" min="0" max="108" inputmode="numeric" placeholder="Per day" style="max-width:110px">'}</div>
+  ${ui.gSub==='prayers'?'':'<select class="field" id="scK" style="margin-top:8px" aria-label="How to count"><option value="">Count automatically (long text → paths)</option><option value="mala">Mala counter — tap 108 beads</option><option value="path">Path count — type how many times</option></select>'}
   <textarea class="field dev" id="scX" style="margin-top:8px;min-height:110px" placeholder="Paste or type the text — Devanagari or roman"></textarea>
   <input class="field" id="scM" style="margin-top:8px" placeholder="Meaning or when you chant it">
   <button class="btn green block" style="margin-top:10px" data-a="addSacred">Add ${ui.gSub==='prayers'?'prayer':'mantra'}</button></div>`;
   return html;
 }
+function pathSheet(){
+  const s=state.sacred.find(x=>x.id===ui.japaId);if(!s)return closeModal();
+  const T=today(),tgt=Number(s.target||0),b=beads(T,s.id),lines=String(s.text||'').split('\n').filter(l=>l.trim());
+  let week=0;for(let i=0;i<7;i++)week+=beads(dk(addDays(new Date(),-i)),s.id);
+  openModal(`<h2 style="text-align:center">${esc(s.title)}</h2>
+  ${s.deity?`<p class="small muted" style="text-align:center;margin-top:2px">${esc(s.deity)}</p>`:''}
+  <p class="small muted" style="text-align:center;margin-top:10px">How many times did you recite it today?</p>
+  <div class="stepper" style="margin-top:10px;gap:10px">
+    <button data-a="pathStep" data-v="-1" aria-label="One less" style="width:52px;height:52px;font-size:1.5rem">−</button>
+    <input class="field" id="ptN" type="number" min="0" inputmode="numeric" value="${b}" aria-label="Paths today" style="width:110px;min-height:64px;font-size:2rem;font-weight:800;text-align:center;font-family:var(--display);color:var(--forest)">
+    <button data-a="pathStep" data-v="1" aria-label="One more" style="width:52px;height:52px;font-size:1.5rem;background:var(--saffron);color:#fff;border-color:var(--saffron)">+</button></div>
+  <div class="row" style="justify-content:center;gap:6px;margin-top:10px;flex-wrap:wrap">${[1,3,7,11].map(n=>`<button class="btn ghost sm" data-a="pathStep" data-v="${n}">+${n}</button>`).join('')}</div>
+  <p class="small muted" style="text-align:center;margin-top:10px">${tgt?`Target ${tgt} path${tgt===1?'':'s'} a day · `:''}${week} in the last 7 days</p>
+  <button class="btn green block big" style="margin-top:14px" data-a="pathSave">Save</button>
+  ${lines.length?`<details class="fold" style="margin-top:14px"><summary><span class="link">Read the text (${lines.length} lines)</span></summary><p class="dev" lang="sa" style="font-size:1.15rem;line-height:2;text-align:center;margin-top:8px">${lines.map(esc).join('<br>')}</p></details>`:''}`);
+  const i=document.getElementById('ptN');i.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();ACT_pathSave()}});
+}
+function ACT_pathSave(){document.querySelector('[data-a="pathSave"]').click()}
 function japaSheet(){
   const s=state.sacred.find(x=>x.id===ui.japaId);if(!s)return closeModal();
   const T=today(),tgt=Number(s.target||0);
@@ -3899,8 +3930,8 @@ function numCard(){
 /* =================== Japa year view & milestones =================== */
 function japaYear(){
   const end=new Date(),start=addDays(end,-7*26-end.getDay());let cells='',days=0;
-  for(let d=new Date(start);d<=end;d=addDays(d,1)){const k=dk(d),b=beadsDay(k),bl=bilvaDay(k),lv=b>=216?4:b>=108?3:b>=27?2:b>0||bl?1:0;if(b||bl)days++;
-    cells+=`<i class="l${lv}" title="${prettyDate(k)} · ${b} beads${bl?' · '+bl+' patra':''}"></i>`}
+  for(let d=new Date(start);d<=end;d=addDays(d,1)){const k=dk(d),b=beadsDay(k),pt=pathsDay(k),bl=bilvaDay(k),lv=b>=216||pt>=3?4:b>=108||pt>=2?3:b>=27||pt>=1?2:b>0||bl?1:0;if(b||bl||pt)days++;
+    cells+=`<i class="l${lv}" title="${prettyDate(k)} · ${b} beads${pt?' · '+pt+' paths':''}${bl?' · '+bl+' patra':''}"></i>`}
   const tb=beadsTotal(),tp=bilvaTotal(),st=japaStreak();
   const marks=[[7,'7-day streak'],[21,'21 days'],[40,'40 days — a mandal'],[108,'108 days']].map(([n,l])=>`<span class="badge-m ${st>=n?'on':''}">${st>=n?'🏅':'🔒'} ${l}</span>`).join('');
   const nextB=[108,1008,10008,100008,1000008].find(n=>n>tb)||tb+1,nextP=[11,108,1008,10008].find(n=>n>tp)||tp+1;
@@ -4022,7 +4053,7 @@ function vWeek(){
    ${per.length?`<p class="small" style="margin-top:10px">💪 Strongest: <b>${esc(per[0][0].name)}</b> (${per[0][1]}/7) · 🎯 Needs care: <b>${esc(per[per.length-1][0].name)}</b> (${per[per.length-1][1]}/7)</p>`:''}</div>
   <div class="sec-head"><h2>Money</h2></div><div class="stats"><div class="stat"><span>Cash in</span><b class="pos">${INR(cin)}</b></div><div class="stat"><span>Cash out</span><b class="neg">${INR(cout)}</b></div><div class="stat"><span>Khata got</span><b class="pos">${INR(got)}</b></div></div>
   <p class="small muted" style="margin-top:6px">Khata given out this week: ${INR(gave)}</p>
-  <div class="sec-head"><h2>Sadhana</h2></div><div class="card"><p>📿 ${beadsW.toLocaleString('en-IN')} beads · 🍃 ${bil} bel patra · ${days.filter(d=>beadsDay(d)).length}/7 days of japa</p></div>
+  <div class="sec-head"><h2>Sadhana</h2></div><div class="card"><p>📿 ${beadsW.toLocaleString('en-IN')} beads${days.reduce((x,d)=>x+pathsDay(d),0)?' · 📖 '+days.reduce((x,d)=>x+pathsDay(d),0)+' paths':''} · 🍃 ${bil} bel patra · ${days.filter(d=>sadhanaDay(d)).length}/7 days of japa</p></div>
   ${moments.length?`<div class="sec-head"><h2>Moments worth remembering</h2></div><div class="card">${moments.map(([d,m])=>`<p class="idea"><b>${DAYS[parseDk(d).getDay()].slice(0,3)}:</b> ${esc(m)}</p>`).join('')}</div>`:''}
   ${off===0?`<div class="sec-head"><h2>Next week’s top 3</h2></div><div class="card">${['a','b','c'].map((k,i)=>`<input class="field" style="margin-top:${i?8:0}px" data-bind="weekTop.${nx}.${k}" value="${esc(top[k]||'')}" placeholder="${i+1}. ${['The one thing that matters most','Second priority','Third priority'][i]}">`).join('')}
     <button class="btn green block" style="margin-top:10px" data-a="wkTasks" data-v="${nx}">Add them as tasks for Monday</button></div>`:''}`;
@@ -4393,14 +4424,16 @@ const A={
   addSacred:()=>{
     const t=document.getElementById('scT').value.trim(),x=document.getElementById('scX').value.trim();
     if(!t||!x){toast('A name and the text are needed');return}
-    const g=document.getElementById('scG');
-    state.sacred.push({id:uid(),kind:ui.gSub==='prayers'?'prayer':'mantra',title:t,deity:document.getElementById('scD').value.trim(),
-      target:g?Number(g.value)||0:0,text:x,meaning:document.getElementById('scM').value.trim()});
+    const g=document.getElementById('scG'),k=document.getElementById('scK');
+    const it={id:uid(),kind:ui.gSub==='prayers'?'prayer':'mantra',title:t,deity:document.getElementById('scD').value.trim(),
+      target:g?Number(g.value)||0:0,text:x,meaning:document.getElementById('scM').value.trim()};
+    if(k&&k.value)it.mode=k.value;state.sacred.push(it);
     commit();toast('Added');window.scrollTo(0,0)},
   editSacred:el=>{const s=state.sacred.find(x=>x.id===el.dataset.id);
     openModal(`<h2>Edit</h2><label class="lbl">Name</label><input class="field" value="${esc(s.title)}" data-bind="sacred.${state.sacred.indexOf(s)}.title">
     <div class="row" style="margin-top:8px"><input class="field" value="${esc(s.deity)}" placeholder="Deity" data-bind="sacred.${state.sacred.indexOf(s)}.deity">
-    ${s.kind==='mantra'?`<input class="field" type="number" min="0" max="108" value="${s.target||0}" data-type="num" data-bind="sacred.${state.sacred.indexOf(s)}.target" style="max-width:120px" aria-label="Malas per day">`:''}</div>
+    ${s.kind==='mantra'?`<input class="field" type="number" min="0" max="108" value="${s.target||0}" data-type="num" data-bind="sacred.${state.sacred.indexOf(s)}.target" style="max-width:120px" aria-label="${isPath(s)?'Paths':'Malas'} per day">`:''}</div>
+    ${s.kind==='mantra'?`<label class="lbl">How to count</label><select class="field" data-bind="sacred.${state.sacred.indexOf(s)}.mode"><option value="mala" ${isPath(s)?'':'selected'}>Mala counter — tap 108 beads</option><option value="path" ${isPath(s)?'selected':''}>Path count — type how many times</option></select><p class="small muted" style="margin-top:4px">The daily target means malas or paths, whichever you pick.</p>`:''}
     <label class="lbl">Text</label><textarea class="field dev" style="min-height:130px" data-bind="sacred.${state.sacred.indexOf(s)}.text">${esc(s.text)}</textarea>
     <label class="lbl">Meaning</label><textarea class="field" rows="2" data-bind="sacred.${state.sacred.indexOf(s)}.meaning">${esc(s.meaning||'')}</textarea>
     <button class="btn green block" style="margin-top:12px" data-a="closeEdit">Save</button>`)},
@@ -4410,7 +4443,11 @@ const A={
     openModal(`<h2 style="text-align:center">${esc(s.title)}</h2><p class="dev" lang="sa" style="font-size:1.45rem;line-height:2.1;text-align:center;margin-top:14px">${esc(s.text).replace(/\n/g,'<br>')}</p>
     ${s.meaning?`<p class="small muted" style="text-align:center;margin-top:14px">${esc(s.meaning)}</p>`:''}
     <button class="btn green block" style="margin-top:18px" data-a="wnClose">Close</button>`)},
-  chant:el=>{ui.japaId=el.dataset.id;japaSheet()},
+  chant:el=>{ui.japaId=el.dataset.id;const s=state.sacred.find(x=>x.id===ui.japaId);isPath(s)?pathSheet():japaSheet()},
+  pathStep:el=>{const i=document.getElementById('ptN');i.value=Math.max(0,(Number(i.value)||0)+ +el.dataset.v);try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}},
+  pathSave:()=>{const i=document.getElementById('ptN');const s=state.sacred.find(x=>x.id===ui.japaId);if(!s)return closeModal();
+    setPaths(s.id,i.value);const n=beads(today(),s.id),tg=Number(s.target||0);closeModal();flushSave();render();
+    toast(n?`${n} path${n===1?'':'s'} of ${s.title} saved${tg&&n>=tg?' — target done 🙏':''}`:'Cleared for today')},
   japaUndo:()=>{const T=today();if(!state.japa[T]||!state.japa[T][ui.japaId])return;state.japa[T][ui.japaId]--;saveLazy();japaSheet()},
   japaReset:()=>{const T=today();if(state.japa[T])delete state.japa[T][ui.japaId];saveLazy();japaSheet()},
   japaDone:()=>{closeModal();flushSave();render()},
