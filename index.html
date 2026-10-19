@@ -133,6 +133,46 @@ tr.click:hover td{background:var(--surface2)}
 .pmeta{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted)}
 .pmeta b{color:var(--ink);font-weight:600}
 
+/* orders + gantt */
+section.view>*{min-width:0}
+.gantt{max-width:100%}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:18px}
+.smart h4{margin:0 0 4px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.gantt{position:relative;overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.ghead,.grow,.gover{display:grid;grid-template-columns:minmax(170px,230px) minmax(420px,1fr)}
+.ghead{position:sticky;top:0;background:var(--surface2);border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}
+.ghead .glabel{padding:8px 12px}
+.gscale{position:relative;height:30px}
+.gtick{position:absolute;top:8px;transform:translateX(-50%);font-variant-numeric:tabular-nums;white-space:nowrap}
+.gtick.m{font-weight:700;color:var(--ink)}
+.gbody{position:relative}
+.grow{border-bottom:1px solid var(--line);min-height:64px}
+.grow:last-of-type{border-bottom:0}
+.grow.late .glabel{box-shadow:inset 3px 0 0 var(--bad)}
+.glabel{padding:8px 12px;position:sticky;left:0;background:var(--surface);z-index:2;border-right:1px solid var(--line);display:grid;gap:3px;min-width:0}
+.glabel .sub{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gname{font-weight:600;text-align:left;text-decoration:none;color:var(--ink)}
+.gact{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.gtrack{position:relative;cursor:pointer;background-image:repeating-linear-gradient(90deg,transparent 0,transparent calc(100%/var(--days) - 1px),var(--line) calc(100%/var(--days) - 1px),var(--line) calc(100%/var(--days)))}
+.gtrack:hover{background-color:var(--surface2)}
+.gseg{position:absolute;top:22px;height:20px;border-radius:5px;z-index:1}
+.gseg.s0{background:#9aa6a4}.gseg.s1{background:var(--gold)}.gseg.s2{background:#3b7fc4}.gseg.s3{background:var(--good)}
+.gplan{position:absolute;top:18px;height:28px;border-radius:7px;border:1.5px dashed var(--faint);background:transparent}
+.gplan.late{border-color:var(--bad)}
+.gdue{position:absolute;top:26px;width:12px;height:12px;margin-left:-6px;transform:rotate(45deg);background:var(--ink);z-index:2;border:2px solid var(--surface)}
+.gdue.late{background:var(--bad)}
+.gover{position:absolute;inset:0;pointer-events:none}
+.gtodaywrap{position:relative}
+.gtoday{position:absolute;top:0;bottom:0;border-left:2px solid var(--bad);z-index:3}
+.gtoday span{position:absolute;top:2px;left:4px;font-size:10.5px;font-weight:700;color:var(--bad);background:var(--surface);padding:0 3px;border-radius:4px}
+.gkey{display:inline-block;width:14px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.gkey.s0{background:#9aa6a4}.gkey.s1{background:var(--gold)}.gkey.s2{background:#3b7fc4}.gkey.s3{background:var(--good)}
+.gkey.plan{border:1.5px dashed var(--faint)}.gkey.due{width:10px;height:10px;transform:rotate(45deg);background:var(--ink)}
+.stages{display:flex;gap:6px;flex-wrap:wrap}
+.stages label{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--muted)}
+.stages input{accent-color:var(--accent)}
+.stages label:has(input:checked){border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+
 /* catalogue */
 .catsec{display:grid;gap:10px}
 .catsec h3{font-size:21px;display:flex;align-items:baseline;gap:10px}
@@ -290,7 +330,7 @@ const PARTNERS = [
 ];
 const COLS = ['products','purchases','sales','parties','ledger','expenses','ideas'];
 const TABS = [
-  ['dash','Dashboard'],['stock','Stock'],['catalogue','Catalogue'],['purchases','Purchases'],['sales','Sales'],
+  ['dash','Dashboard'],['stock','Stock'],['catalogue','Catalogue'],['purchases','Purchases'],['orders','Orders'],['sales','Sales'],
   ['parties','Customers & Resellers'],['partners','Partners'],['expenses','Expenses'],['promote','Promote']
 ];
 const CATS = ['Pooja set','Bowl set','Jaali box','Inlay table','Diwali hamper','Other'];
@@ -305,7 +345,7 @@ const dmy = s => { if(!s) return ''; const [y,m,d]=s.split('-'); return `${d}/${
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-let data = Object.fromEntries(COLS.map(c=>[c,[]]));
+let data = Object.fromEntries(COLS.map(c=>[c,[]])); data.orders = [];
 let settings = { shareAnita: 50 };
 let mode = 'loading';   // loading | db | local
 let demo = false, loadedCount = 0;
@@ -340,10 +380,10 @@ function exampleData(){
     {id:'u4',date:d(20),supplier:'Local packer',productId:'p5',qty:30,rate:1100,transport:600,handling:400,other:500,paidBy:'Firm'}
   ];
   const sales = [
-    {id:'s1',date:d(55),partyId:'c1',items:[{productId:'p1',qty:2,rate:2200}],discount:200,transport:0,handling:0,received:4200,mode:'UPI'},
-    {id:'s2',date:d(35),partyId:'r1',items:[{productId:'p3',qty:8,rate:1300},{productId:'p1',qty:4,rate:1850}],discount:0,transport:350,handling:0,received:12000,mode:'UPI'},
-    {id:'s3',date:d(12),partyId:'c2',items:[{productId:'p5',qty:15,rate:1950},{productId:'p2',qty:3,rate:2300}],discount:1500,transport:500,handling:200,received:20000,mode:'Bank'},
-    {id:'s4',date:d(3),partyId:'c1',items:[{productId:'p4',qty:1,rate:6500}],discount:300,transport:250,handling:0,received:6200,mode:'Cash'}
+    {id:'s1',date:d(55),partyId:'c1',items:[{productId:'p1',qty:2,rate:2200}],discount:200,transport:0,handling:0,received:4200,receivedBy:'Anita',mode:'UPI'},
+    {id:'s2',date:d(35),partyId:'r1',items:[{productId:'p3',qty:8,rate:1300},{productId:'p1',qty:4,rate:1850}],discount:0,transport:350,handling:0,received:12000,receivedBy:'Neha',mode:'UPI'},
+    {id:'s3',date:d(12),partyId:'c2',items:[{productId:'p5',qty:15,rate:1950},{productId:'p2',qty:3,rate:2300}],discount:1500,transport:500,handling:200,received:20000,receivedBy:'Firm',mode:'Bank'},
+    {id:'s4',date:d(3),partyId:'c1',items:[{productId:'p4',qty:1,rate:6500}],discount:300,transport:250,handling:0,received:6200,receivedBy:'Anita',mode:'Cash'}
   ];
   const ledger = [
     {id:'l1',date:d(80),partner:'Anita',kind:'Capital in',amount:50000,note:'Opening capital'},
@@ -353,13 +393,19 @@ function exampleData(){
     {id:'e1',date:d(30),category:'Promotion',amount:1500,paidBy:'Anita',note:'Instagram boost'},
     {id:'e2',date:d(15),category:'Packaging',amount:2200,paidBy:'Firm',note:'Gift boxes and ribbon'}
   ];
-  return {products,purchases,sales,parties,ledger,expenses,ideas:[]};
+  const orders = [
+    {id:'o1',type:'order',partyId:'c2',items:[{productId:'p5',qty:20,rate:1950}],orderDate:d(6),dueDate:d(-4),stage:'Packed',stageDates:{Taken:d(6),Packed:d(2)},discount:0,received:0},
+    {id:'o2',type:'order',partyId:'r1',items:[{productId:'p1',qty:6,rate:1850}],orderDate:d(9),dueDate:d(2),stage:'Taken',stageDates:{Taken:d(9)},discount:0,received:0},
+    {id:'o3',type:'order',partyId:'c1',items:[{productId:'p3',qty:2,rate:1600}],orderDate:d(4),dueDate:d(-1),stage:'Dispatched',stageDates:{Taken:d(4),Packed:d(3),Dispatched:d(1)},discount:0,received:0}
+  ];
+  purchases.push({id:'u5',date:d(3),supplier:'Moradabad supplier',status:'In transit',eta:d(-3),items:[{productId:'p1',qty:15,rate:1250}],transport:900,handling:0,other:0,payments:{Anita:19650}});
+  return {products,purchases,sales,parties,ledger,expenses,ideas:[],orders};
 }
 function view(){ return demo ? exampleData() : data; }
 
 /* ---------- storage ---------- */
 function localLoad(){
-  try { const s = JSON.parse(localStorage.getItem('phd-data')||'null'); if (s){ COLS.forEach(c=>data[c]=s[c]||[]); settings = s.settings||settings; } } catch(e){}
+  try { const s = JSON.parse(localStorage.getItem('phd-data')||'null'); if (s){ COLS.forEach(c=>data[c]=s[c]||[]); data.orders = s.orders||[]; settings = s.settings||settings; } } catch(e){}
 }
 function localSave(){ try{ localStorage.setItem('phd-data', JSON.stringify({...data,settings})); }catch(e){} }
 
@@ -368,7 +414,8 @@ async function saveDoc(col, obj){
   const clean = JSON.parse(JSON.stringify(obj));
   if (mode === 'db'){
     // Firestore shows the change at once from its local copy and syncs when online; errors surface later
-    db.collection(col).doc(clean.id).set(clean).catch(fail);
+    if (col==='orders'){ clean.type='order'; db.collection('sales').doc(clean.id).set(clean).catch(fail); }
+    else db.collection(col).doc(clean.id).set(clean).catch(fail);
   } else {
     const i = data[col].findIndex(x=>x.id===clean.id);
     if (i>=0) data[col][i]=clean; else data[col].push(clean);
@@ -377,7 +424,7 @@ async function saveDoc(col, obj){
   return true;
 }
 async function delDoc(col, id){
-  if (mode === 'db'){ db.collection(col).doc(id).delete().catch(fail); }
+  if (mode === 'db'){ db.collection(col==='orders'?'sales':col).doc(id).delete().catch(fail); }
   else { data[col] = data[col].filter(x=>x.id!==id); localSave(); render(); }
   return true;
 }
@@ -418,10 +465,14 @@ function calc(V){
   const P = {};
   V.products.forEach(p=>P[p.id]={...p,inQty:0,inCost:0,soldQty:0,soldVal:0});
   const purchases = V.purchases.map(normPurchase);
-  purchases.forEach(u=>{ const pc=purchCalc(u); (u.items||[]).forEach(it=>{ const p=P[it.productId]; if(!p) return; p.inQty+=n(it.qty); p.inCost+=pc.landed(it); }); });
+  Object.values(P).forEach(p=>{ p.transit=0; p.booked=0; p.sold30=0; });
+  purchases.forEach(u=>{ const pc=purchCalc(u); const moving = u.status==='In transit'; (u.items||[]).forEach(it=>{ const p=P[it.productId]; if(!p) return; if (moving){ p.transit+=n(it.qty); return; } p.inQty+=n(it.qty); p.inCost+=pc.landed(it); }); });
+  const since30 = (()=>{ const x=new Date(); x.setDate(x.getDate()-30); return x.toISOString().slice(0,10); })();
+  V.sales.forEach(s=>{ if ((s.date||'')>=since30) (s.items||[]).forEach(it=>{ const p=P[it.productId]; if(p) p.sold30+=n(it.qty); }); });
+  (V.orders||[]).forEach(o=>{ if (stageIdx(o.stage)<STAGE_DELIVERED) (o.items||[]).forEach(it=>{ const p=P[it.productId]; if(p) p.booked+=n(it.qty); }); });
   Object.values(P).forEach(p=>{ p.avgCost = p.inQty>0 ? p.inCost/p.inQty : n(p.cost); });
   V.sales.forEach(s=>(s.items||[]).forEach(it=>{ const p=P[it.productId]; if(!p) return; p.soldQty+=n(it.qty); p.soldVal+=n(it.qty)*n(it.rate); }));
-  Object.values(P).forEach(p=>{ p.qty = n(p.opening)+p.inQty-p.soldQty; p.value = Math.max(p.qty,0)*p.avgCost; });
+  Object.values(P).forEach(p=>{ p.qty = n(p.opening)+p.inQty-p.soldQty; p.value = Math.max(p.qty,0)*p.avgCost; p.free = p.qty-p.booked; });
   const saleCalc = s => {
     const gross = (s.items||[]).reduce((a,it)=>a+n(it.qty)*n(it.rate),0);
     const net = gross - n(s.discount);
@@ -469,7 +520,7 @@ function render(){
   const main = document.getElementById('main');
   if (mode==='loading'){ main.innerHTML = `<section class="view"><div class="panel empty">Opening the books…</div></section>`; return; }
   const V = view(), C = calc(V);
-  const fn = {dash,stock,catalogue:catalogueV,purchases:purchasesV,sales:salesV,parties:partiesV,partners:partnersV,expenses:expensesV,promote:promoteV}[tab];
+  const fn = {dash,stock,catalogue:catalogueV,orders:ordersV,purchases:purchasesV,sales:salesV,parties:partiesV,partners:partnersV,expenses:expensesV,promote:promoteV}[tab];
   main.innerHTML = `<section class="view">${fn(V,C)}</section>`;
   if (tab==='stock' || tab==='catalogue') hydrateImages();
 }
@@ -508,6 +559,7 @@ function dash(V,C){
     <div class="kpi"><span>Stock value</span><b>${rs(stockVal)}</b><em>${Object.values(C.P).reduce((a,p)=>a+Math.max(p.qty,0),0)} pieces</em></div>
     <div class="kpi"><span>To collect</span><b style="color:${recv>0?'var(--warn)':'inherit'}">${rs(recv)}</b><em>unpaid bills</em></div>
   </div>
+  ${smartPanel(V,C,true)}
   <div class="grid-2">
     <div class="panel"><h3>Last 6 months</h3>${chart(months)}
       <div class="legend"><span><i style="background:var(--accent)"></i>Net sales</span><span><i style="background:var(--gold)"></i>Net profit</span></div></div>
@@ -561,7 +613,8 @@ function stock(V,C){
       <div class="pbody"><div class="pmeta"><span class="pill plain">${esc(p.category||'Other')}</span>${stockPill(p)}</div>
       <h4>${esc(p.name)}</h4>
       <div class="pmeta"><span>Retail <b>${rs(p.price)}</b></span><span>Reseller <b>${rs(p.resellerPrice)}</b></span></div>
-      <div class="pmeta"><span>Landed cost <b>${rs(p.avgCost)}</b></span><span>Margin <b>${m}%</b></span></div></div></button>`; }).join('')}</div>`
+      <div class="pmeta"><span>Landed cost <b>${rs(p.avgCost)}</b></span><span>Margin <b>${m}%</b></span></div>
+      ${(p.booked||p.transit)?`<div class="pmeta">${p.booked?`<span class="pill gold">${p.booked} booked</span>`:'<span></span>'}${p.transit?`<span class="pill acc">${p.transit} in transit</span>`:''}</div>`:''}</div></button>`; }).join('')}</div>`
   : `<div class="panel empty">No products yet. Add your first product with a photo, price and reseller price.</div>`}`;
 }
 function hydrateImages(){
@@ -570,6 +623,156 @@ function hydrateImages(){
     const show = url => { if(!url || !el.isConnected) return; const im=new Image(); im.alt=''; im.onload=()=>{el.textContent='';el.appendChild(im);}; im.src=url; };
     if (id) getPhotoUrl(id).then(show); else show(src);
   });
+}
+
+/* ---------- orders: customer orders, Gantt timeline, smart alerts ---------- */
+const STAGES = ['Taken','Packed','Dispatched','Delivered','Paid'];
+const STAGE_LABEL = {Taken:'Order taken',Packed:'Packed',Dispatched:'Dispatched',Delivered:'Delivered',Paid:'Paid'};
+const STAGE_DELIVERED = 3;
+const stageIdx = st => Math.max(0, STAGES.indexOf(st||'Taken'));
+const dayMs = 864e5;
+const toDay = s => s ? Math.round(new Date(s+'T00:00:00').getTime()/dayMs) : null;
+const fromDay = d => new Date(d*dayMs).toISOString().slice(0,10);
+const addDays = (s,k) => fromDay(toDay(s)+k);
+let orderFilter = 'open', ganttDays = 30, ganttStart = null;
+try { const g = +localStorage.getItem('phd-gdays'); if ([14,30,90].includes(g)) ganttDays = g; } catch(e){}
+function orderTotal(o){ return (o.items||[]).reduce((a,it)=>a+n(it.qty)*n(it.rate),0) - n(o.discount); }
+function orderInfo(o){
+  const i = stageIdx(o.stage), t = toDay(today()), due = toDay(o.dueDate);
+  const open = i < STAGE_DELIVERED;
+  const late = open && due!=null && due < t;
+  const lateBy = late ? t-due : 0;
+  const soon = open && !late && due!=null && due-t <= 2;
+  return {i, open, late, lateBy, soon, unpaid: i===STAGE_DELIVERED};
+}
+function orderName(V,o){ return partyName(V,o.partyId); }
+function itemsShort(C,o){ const it=o.items||[]; return it.slice(0,2).map(x=>`${prodName(C,x.productId)} × ${n(x.qty)}`).join(', ') + (it.length>2?` +${it.length-2} more`:''); }
+
+/* the sale that a delivered order turns into: it reduces stock and records the money */
+function orderSale(o){
+  return {id:'so-'+o.id, date:(o.stageDates||{}).Delivered || today(), partyId:o.partyId||'', items:(o.items||[]).map(x=>({...x})),
+    discount:n(o.discount), transport:n(o.transport), handling:0, received:n(o.received), receivedBy:o.receivedBy||'', mode:o.mode||'UPI',
+    note:`From order of ${dmy(o.orderDate)}`, fromOrder:o.id};
+}
+async function syncOrderSale(o){
+  const i = stageIdx(o.stage);
+  if (i >= STAGE_DELIVERED){ await saveDoc('sales', orderSale(o)); }
+  else if (data.sales.some(s=>s.id==='so-'+o.id)){ await delDoc('sales','so-'+o.id); }
+}
+async function advanceOrder(id){
+  const o = data.orders.find(x=>x.id===id); if (!o) return;
+  const i = stageIdx(o.stage); if (i >= STAGES.length-1) return;
+  const next = STAGES[i+1];
+  if (next==='Paid'){ openForm('orders', id, 'Paid'); return; }  // asks how much and who got the money
+  const upd = {...o, stage:next, stageDates:{...(o.stageDates||{}), [next]:today()}};
+  await saveDoc('orders', upd); await syncOrderSale(upd);
+  toast(next==='Delivered' ? 'Delivered. Stock reduced and the sale is recorded.' : `Moved to ${STAGE_LABEL[next]}`);
+}
+
+/* smart lists, shared by the Dashboard and the Orders tab */
+function smartLists(V,C){
+  const t = toDay(today());
+  const late = (V.orders||[]).map(o=>({o,f:orderInfo(o)})).filter(x=>x.f.late).sort((a,b)=>b.f.lateBy-a.f.lateBy);
+  const soon = (V.orders||[]).map(o=>({o,f:orderInfo(o)})).filter(x=>x.f.soon);
+  const transitLate = C.purchases.filter(u=>u.status==='In transit' && u.eta && toDay(u.eta) < t);
+  const reorder = Object.values(C.P).filter(p=>p.catalogue!=='No').map(p=>{
+    const perDay = p.sold30/30, have = p.free + p.transit;
+    const cover = perDay>0 ? have/perDay : Infinity;
+    const want = Math.max(Math.ceil(perDay*45 - have), 0);
+    const short = Math.max(-have, 0);                      // booked orders that stock + transit can't cover
+    const need = (perDay>0 && cover < 21 && want>0) || short>0;
+    return {p, perDay, have, cover, buy: Math.max(want, short), need};
+  }).filter(x=>x.need && x.buy>0).sort((a,b)=>a.cover-b.cover).slice(0,8);
+  const resellers = V.parties.filter(p=>p.type==='Reseller').map(p=>{
+    const bills = V.sales.filter(s=>s.partyId===p.id);
+    let due = 0, oldest = null;
+    bills.forEach(s=>{ const d = C.saleCalc(s).due; if (d>0.5){ due+=d; if(!oldest || s.date<oldest) oldest=s.date; } });
+    const last = bills.reduce((a,s)=>(s.date||'')>a?s.date:a,'');
+    const daysDue = oldest ? t-toDay(oldest) : 0, quiet = last ? t-toDay(last) : null;
+    let why = '';
+    if (due>0.5 && daysDue>=15) why = `${rs(due)} unpaid for ${daysDue} days`;
+    else if (quiet!=null && quiet>=45) why = `No order for ${quiet} days`;
+    return {p, due, daysDue, quiet, why};
+  }).filter(x=>x.why).sort((a,b)=>b.due-a.due || (b.quiet||0)-(a.quiet||0));
+  return {late, soon, transitLate, reorder, resellers};
+}
+function smartPanel(V,C,compact){
+  const L = smartLists(V,C);
+  const count = L.late.length + L.transitLate.length + L.reorder.length + L.resellers.length;
+  const li = (a,b) => `<div class="li"><span>${a}</span>${b}</div>`;
+  return `<div class="panel smart"><div class="row-head" style="margin-bottom:8px"><h3 style="margin:0">Needs attention</h3><span class="pill ${count?'warn':'good'}">${count?count+' item'+(count===1?'':'s'):'All clear'}</span></div>
+  <div class="grid-3">
+    <div><h4>Late orders</h4><div class="list">${L.late.length? L.late.slice(0,6).map(x=>li(`<button type="button" class="linkbtn" data-edit="orders" data-id="${x.o.id}">${esc(orderName(V,x.o))}</button><div class="sub">${esc(STAGE_LABEL[x.o.stage||'Taken'])} · due ${dmy(x.o.dueDate)}</div>`,`<span class="pill bad">${x.f.lateBy} day${x.f.lateBy===1?'':'s'} late</span>`)).join('') : '<p class="sub">No order is past its delivery date.</p>'}
+      ${L.soon.length?L.soon.slice(0,3).map(x=>li(`<button type="button" class="linkbtn" data-edit="orders" data-id="${x.o.id}">${esc(orderName(V,x.o))}</button><div class="sub">due ${dmy(x.o.dueDate)}</div>`,'<span class="pill warn">Due soon</span>')).join(''):''}
+      ${L.transitLate.map(u=>li(`${esc(u.supplier||'Supplier')} goods<div class="sub">expected ${dmy(u.eta)}</div>`,`<span class="pill bad">Not arrived</span>`)).join('')}</div></div>
+    <div><h4>Reorder suggestions</h4><div class="list">${L.reorder.length? L.reorder.map(x=>li(`${esc(x.p.name)}<div class="sub">${x.perDay>0?`sells ${(x.perDay*7).toFixed(1)} a week · ${x.have<=0?'none free':Number.isFinite(x.cover)?`${Math.floor(x.cover)} days left`:''}`:`${x.p.booked} booked, only ${Math.max(x.p.qty,0)} in stock`}</div>`,`<span class="pill acc">Buy ${x.buy}</span>`)).join('') : '<p class="sub">Stock, orders and goods on the way cover the next 3 weeks of sales.</p>'}</div>
+      ${compact?'':'<p class="sub" style="margin:6px 0 0">Based on the last 30 days of sales, free stock (stock minus booked orders) and goods in transit. Suggested to cover 45 days.</p>'}</div>
+    <div><h4>Reseller follow-ups</h4><div class="list">${L.resellers.length? L.resellers.slice(0,6).map(x=>li(`${esc(x.p.name)}${x.p.phone?`<div class="sub num">${esc(x.p.phone)}</div>`:''}`,`<span class="pill ${x.due>0.5?'warn':'plain'}">${x.why}</span>`)).join('') : '<p class="sub">No reseller owes money for 15+ days or has gone quiet for 45+ days.</p>'}</div></div>
+  </div></div>`;
+}
+
+function ganttHtml(V,C,list){
+  const t = toDay(today());
+  if (ganttStart==null) ganttStart = t - Math.round(ganttDays*0.3);
+  const s0 = ganttStart, s1 = s0 + ganttDays;
+  const pct = d => (Math.min(Math.max(d,s0),s1)-s0)/ganttDays*100;
+  const step = ganttDays<=14?1:ganttDays<=30?2:7;
+  let ticks='';
+  for (let d=s0; d<=s1; d++){
+    const dt = new Date(d*dayMs), first = dt.getUTCDate()===1;
+    if ((d-s0)%step===0 || first) ticks += `<span class="gtick${first?' m':''}" style="left:${(d-s0)/ganttDays*100}%">${first?MONTHS[dt.getUTCMonth()]:dt.getUTCDate()}</span>`;
+  }
+  const todayLine = (t>=s0&&t<=s1)?`<div class="gtoday" style="left:${pct(t)}%"><span>Today</span></div>`:'';
+  const rows = list.map(o=>{
+    const f = orderInfo(o), sd = o.stageDates||{};
+    const start = toDay(o.orderDate) ?? t;
+    const endDone = f.i>=STAGE_DELIVERED ? (toDay(sd.Delivered)??t) : Math.max(t, toDay(o.dueDate)??t);
+    let segs=''; 
+    for (let k=0;k<=Math.min(f.i,STAGE_DELIVERED);k++){
+      const a = toDay(sd[STAGES[k]]) ?? (k===0?start:null); if (a==null) continue;
+      let b = null; for (let m=k+1;m<=STAGE_DELIVERED;m++){ if (sd[STAGES[m]]) { b = toDay(sd[STAGES[m]]); break; } }
+      if (b==null) b = k===f.i ? (f.open ? t : a) : a;
+      const L = pct(a), R = pct(Math.max(b,a)+ (k===f.i&&!f.open?1:0));
+      if (R>L || k===f.i) segs += `<span class="gseg s${k}" style="left:${L}%;width:${Math.max(R-L,0.8)}%" title="${STAGE_LABEL[STAGES[k]]} from ${dmy(fromDay(a))}"></span>`;
+    }
+    const plan = toDay(o.dueDate);
+    const planBar = plan!=null && f.open ? `<span class="gplan${f.late?' late':''}" style="left:${pct(start)}%;width:${Math.max(pct(plan+1)-pct(start),0.8)}%"></span>` : '';
+    const dueMark = plan!=null && plan>=s0 && plan<=s1 ? `<span class="gdue${f.late?' late':''}" style="left:${pct(plan)}%" title="Promised for ${dmy(o.dueDate)}"></span>` : '';
+    const next = f.i < STAGES.length-1 ? STAGES[f.i+1] : null;
+    const tag = f.late?`<span class="pill bad">${f.lateBy}d late</span>`: f.soon?'<span class="pill warn">Due soon</span>': f.unpaid?'<span class="pill warn">Payment due</span>': f.i===4?'<span class="pill good">Done</span>':`<span class="pill plain">${STAGE_LABEL[o.stage||'Taken']}</span>`;
+    return `<div class="grow${f.late?' late':''}">
+      <div class="glabel"><button type="button" class="linkbtn gname" data-edit="orders" data-id="${o.id}">${esc(orderName(V,o))}</button>
+        <div class="sub">${esc(itemsShort(C,o))} · ${rs(orderTotal(o))}</div>
+        <div class="gact">${tag}${next?`<button type="button" class="btn small" data-advance="${o.id}">→ ${STAGE_LABEL[next]}</button>`:''}</div></div>
+      <div class="gtrack" data-edit="orders" data-id="${o.id}" role="button" tabindex="0" aria-label="Open order for ${esc(orderName(V,o))}">${planBar}${segs}${dueMark}</div></div>`;
+  }).join('');
+  return `<div class="gantt" style="--days:${ganttDays}">
+    <div class="ghead"><div class="glabel"><b>Order</b></div><div class="gscale">${ticks}</div></div>
+    <div class="gbody">${rows || '<p class="empty">No orders match this filter.</p>'}<div class="gover"><div></div><div class="gtodaywrap">${todayLine}</div></div></div>
+  </div>
+  <div class="legend">${STAGES.slice(0,4).map((st,k)=>`<span><i class="gkey s${k}"></i>${STAGE_LABEL[st]}</span>`).join('')}<span><i class="gkey plan"></i>Promised time</span><span><i class="gkey due"></i>Promised date</span></div>`;
+}
+function ordersV(V,C){
+  const all = [...(V.orders||[])].sort((a,b)=>(a.dueDate||'9').localeCompare(b.dueDate||'9'));
+  const list = all.filter(o=>{ const f=orderInfo(o); return orderFilter==='all' || (orderFilter==='open'&&f.open) || (orderFilter==='late'&&f.late) || (orderFilter==='unpaid'&&f.unpaid); });
+  const open = all.filter(o=>orderInfo(o).open), late = all.filter(o=>orderInfo(o).late), unpaid = all.filter(o=>orderInfo(o).unpaid);
+  const t = toDay(today());
+  const week = open.filter(o=>{ const d=toDay(o.dueDate); return d!=null && d>=t && d<=t+7; });
+  return `<div class="row-head"><div><h2>Orders</h2><p>Customer orders from taken to paid. Tap a bar or name to edit, or move an order to its next step.</p></div>
+  <div class="controls">
+    <select class="sel" id="orderSel" aria-label="Show">${[['open','Open orders'],['late','Late orders'],['unpaid','Delivered, not paid'],['all','All orders']].map(([k,l])=>`<option value="${k}" ${k===orderFilter?'selected':''}>${l}</option>`).join('')}</select>
+    <button class="btn primary" data-add="orders">+ Order</button></div></div>
+  <div class="kpis">
+    <div class="kpi hero"><span>Open orders</span><b>${open.length}</b><em>${rs(open.reduce((a,o)=>a+orderTotal(o),0))} to deliver</em></div>
+    <div class="kpi"><span>Late</span><b style="color:${late.length?'var(--bad)':'inherit'}">${late.length}</b><em>past promised date</em></div>
+    <div class="kpi"><span>Due in 7 days</span><b>${week.length}</b></div>
+    <div class="kpi"><span>Delivered, not paid</span><b style="color:${unpaid.length?'var(--warn)':'inherit'}">${unpaid.length}</b><em>${rs(unpaid.reduce((a,o)=>a+orderTotal(o)-n(o.received),0))}</em></div>
+  </div>
+  <div class="panel"><div class="row-head" style="margin-bottom:10px"><h3 style="margin:0">Timeline</h3>
+    <div class="controls"><button type="button" class="btn small" data-gnav="-1" aria-label="Earlier">‹</button><button type="button" class="btn small" data-gnav="0">Today</button><button type="button" class="btn small" data-gnav="1" aria-label="Later">›</button>
+    <select class="sel" id="gDays" aria-label="Show period">${[[14,'2 weeks'],[30,'1 month'],[90,'3 months']].map(([v,l])=>`<option value="${v}" ${v===ganttDays?'selected':''}>${l}</option>`).join('')}</select></div></div>
+    ${ganttHtml(V,C,list)}</div>
+  ${smartPanel(V,C,false)}`;
 }
 
 /* ---------- catalogue: built from the Stock list ---------- */
@@ -797,18 +1000,35 @@ function purchasesV(V,C){
   ${purchView==='sheet' ? statementHTML(rows,C,S) : table(['Date','Supplier','Items','Items value','Charges','Bill total','Paid by','Status'],
     rows.map(u=>{ const pc=purchCalc(u); const it=u.items||[];
       const list = it.slice(0,3).map(i=>`${esc(prodName(C,i.productId))} <span class="sub">${n(i.qty)} × ${rs(i.rate)}</span>`).join('<br>') + (it.length>3?`<div class="sub">and ${it.length-3} more</div>`:'');
-      const status = pc.due>0.5?`<span class="pill warn">Due ${rs(pc.due)}</span>`: pc.due<-0.5?`<span class="pill bad">Overpaid ${rs(-pc.due)}</span>`:`<span class="pill good">Paid</span>`;
+      const status = (u.status==='In transit'?`<span class="pill ${u.eta&&u.eta<today()?'bad':'acc'}">In transit${u.eta?` · due ${dmy(u.eta)}`:''}</span> <button type="button" class="btn small" data-mark-recv="${u.id}">Mark received</button><br>`:'') + (pc.due>0.5?`<span class="pill warn">Due ${rs(pc.due)}</span>`: pc.due<-0.5?`<span class="pill bad">Overpaid ${rs(-pc.due)}</span>`:`<span class="pill good">Paid</span>`);
       return `<tr class="click" data-edit="purchases" data-id="${u.id}"><td>${dmy(u.date)}</td><td><b>${esc(u.supplier||'')}</b>${u.billNo?`<div class="sub">Bill ${esc(u.billNo)}</div>`:''}</td><td>${list}</td><td class="n">${rs(pc.itemsVal)}</td><td class="n">${rs(pc.charges)}</td><td class="n"><b>${rs(pc.total)}</b><div class="sub">${pc.qty} pcs</div></td><td>${payPills(u)}</td><td>${status}</td></tr>`; }),
     'No purchase bills match these filters.',[3,4,5])}`;
 }
+let recvFilter = 'all';
+function recvPill(s){
+  if (!(n(s.received)>0)) return '<span class="sub">Nothing received</span>';
+  const k = s.receivedBy;
+  if (!k) return `<span class="pill warn">${rs(s.received)} · not marked</span>`;
+  return `<span class="pill ${k==='Anita'?'acc':k==='Neha'?'gold':'plain'}">${k==='Firm'?'Firm':k} ${rs(s.received)}</span>`;
+}
 function salesV(V,C){
-  const rows=[...V.sales].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  return `<div class="row-head"><div><h2>Sales</h2><p>Profit on each bill is after landed cost, discount and delivery</p></div><div class="controls"><button class="btn primary" data-add="sales">+ Sale</button></div></div>
-  ${table(['Date','Party','Items','Net amount','Discount','Profit','Status'],
+  const all=[...V.sales].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const tot={Anita:0,Neha:0,Firm:0,none:0}; all.forEach(x=>{ if(n(x.received)>0) tot[x.receivedBy||'none']+=n(x.received); });
+  const rows = all.filter(x=> recvFilter==='all' || (recvFilter==='none' ? (n(x.received)>0 && !x.receivedBy) : x.receivedBy===recvFilter));
+  return `<div class="row-head"><div><h2>Sales</h2><p>Profit on each bill is after landed cost, discount and delivery</p></div><div class="controls">
+    <select class="sel" id="recvSel" aria-label="Money received by">${[['all','Money with anyone'],['Anita','Money with Anita'],['Neha','Money with Neha'],['Firm','Money in firm account'],['none','Not marked']].map(([k,l])=>`<option value="${k}" ${k===recvFilter?'selected':''}>${l}</option>`).join('')}</select>
+    <button class="btn primary" data-add="sales">+ Sale</button></div></div>
+  <div class="kpis">
+    <div class="kpi"><span>Received by Anita</span><b>${rs(tot.Anita)}</b></div>
+    <div class="kpi"><span>Received by Neha</span><b>${rs(tot.Neha)}</b></div>
+    <div class="kpi"><span>Firm account</span><b>${rs(tot.Firm)}</b></div>
+    ${tot.none>0.5?`<div class="kpi"><span>Not marked yet</span><b style="color:var(--warn)">${rs(tot.none)}</b><em>open these sales and choose who got the money</em></div>`:''}
+  </div>
+  ${table(['Date','Party','Items','Net amount','Discount','Profit','Money with','Status'],
     rows.map(s=>{ const c=C.saleCalc(s); const t=partyType(V,s.partyId);
       const status = c.due>0.5?`<span class="pill warn">Due ${rs(c.due)}</span>`:`<span class="pill good">Paid</span>`;
-      return `<tr class="click" data-edit="sales" data-id="${s.id}"><td>${dmy(s.date)}</td><td>${esc(partyName(V,s.partyId))}<div class="sub">${t}</div></td><td>${(s.items||[]).map(it=>`${esc(prodName(C,it.productId))} × ${n(it.qty)}`).join('<br>')}</td><td class="n"><b>${rs(c.net)}</b></td><td class="n">${rs(s.discount)}</td><td class="n" style="color:${c.profit<0?'var(--bad)':'var(--good)'}">${rs(c.profit)}</td><td>${status}</td></tr>`; }),
-    'No sales yet.',[3,4,5])}`;
+      return `<tr class="click" data-edit="sales" data-id="${s.id}"><td>${dmy(s.date)}</td><td>${esc(partyName(V,s.partyId))}<div class="sub">${t}</div></td><td>${(s.items||[]).map(it=>`${esc(prodName(C,it.productId))} × ${n(it.qty)}`).join('<br>')}</td><td class="n"><b>${rs(c.net)}</b></td><td class="n">${rs(s.discount)}</td><td class="n" style="color:${c.profit<0?'var(--bad)':'var(--good)'}">${rs(c.profit)}</td><td>${recvPill(s)}</td><td>${status}</td></tr>`; }),
+    recvFilter==='all'?'No sales yet.':'No sales match this filter.',[3,4,5])}`;
 }
 function partiesV(V,C){
   const stats={}; V.sales.forEach(s=>{ const c=C.saleCalc(s); const k=s.partyId||'_'; stats[k]=stats[k]||{bought:0,due:0,bills:0,last:''}; stats[k].bought+=c.net; stats[k].due+=c.due; stats[k].bills++; if((s.date||'')>stats[k].last) stats[k].last=s.date; });
@@ -831,17 +1051,18 @@ function partnerBooks(V,C){
     const paidP = C.purchases.reduce((a,u)=>a+n((u.payments||{})[pt.key]),0);
     const paidE = V.expenses.filter(e=>e.paidBy===pt.key).reduce((a,e)=>a+n(e.amount),0);
     const share = profit*(pt.key==='Anita'?shareA:1-shareA);
-    return {...pt,cap,wd,paid:paidP+paidE,share,bal:cap+paidP+paidE+share-wd};
+    const held = V.sales.filter(s=>s.receivedBy===pt.key).reduce((a,s)=>a+n(s.received),0);
+    return {...pt,cap,wd,held,paid:paidP+paidE,share,bal:cap+paidP+paidE+share-wd-held};
   });
 }
 function partnersV(V,C){
   const B = partnerBooks(V,C);
   const rows=[...V.ledger].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  return `<div class="row-head"><div><h2>Partners</h2><p>Each partner's stake: capital put in, bills paid from their own pocket, and their profit share, less money taken out</p></div>
+  return `<div class="row-head"><div><h2>Partners</h2><p>Each partner's stake: capital put in, bills paid from their own pocket, and their profit share, less money taken out and sale money they received</p></div>
   <div class="controls"><label class="sub" for="shareInp">Anita's profit share %</label><input class="search" id="shareInp" type="number" min="0" max="100" style="width:80px" value="${n(settings.shareAnita)}"><button class="btn primary" data-add="ledger">+ Money entry</button></div></div>
   <div class="partners">${B.map(b=>`<div class="partner"><div><h3>${b.name}</h3><div class="phone num">${b.phone}</div></div>
     <div><div class="sub">Stake in the business</div><div class="bal num">${rs(b.bal)}</div></div>
-    <div class="split"><span>Capital put in</span><b class="num">${rs(b.cap)}</b><span>Paid for purchases &amp; expenses</span><b class="num">${rs(b.paid)}</b><span>Profit share (${b.key==='Anita'?n(settings.shareAnita):100-n(settings.shareAnita)}%)</span><b class="num">${rs(b.share)}</b><span>Withdrawn</span><b class="num">− ${rs(b.wd)}</b></div></div>`).join('')}</div>
+    <div class="split"><span>Capital put in</span><b class="num">${rs(b.cap)}</b><span>Paid for purchases &amp; expenses</span><b class="num">${rs(b.paid)}</b><span>Profit share (${b.key==='Anita'?n(settings.shareAnita):100-n(settings.shareAnita)}%)</span><b class="num">${rs(b.share)}</b><span>Withdrawn</span><b class="num">− ${rs(b.wd)}</b><span>Sale money received (kept by ${b.key})</span><b class="num">− ${rs(b.held)}</b></div></div>`).join('')}</div>
   ${table(['Date','Partner','Entry','Amount','Note'],
     rows.map(l=>`<tr class="click" data-edit="ledger" data-id="${l.id}"><td>${dmy(l.date)}</td><td>${esc(l.partner)}</td><td><span class="pill ${l.kind==='Capital in'?'good':'warn'}">${esc(l.kind)}</span></td><td class="n">${rs(l.amount)}</td><td>${esc(l.note||'')}</td></tr>`),
     'No capital or withdrawal entries yet.',[3])}
@@ -981,9 +1202,10 @@ function field(k,label,type='text',val='',opts={}){
   return `<label class="f ${opts.wide?'wide':''}">${label}<input name="${k}" id="f-${k}" type="${type}" value="${esc(v)}" ${type==='number'?'step="any" inputmode="decimal"':''} ${opts.req?'required':''} ${opts.ph?`placeholder="${esc(opts.ph)}"`:''}></label>`;
 }
 const PAYERS = ['Firm','Anita','Neha'];
+const RECEIVERS = ['Anita','Neha','Firm'];
 let current = null, pendingImg = null;
 
-function openForm(col, id){
+function openForm(col, id, presetStage){
   if (demo){ demo=false; render(); }
   const V = data, C = calc(V);
   const rec = id ? JSON.parse(JSON.stringify(V[col].find(x=>x.id===id)||{})) : {id:uid()};
@@ -1013,7 +1235,9 @@ function openForm(col, id){
     body = `<div class="fgrid">${field('date','Date','date',b.date||today())}
       <label class="f">Supplier<input name="supplier" id="f-supplier" list="supList" value="${esc(supPre)}" placeholder="Pick or type a name" autocomplete="off"></label>
       <datalist id="supList">${sups.filter(s=>s.key).map(s=>`<option value="${esc(s.name)}"></option>`).join('')}</datalist>
-      ${field('billNo','Bill no. (optional)','text',b.billNo)}</div>
+      ${field('billNo','Bill no. (optional)','text',b.billNo)}
+      ${field('status','Goods','select',b.status||'Received',{options:[['Received','Received in godown'],['In transit','On the way (in transit)']]})}
+      ${field('eta','Expected to arrive','date',b.eta)}</div>
       <div><div class="row-head"><b style="font-size:13px;color:var(--muted)">ITEMS ON THIS BILL</b><button type="button" class="btn small" id="addItem">+ Item</button></div><div class="items" id="items">${items.map(it=>itemRow(it,prodOpts)).join('')}</div></div>
       <div class="fgrid">${field('transport','Shipping / courier ₹','number',b.transport)}
       ${field('handling','Packing / handling ₹','number',b.handling)}
@@ -1035,6 +1259,7 @@ function openForm(col, id){
       ${field('transport','Delivery transport ₹ (our cost)','number',rec.transport)}
       ${field('handling','Handling / packing ₹','number',rec.handling)}
       ${field('received','Amount received ₹','number',rec.received)}
+      ${field('receivedBy','Money received by (पैसा किसके पास आया)','select',rec.receivedBy||'',{options:[['','Choose who got the money'],...RECEIVERS.map(k=>[k,k==='Firm'?'Firm account':PARTNERS.find(p=>p.key===k).name])]})}
       ${field('mode','Payment mode','select',rec.mode||'UPI',{options:['UPI','Cash','Bank','Credit']})}
       ${field('note','Notes','textarea',rec.note)}</div><div class="calc" id="calcBox"></div>`;
   } else if (col==='parties'){ title = id?'Edit party':'New customer or reseller';
@@ -1055,6 +1280,24 @@ function openForm(col, id){
       ${field('amount','Amount ₹','number',rec.amount)}
       ${field('paidBy','Paid by','select',rec.paidBy||'Firm',{options:PAYERS})}
       ${field('note','Notes','textarea',rec.note)}</div>`;
+  } else if (col==='orders'){ title = id?'Edit order':'New customer order';
+    if(!prodOpts.length) return needProducts();
+    const partyOpts = [['','Walk-in customer'],...V.parties.map(p=>[p.id,`${p.name} (${p.type})`])];
+    const items = rec.items?.length ? rec.items : [{productId:prodOpts[0][0],qty:1,rate:''}];
+    const st = presetStage || rec.stage || 'Taken';
+    current.rec.stageDates = {...(rec.stageDates||{})};
+    body = `<div class="fgrid">${field('partyId','Customer / reseller','select',rec.partyId||'',{options:partyOpts})}
+      ${field('orderDate','Order date','date',rec.orderDate||today())}
+      ${field('dueDate','Promised delivery date','date',rec.dueDate||addDays(today(),5))}</div>
+      <div><div class="row-head"><b style="font-size:13px;color:var(--muted)">ITEMS</b><button type="button" class="btn small" id="addItem">+ Item</button></div><div class="items" id="items">${items.map(it=>itemRow(it,prodOpts)).join('')}</div></div>
+      <div><b style="font-size:13px;color:var(--muted)">STAGE</b><div class="stages" style="margin-top:6px">${STAGES.map(x=>`<label><input type="radio" name="stage" value="${x}" ${x===st?'checked':''}>${STAGE_LABEL[x]}</label>`).join('')}</div>
+        <p class="sub" style="margin:6px 0 0">When an order reaches Delivered, the app records the sale and takes the items out of stock. Until then they show as booked.</p></div>
+      <div class="fgrid">${field('discount','Discount ₹','number',rec.discount)}
+      ${field('transport','Delivery cost ₹ (our cost)','number',rec.transport)}
+      ${field('received','Amount received ₹','number',rec.received)}
+      ${field('receivedBy','Money received by','select',rec.receivedBy||'',{options:[['','Choose who got the money'],...RECEIVERS.map(k=>[k,k==='Firm'?'Firm account':PARTNERS.find(p=>p.key===k).name])]})}
+      ${field('mode','Payment mode','select',rec.mode||'UPI',{options:['UPI','Cash','Bank','Credit']})}
+      ${field('note','Notes','textarea',rec.note)}</div><div class="calc" id="calcBox"></div>`;
   } else if (col==='ideas'){ title = id?'Edit idea':'New idea';
     body = `<div class="fgrid">${field('text','Idea','textarea',rec.text)}
       ${field('owner','Who will do it','select',rec.owner||'',{options:[['','Not assigned'],...PARTNERS.map(p=>[p.key,p.name])]})}</div>`;
@@ -1078,14 +1321,14 @@ function itemRow(it,prodOpts){
 }
 function readForm(){
   const o = {...current.rec};
-  form.querySelectorAll('[name]').forEach(el=>{ o[el.name] = el.type==='number' ? (el.value===''? '' : n(el.value)) : el.value; });
+  form.querySelectorAll('[name]').forEach(el=>{ if (el.type==='radio'){ if (el.checked) o[el.name]=el.value; return; } o[el.name] = el.type==='number' ? (el.value===''? '' : n(el.value)) : el.value; });
   if (current.col==='purchases'){
     o.supplier = String(o.supplier||'').trim();
     o.payments = {};
     [['Anita','payAnita'],['Neha','payNeha'],['Firm','payFirm']].forEach(([k,f])=>{ if(n(o[f])>0) o.payments[k]=n(o[f]); delete o[f]; });
     ['productId','qty','rate','paidBy'].forEach(k=>delete o[k]);
   }
-  if (current.col==='sales' || current.col==='purchases'){
+  if (current.col==='sales' || current.col==='purchases' || current.col==='orders'){
     o.items = [...form.querySelectorAll('.item-row')].map(r=>({productId:r.querySelector('[data-k=productId]').value, qty:n(r.querySelector('[data-k=qty]').value), rate:n(r.querySelector('[data-k=rate]').value)})).filter(i=>i.qty>0);
   }
   return o;
@@ -1110,6 +1353,9 @@ function updateCalc(){
     const pc = purchCalc(o);
     const bal = pc.due>0.5 ? `<span>Still owed to supplier</span><b style="color:var(--warn)">${rs(pc.due)}</b>` : pc.due<-0.5 ? `<span>Paid more than the bill</span><b style="color:var(--bad)">${rs(-pc.due)}</b>` : `<span>Bill fully paid</span><b style="color:var(--good)">✓</b>`;
     box.innerHTML = `<span>Items value</span><b>${rs(pc.itemsVal)}</b><span>Shipping, packing, GST, other</span><b>${rs(pc.charges)}</b><span>Bill total</span><b>${rs(pc.total)}</b><span>Paid (Anita ${rs(o.payments.Anita)} + Neha ${rs(o.payments.Neha)}${o.payments.Firm?` + firm ${rs(o.payments.Firm)}`:''})</span><b>${rs(pc.paid)}</b>${bal}<span class="sub">Charges are spread over the items by value, so each piece's landed cost includes its share.</span><span></span>`;
+  } else if (current.col==='orders'){
+    const tot = orderTotal(o);
+    box.innerHTML = `<span>Order value</span><b>${rs(tot)}</b><span>Received so far</span><b>${rs(o.received)}</b><span>Still to collect</span><b>${rs(Math.max(tot-n(o.received),0))}</b>`;
   } else if (current.col==='sales'){
     const C = calc(data); const c = C.saleCalc(o);
     box.innerHTML = `<span>Bill total</span><b>${rs(c.gross)}</b><span>After discount</span><b>${rs(c.net)}</b><span>Profit on this bill</span><b style="color:${c.profit<0?'var(--bad)':'var(--good)'}">${rs(c.profit)}</b><span>Still to collect</span><b>${rs(Math.max(c.due,0))}</b>`;
@@ -1125,7 +1371,7 @@ function fillOtherPartner(){
   form.querySelector(`[name=${autoPay}]`).value = rest ? Math.round(rest*100)/100 : '';
 }
 form.addEventListener('input', e=>{
-  if (current?.col==='sales' && e.target.name==='partyId') fillRates(true);
+  if ((current?.col==='sales'||current?.col==='orders') && e.target.name==='partyId') fillRates(true);
   if (e.target.dataset?.k==='productId'){ const r=e.target.closest('.item-row').querySelector('[data-k=rate]'); r.value=defaultRate(e.target.value)||''; }
   if (current?.col==='purchases'){
     const nm = e.target.name;
@@ -1175,6 +1421,7 @@ form.addEventListener('click', async e=>{
     if (!t.classList.contains('armed')){ t.classList.add('armed'); t.textContent='Tap again to delete'; setTimeout(()=>{ if(t.isConnected){t.classList.remove('armed'); t.textContent='Delete';} },3000); return; }
     const ok = await delDoc(current.col, current.rec.id);
     if (ok && current.col==='products' && current.rec.imageId) removePhoto(current.rec.imageId);
+    if (ok && current.col==='orders' && data.sales.some(x=>x.id==='so-'+current.rec.id)) delDoc('sales','so-'+current.rec.id);
     if(ok){ dlg.close(); toast('Deleted'); }
   }
 });
@@ -1182,7 +1429,8 @@ form.addEventListener('submit', async e=>{
   e.preventDefault();
   const o = readForm(); const err = document.getElementById('formErr');
   const need = {products:()=>o.name?.trim()?'':'Give the product a name.', parties:()=>o.name?.trim()?'':'Enter a name.',
-    purchases:()=>!o.items.length?'Add at least 1 item with a quantity.': purchCalc(o).due<-0.5?'Payments add up to more than the bill total. Check the amounts.':'', sales:()=>o.items.length?'':'Add at least 1 item with a quantity.',
+    purchases:()=>!o.items.length?'Add at least 1 item with a quantity.': purchCalc(o).due<-0.5?'Payments add up to more than the bill total. Check the amounts.':'', sales:()=>!o.items.length?'Add at least 1 item with a quantity.': n(o.received)>0 && !o.receivedBy ? 'Choose who received the money: Anita, Neha or the firm account.':'',
+    orders:()=>!o.items.length?'Add at least 1 item with a quantity.': !o.dueDate?'Choose the promised delivery date.': (o.stage==='Paid' && !(n(o.received)>0))?'Enter the amount received to mark this order Paid.': n(o.received)>0 && !o.receivedBy ? 'Choose who received the money: Anita, Neha or the firm account.':'',
     ledger:()=>n(o.amount)>0?'':'Enter an amount.', expenses:()=>n(o.amount)>0?'':'Enter an amount.', ideas:()=>o.text?.trim()?'':'Write the idea.'}[current.col]();
   if (need){ err.textContent=need; err.hidden=false; return; }
   if (current.col==='ideas' && current.isNew) o.created = new Date().toISOString();
@@ -1193,14 +1441,16 @@ form.addEventListener('submit', async e=>{
       catch(er){ toast(er?.code==='too_large'?'Photo is too large.':'Photo could not be uploaded. The product is saved without it.'); }
     } else if (pendingImg.small){ o.img = pendingImg.small; }
   }
+  if (current.col==='orders'){ o.stageDates = {...(o.stageDates||{})}; STAGES.slice(0, stageIdx(o.stage)+1).forEach(x=>{ if(!o.stageDates[x]) o.stageDates[x] = x==='Taken' ? (o.orderDate||today()) : today(); }); STAGES.slice(stageIdx(o.stage)+1).forEach(x=>delete o.stageDates[x]); }
   const ok = await saveDoc(current.col, o);
+  if (ok && current.col==='orders') await syncOrderSale(o);
   btn.disabled=false; btn.textContent='Save';
   if (ok){ dlg.close(); toast('Saved'); }
 });
 
 /* ---------- page events ---------- */
 document.addEventListener('click', async e=>{
-  const t = e.target.closest('button,tr.click'); if(!t) return;
+  const t = e.target.closest('button,tr.click,.gtrack'); if(!t) return;
   if (t.dataset.tab){ tab=t.dataset.tab; try{localStorage.setItem('phd-tab',tab);}catch(er){} render(); window.scrollTo({top:0}); return; }
   if (t.id==='startOwn'){ demo=false; render(); return; }
   if (t.id==='quickSale') return openForm('sales');
@@ -1211,6 +1461,9 @@ document.addEventListener('click', async e=>{
   if (t.dataset.catauto){ const p=data.products.find(x=>x.id===t.dataset.catauto); if(p && await saveDoc('products',{...p,catRate:''})) toast('Rate set back to automatic'); return; }
   if (t.dataset.pview){ purchView = t.dataset.pview; try{localStorage.setItem('phd-pview',purchView);}catch(er){} render(); return; }
   if (t.id==='xlsPurch') return purchasesExcel(t);
+  if (t.dataset.advance){ if(demo){ toast('This is example data. Start your own books to edit.'); return; } return advanceOrder(t.dataset.advance); }
+  if (t.dataset.markRecv){ const u=data.purchases.find(x=>x.id===t.dataset.markRecv); if(u && await saveDoc('purchases',{...u,status:'Received',receivedOn:today()})) toast('Received. Stock updated.'); return; }
+  if (t.dataset.gnav!=null){ const k=+t.dataset.gnav; ganttStart = k===0 ? null : (ganttStart??(toDay(today())-Math.round(ganttDays*0.3))) + k*Math.round(ganttDays/2); render(); return; }
   if (t.dataset.add) return openForm(t.dataset.add);
   if (t.dataset.edit){ if(demo){ toast('This is example data. Start your own books to edit.'); return; } return openForm(t.dataset.edit, t.dataset.id); }
   if (t.dataset.copy){ const txt = POSTS.find(p=>p.id===t.dataset.copy).text;
@@ -1222,6 +1475,9 @@ document.addEventListener('click', async e=>{
 document.addEventListener('change', e=>{
   if (e.target.id==='periodSel'){ period=e.target.value; render(); }
   if (e.target.id==='partySel'){ partyFilter=e.target.value; render(); }
+  if (e.target.id==='recvSel'){ recvFilter=e.target.value; render(); }
+  if (e.target.id==='orderSel'){ orderFilter=e.target.value; render(); }
+  if (e.target.id==='gDays'){ ganttDays=+e.target.value; ganttStart=null; try{localStorage.setItem('phd-gdays',ganttDays);}catch(er){} render(); }
   if (e.target.id==='supSel'){ supFilter=e.target.value; render(); }
   if (e.target.id==='paySel'){ payFilter=e.target.value; render(); }
   if (e.target.id==='purchPeriodSel'){ purchPeriod=e.target.value; render(); }
@@ -1300,7 +1556,7 @@ async function runImport(btn){
       else { p.img = await shrinkDataUrl(d, 480, .7); delete p.imageId; photoOk++; }
     } catch(e){ photoSkip++; }
   }
-  const all = []; COLS.forEach(c=>(c==='products' ? prods : c==='purchases' ? groupRows(j[c]||[]) : (j[c]||[])).forEach(x=>{ if(x&&x.id) all.push([c,x]); }));
+  const all = []; COLS.forEach(c=>(c==='products' ? prods : c==='purchases' ? groupRows(j[c]||[]) : (j[c]||[])).forEach(x=>{ if(x&&x.id) all.push([c,x]); })); (j.orders||[]).forEach(x=>{ if(x&&x.id) all.push(['orders',x]); });
   let done = 0;
   for (const [c,x] of all){
     if (!(await saveDoc(c,x))) { prog.textContent = `Stopped after ${done} of ${all.length}. Try again to finish.`; btn.disabled=false; return; }
@@ -1556,7 +1812,7 @@ function startBooks(){
   const seen = new Set();
   const done = () => { if (seen.size >= COLS.length+1 && loadedCount===0){ loadedCount=1; demo = COLS.every(c=>!data[c].length); } render(); };
   const onErr = c => e => { seen.add(c); lastErr = (e && e.code) || 'error'; syncLight(); if (e && e.code==='permission-denied' && !isOwnerUser){ stopBooks(); showGate('notmember', me); } else done(); };
-  COLS.forEach(c => unsubs.push(db.collection(c).onSnapshot(snap=>{ data[c]=snap.docs.map(d=>({...d.data(),id:d.id})); if (data[c].length) demo=false; seen.add(c); done(); }, onErr(c))));
+  COLS.forEach(c => unsubs.push(db.collection(c).onSnapshot(snap=>{ const docs=snap.docs.map(d=>({...d.data(),id:d.id})); if (c==='sales'){ data.sales=docs.filter(x=>x.type!=='order'); data.orders=docs.filter(x=>x.type==='order'); } else data[c]=docs; if (docs.length) demo=false; seen.add(c); done(); }, onErr(c))));
   unsubs.push(db.doc('config/settings').onSnapshot(s=>{ if(s.exists) settings={shareAnita:50,...s.data()}; seen.add('settings'); done(); }, onErr('settings')));
   if (isOwnerUser) unsubs.push(onSnapshot(collection(fs,'members'), s=>{ members = s.docs.map(d=>({id:d.id,...d.data()})); render(); }, ()=>{}));
 }
