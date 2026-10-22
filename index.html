@@ -124,7 +124,7 @@ tr.click:hover td{background:var(--surface2)}
 
 /* sales cards */
 .scards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:14px}
-.scard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;grid-template-rows:auto 1fr auto auto;gap:12px;align-items:start;text-align:left;cursor:pointer;font:inherit;color:inherit;min-width:0}
+.scard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;grid-template-rows:auto 1fr auto auto auto;gap:12px;align-items:start;text-align:left;cursor:pointer;font:inherit;color:inherit;min-width:0}
 .scard:hover,.scard:focus-visible{border-color:var(--faint);outline:none}
 .shead{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center}
 .sthumb{width:44px;height:44px;aspect-ratio:auto;border-radius:10px;font-size:18px}
@@ -136,7 +136,42 @@ tr.click:hover td{background:var(--surface2)}
 .sfig div:first-child b{font-size:18px}
 .sfoot{display:flex;justify-content:space-between;align-items:center;gap:8px}
 
+/* card theme: lists as cards */
+:root{--shadow:0 1px 2px rgba(20,40,38,.05),0 6px 18px -8px rgba(20,40,38,.16)}
+.panel,.kpi,.pcard,.scard,.lcard,.place,.fstep,.partner,.tbl-wrap:not(.as-cards){box-shadow:var(--shadow)}
+.panel,.kpi,.pcard,.scard,.lcard{border-radius:16px}
+.lcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px}
+.lcard{background:var(--surface);border:1px solid var(--line);padding:14px;display:grid;gap:10px;align-content:start;cursor:pointer;min-width:0}
+.lcard:hover,.lcard:focus-visible,.scard:focus-visible{border-color:var(--faint);outline:none}
+.lhead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.lhead>div:first-child{min-width:0}.lhead b{font-weight:600;overflow-wrap:anywhere}
+.lpills{display:flex;flex-direction:column;gap:4px;align-items:flex-end}
+.lmeta{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.lacts{display:flex;gap:6px;flex-wrap:wrap}.lacts:empty{display:none}
+.btn.wa{border-color:#25d36655;color:#128c4b}.btn.wa::before{content:"";width:8px;height:8px;border-radius:50%;background:#25d366}
+.btn.primary.wa{background:#1fa855;border-color:#1fa855;color:#fff}.btn.primary.wa::before{background:#fff}
+.bars{display:grid;gap:6px}.bar{display:grid;grid-template-columns:minmax(0,180px) 1fr 40px;gap:10px;align-items:center;font-size:13.5px}
+.bar i{display:block;height:10px;border-radius:5px;background:var(--bad);opacity:.75;min-width:4px}.bar b{text-align:right}
+.tbl-wrap.as-cards{border:0;background:none;overflow:visible}
+.as-cards table{min-width:0;display:block}.as-cards thead{display:none}
+.as-cards tbody{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:14px}
+.as-cards tr{display:grid;gap:6px;align-content:start;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:var(--shadow)}
+.as-cards tr.click:hover td{background:none}.as-cards tr.click:hover{border-color:var(--faint)}
+.as-cards td{display:flex;justify-content:space-between;gap:12px;padding:0;border:0;text-align:right;align-items:baseline;min-width:0;overflow-wrap:anywhere}
+.as-cards td::before{content:attr(data-label);color:var(--muted);font-size:12px;text-align:left;flex:none;max-width:45%}
+.as-cards td:first-child{font-size:15px;font-weight:600;padding-bottom:8px;margin-bottom:2px;border-bottom:1px dashed var(--line)}
+.as-cards td:first-child{display:block;text-align:left}.as-cards td:first-child::before{content:none}
+.as-cards td:empty{display:none}
+.as-cards td.empty{justify-content:center}.as-cards td.empty::before{content:none}
 /* material flow */
+.fstrip{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:6px}
+.fmini{position:relative;display:grid;gap:2px;text-align:left;font:inherit;color:inherit;background:var(--surface2);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:10px;padding:8px 10px;cursor:pointer;min-width:0}
+.fmini.buy{--c:var(--gold)}.fmini.stock{--c:var(--accent)}.fmini.sell{--c:var(--good)}.fmini.dmg{--c:var(--bad)}
+.fmini span{font-size:11.5px;color:var(--muted);line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fmini b{font-size:18px}
+.fmini .dot{position:absolute;top:7px;right:7px;width:8px;height:8px;border-radius:50%;background:var(--bad)}
+.fmini:hover{border-color:var(--c)}
+@media (max-width:900px){.fstrip{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
 .flow{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;counter-reset:f}
 .fstep{position:relative;display:grid;gap:4px;align-content:start;text-align:left;font:inherit;color:inherit;background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:12px;padding:10px 10px 12px;cursor:pointer;min-width:0}
 .fstep.buy{--c:var(--gold)}.fstep.stock{--c:var(--accent)}.fstep.sell{--c:var(--good)}
@@ -159,7 +194,7 @@ tr.click:hover td{background:var(--surface2)}
 .trace::before{content:"";position:absolute;left:79px;top:6px;bottom:6px;width:2px;background:var(--line)}
 .trace li{display:grid;grid-template-columns:70px 1fr auto;gap:22px;align-items:baseline;padding:7px 0;position:relative}
 .trace li::before{content:"";position:absolute;left:75px;top:12px;width:10px;height:10px;border-radius:50%;background:var(--surface);border:2px solid var(--c,var(--muted))}
-.trace .buy,.trace .way{--c:var(--gold)}.trace .in,.trace .move{--c:var(--accent)}.trace .order,.trace .out,.trace .paid{--c:var(--good)}
+.trace .buy,.trace .way{--c:var(--gold)}.trace .in,.trace .move{--c:var(--accent)}.trace .order,.trace .out,.trace .paid{--c:var(--good)}.trace .dmg{--c:var(--bad)}
 .trace .tdate{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
 .trace .tbody{min-width:0;overflow-wrap:anywhere}
 .tbal{font-size:13px;font-weight:600;white-space:nowrap}
@@ -356,6 +391,7 @@ html,body{height:100%}
       <span id="syncPill" class="pill plain" style="align-self:center" title="Cloud sync status">Connecting…</span>
       <button class="btn primary" id="quickSale">+ Sale</button>
       <button class="btn" id="quickPurchase">+ Purchase</button>
+      <button class="btn" id="viewBtn" aria-label="Switch between card and table view">Table view</button>
       <button class="btn" id="backupBtn" hidden>Backup</button>
       <label class="btn" id="importBtn" hidden>Restore backup<input type="file" id="importFile" accept=".json,application/json" hidden></label>
     </div>
@@ -382,7 +418,7 @@ const PARTNERS = [
 ];
 const COLS = ['products','purchases','sales','parties','ledger','expenses','ideas'];
 const TABS = [
-  ['dash','Dashboard'],['stock','Stock'],['godowns','Godowns'],['flow','Material flow'],['catalogue','Catalogue'],['purchases','Purchases'],['orders','Orders'],['sales','Sales'],
+  ['dash','Dashboard'],['stock','Stock'],['godowns','Godowns'],['flow','Material flow'],['damaged','Damaged'],['catalogue','Catalogue'],['purchases','Purchases'],['orders','Orders'],['sales','Sales'],
   ['parties','Customers & Resellers'],['partners','Partners'],['expenses','Expenses'],['promote','Promote']
 ];
 const CATS = ['Pooja set','Bowl set','Jaali box','Inlay table','Diwali hamper','Other'];
@@ -397,7 +433,8 @@ const dmy = s => { if(!s) return ''; const [y,m,d]=s.split('-'); return `${d}/${
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-let data = Object.fromEntries(COLS.map(c=>[c,[]])); data.orders = []; data.moves = [];
+let data = Object.fromEntries(COLS.map(c=>[c,[]])); data.orders = []; data.moves = []; data.damages = [];
+const SUBTYPE = {orders:'order', moves:'move', damages:'damage'};
 let settings = { shareAnita: 50 };
 let mode = 'loading';   // loading | db | local
 let demo = false, loadedCount = 0;
@@ -406,10 +443,11 @@ let tab = 'dash';
 try { const t = localStorage.getItem('phd-tab'); if (t && TABS.some(x=>x[0]===t)) tab = t; } catch(e){}
 if (location.hash && TABS.some(x=>x[0]===location.hash.slice(1))) tab = location.hash.slice(1);
 let period = 'month', partyFilter = 'all', stockQ = '';
-let supFilter = 'all', payFilter = 'all', purchPeriod = 'all', purchView = 'bills', salesView = 'cards';
-try { if (localStorage.getItem('phd-sview')==='table') salesView = 'table'; } catch(e){}
+let supFilter = 'all', payFilter = 'all', purchPeriod = 'all', purchView = 'list', listView = 'cards';
+try { if (localStorage.getItem('phd-view')==='table') listView = 'table'; } catch(e){}
 let fixPending = false, isOwnerUser = false;
 try { if (localStorage.getItem('phd-pview')==='sheet') purchView = 'sheet'; } catch(e){}
+function setListView(v){ listView = v; try{localStorage.setItem('phd-view',v);}catch(e){} }
 
 /* ---------- example data (shown only while books are empty) ---------- */
 function exampleData(){
@@ -453,13 +491,14 @@ function exampleData(){
   ];
   purchases.push({id:'u5',date:d(3),supplier:'Moradabad supplier',status:'In transit',eta:d(-3),items:[{productId:'p1',qty:15,rate:1250}],transport:900,handling:0,other:0,payments:{Anita:19650}});
   const moves = [{id:'m1',type:'move',date:d(25),from:'godown',to:'p:r1',items:[{productId:'p3',qty:6},{productId:'p5',qty:5}],note:'Sale-or-return stock'}];
-  return {products,purchases,sales,parties,ledger,expenses,ideas:[],orders,moves};
+  const damages = [{id:'dm1',type:'damage',date:d(12),loc:'godown',items:[{productId:'p1',qty:2}],reason:'Broken in transit',action:'Return to supplier',supplier:'Moradabad supplier',claim:2500,recovered:0}];
+  return {products,purchases,sales,parties,ledger,expenses,ideas:[],orders,moves,damages};
 }
 function view(){ return demo ? exampleData() : data; }
 
 /* ---------- storage ---------- */
 function localLoad(){
-  try { const s = JSON.parse(localStorage.getItem('phd-data')||'null'); if (s){ COLS.forEach(c=>data[c]=s[c]||[]); data.orders = s.orders||[]; data.moves = s.moves||[]; settings = s.settings||settings; } } catch(e){}
+  try { const s = JSON.parse(localStorage.getItem('phd-data')||'null'); if (s){ COLS.forEach(c=>data[c]=s[c]||[]); data.orders = s.orders||[]; data.moves = s.moves||[]; data.damages = s.damages||[]; settings = s.settings||settings; } } catch(e){}
 }
 function localSave(){ try{ localStorage.setItem('phd-data', JSON.stringify({...data,settings})); }catch(e){} }
 
@@ -468,7 +507,7 @@ async function saveDoc(col, obj){
   const clean = JSON.parse(JSON.stringify(obj));
   if (mode === 'db'){
     // Firestore shows the change at once from its local copy and syncs when online; errors surface later
-    if (col==='orders' || col==='moves'){ clean.type = col==='orders'?'order':'move'; db.collection('sales').doc(clean.id).set(clean).catch(fail); }
+    if (SUBTYPE[col]){ clean.type = SUBTYPE[col]; db.collection('sales').doc(clean.id).set(clean).catch(fail); }
     else db.collection(col).doc(clean.id).set(clean).catch(fail);
   } else {
     const i = data[col].findIndex(x=>x.id===clean.id);
@@ -478,7 +517,7 @@ async function saveDoc(col, obj){
   return true;
 }
 async function delDoc(col, id){
-  if (mode === 'db'){ db.collection((col==='orders'||col==='moves')?'sales':col).doc(id).delete().catch(fail); }
+  if (mode === 'db'){ db.collection(SUBTYPE[col]?'sales':col).doc(id).delete().catch(fail); }
   else { data[col] = data[col].filter(x=>x.id!==id); localSave(); render(); }
   return true;
 }
@@ -545,6 +584,12 @@ function calc(V){
   purchases.forEach(u=>{ if (onWay(u)) return; (u.items||[]).forEach(it=>add(it.productId, u.location||'godown', n(it.qty))); });
   V.sales.forEach(s=>(s.items||[]).forEach(it=>add(it.productId, s.fromLoc||'godown', -n(it.qty))));
   (V.moves||[]).forEach(m=>(m.items||[]).forEach(it=>{ add(it.productId, m.from||'godown', -n(it.qty)); add(it.productId, m.to||'godown', n(it.qty)); }));
+  // damaged pieces leave stock (unless repaired) and their landed cost, less what the supplier paid back, is a loss
+  Object.values(P).forEach(p=>{ p.damaged=0; });
+  const dmgCalc = d => { const pcs=(d.items||[]).reduce((a,i)=>a+n(i.qty),0); const cost=(d.items||[]).reduce((a,i)=>a+n(i.qty)*(P[i.productId]?.avgCost||0),0);
+    const repaired = d.action==='Repaired'; const loss = repaired ? n(d.repairCost) : Math.max(cost - n(d.recovered), 0);
+    const open = d.action==='Return to supplier' && n(d.recovered) < n(d.claim||cost) - 0.5; return {pcs,cost,loss,repaired,open,pending:open?Math.max(n(d.claim||cost)-n(d.recovered),0):0}; };
+  (V.damages||[]).forEach(d=>{ if (d.action==='Repaired') return; (d.items||[]).forEach(it=>{ const p=P[it.productId]; if(!p) return; p.damaged+=n(it.qty); p.qty-=n(it.qty); p.value=Math.max(p.qty,0)*p.avgCost; p.free=p.qty-p.booked; add(it.productId, d.loc||'godown', -n(it.qty)); }); });
   const saleCalc = s => {
     const gross = (s.items||[]).reduce((a,it)=>a+n(it.qty)*n(it.rate),0);
     const net = gross - n(s.discount);
@@ -552,7 +597,7 @@ function calc(V){
     const costs = n(s.transport)+n(s.handling);
     return {gross,net,cogs,costs,profit:net-cogs-costs,due:net-n(s.received)};
   };
-  return {P,saleCalc,purchases};
+  return {P,saleCalc,purchases,dmgCalc};
 }
 function inPeriod(date, p){
   if (p==='all' || !date) return true;
@@ -587,12 +632,13 @@ function renderBanner(){
 }
 function render(){
   renderTabs(); renderBanner();
+  const vb = document.getElementById('viewBtn'); if (vb) vb.textContent = listView==='cards' ? 'Table view' : 'Card view';
   document.getElementById('backupBtn').hidden = !(downloads && !demo && mode!=='loading');
   document.getElementById('importBtn').hidden = mode==='loading';
   const main = document.getElementById('main');
   if (mode==='loading'){ main.innerHTML = `<section class="view"><div class="panel empty">Opening the books…</div></section>`; return; }
   const V = view(), C = calc(V);
-  const fn = {dash,stock,godowns:godownsV,flow:flowV,catalogue:catalogueV,orders:ordersV,purchases:purchasesV,sales:salesV,parties:partiesV,partners:partnersV,expenses:expensesV,promote:promoteV}[tab];
+  const fn = {dash,stock,godowns:godownsV,flow:flowV,damaged:damagedV,catalogue:catalogueV,orders:ordersV,purchases:purchasesV,sales:salesV,parties:partiesV,partners:partnersV,expenses:expensesV,promote:promoteV}[tab];
   main.innerHTML = `<section class="view">${fn(V,C)}</section>`;
   if (tab==='stock' || tab==='catalogue' || tab==='sales') hydrateImages();
 }
@@ -604,7 +650,8 @@ function dash(V,C){
   let net=0,cogs=0,saleCosts=0,disc=0,cust=0,resl=0;
   S.forEach(s=>{ const c=C.saleCalc(s); net+=c.net; cogs+=c.cogs; saleCosts+=c.costs; disc+=n(s.discount); if(partyType(V,s.partyId)==='Reseller') resl+=c.net; else cust+=c.net; });
   const exp = V.expenses.filter(e=>inPeriod(e.date,period)).reduce((a,e)=>a+n(e.amount),0);
-  const gross = net-cogs, netProfit = gross-saleCosts-exp;
+  const dmgLoss = (V.damages||[]).filter(d=>inPeriod(d.date,period)).reduce((a,d)=>a+C.dmgCalc(d).loss,0);
+  const gross = net-cogs, netProfit = gross-saleCosts-exp-dmgLoss;
   const stockVal = Object.values(C.P).reduce((a,p)=>a+p.value,0);
   const recv = V.sales.reduce((a,s)=>a+Math.max(C.saleCalc(s).due,0),0);
   const margin = net>0 ? Math.round(gross/net*100) : 0;
@@ -614,6 +661,7 @@ function dash(V,C){
   for(let i=5;i>=0;i--){ const m=new Date(now.getFullYear(),now.getMonth()-i,1); months.push({y:m.getFullYear(),m:m.getMonth(),sales:0,profit:0}); }
   V.sales.forEach(s=>{ const d=new Date(s.date+'T00:00:00'); const b=months.find(x=>x.y===d.getFullYear()&&x.m===d.getMonth()); if(b){const c=C.saleCalc(s); b.sales+=c.net; b.profit+=c.profit;} });
   V.expenses.forEach(e=>{ const d=new Date(e.date+'T00:00:00'); const b=months.find(x=>x.y===d.getFullYear()&&x.m===d.getMonth()); if(b) b.profit-=n(e.amount); });
+  (V.damages||[]).forEach(e=>{ const d=new Date(e.date+'T00:00:00'); const b=months.find(x=>x.y===d.getFullYear()&&x.m===d.getMonth()); if(b) b.profit-=C.dmgCalc(e).loss; });
 
   const top = {}; S.forEach(s=>(s.items||[]).forEach(it=>{ top[it.productId]=(top[it.productId]||0)+n(it.qty)*n(it.rate); }));
   const topList = Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,5);
@@ -627,10 +675,11 @@ function dash(V,C){
     <div class="kpi hero"><span>Net sales</span><b>${rs(net)}</b><em>${S.length} bill${S.length===1?'':'s'} · discount ${rs(disc)}</em></div>
     <div class="kpi"><span>Gross profit</span><b>${rs(gross)}</b><em>${margin}% margin on landed cost</em></div>
     <div class="kpi"><span>Expenses</span><b>${rs(exp+saleCosts)}</b><em>incl. delivery ${rs(saleCosts)}</em></div>
-    <div class="kpi"><span>Net profit</span><b style="color:${netProfit<0?'var(--bad)':'inherit'}">${rs(netProfit)}</b><em>after all costs</em></div>
+    <div class="kpi"><span>Net profit</span><b style="color:${netProfit<0?'var(--bad)':'inherit'}">${rs(netProfit)}</b><em>after all costs${dmgLoss?` and ${rs(dmgLoss)} damage`:''}</em></div>
     <div class="kpi"><span>Stock value</span><b>${rs(stockVal)}</b><em>${Object.values(C.P).reduce((a,p)=>a+Math.max(p.qty,0),0)} pieces</em></div>
     <div class="kpi"><span>To collect</span><b style="color:${recv>0?'var(--warn)':'inherit'}">${rs(recv)}</b><em>unpaid bills</em></div>
   </div>
+  ${flowStrip(V,C)}
   ${smartPanel(V,C,true)}
   <div class="grid-2">
     <div class="panel"><h3>Last 6 months</h3>${chart(months)}
@@ -782,11 +831,12 @@ function smartLists(V,C){
     else if (quiet!=null && quiet>=45) why = `No order for ${quiet} days`;
     return {p, due, daysDue, quiet, why};
   }).filter(x=>x.why).sort((a,b)=>b.due-a.due || (b.quiet||0)-(a.quiet||0));
-  return {late, soon, transitLate, transitNoDate, transitSoon, reorder, resellers};
+  const claims = (V.damages||[]).map(d=>({d,c:C.dmgCalc(d),age:t-toDay(d.date)})).filter(x=>x.c.open && x.age>=15).sort((a,b)=>b.age-a.age);
+  return {late, soon, transitLate, transitNoDate, transitSoon, reorder, resellers, claims};
 }
 function smartPanel(V,C,compact){
   const L = smartLists(V,C);
-  const count = L.late.length + L.transitLate.length + L.transitNoDate.length + L.reorder.length + L.resellers.length;
+  const count = L.late.length + L.transitLate.length + L.transitNoDate.length + L.reorder.length + L.resellers.length + L.claims.length;
   const itemsOf = u => (u.items||[]).slice(0,2).map(i=>`${prodName(C,i.productId)} × ${n(i.qty)}`).join(', ') + ((u.items||[]).length>2?` +${u.items.length-2} more`:'');
   const li = (a,b) => `<div class="li"><span>${a}</span>${b}</div>`;
   return `<div class="panel smart"><div class="row-head" style="margin-bottom:8px"><h3 style="margin:0">Needs attention</h3><span class="pill ${count?'warn':'good'}">${count?count+' item'+(count===1?'':'s'):'All clear'}</span></div>
@@ -794,7 +844,7 @@ function smartPanel(V,C,compact){
     <div><h4>Late orders</h4><div class="list">${L.late.length? L.late.slice(0,6).map(x=>li(`<button type="button" class="linkbtn" data-edit="orders" data-id="${x.o.id}">${esc(orderName(V,x.o))}</button><div class="sub">${esc(STAGE_LABEL[x.o.stage||'Taken'])} · due ${dmy(x.o.dueDate)}</div>`,`<span class="pill bad">${x.f.lateBy} day${x.f.lateBy===1?'':'s'} late</span>`)).join('') : '<p class="sub">No order is past its delivery date.</p>'}
       ${L.soon.length?L.soon.slice(0,3).map(x=>li(`<button type="button" class="linkbtn" data-edit="orders" data-id="${x.o.id}">${esc(orderName(V,x.o))}</button><div class="sub">due ${dmy(x.o.dueDate)}</div>`,'<span class="pill warn">Due soon</span>')).join(''):''}
       </div></div>
-    <div><h4>Purchase delays</h4><div class="list">${(L.transitLate.length||L.transitNoDate.length)? L.transitLate.map(x=>li(`<button type="button" class="linkbtn" data-edit="purchases" data-id="${x.u.id}">${esc(x.u.supplier||'Supplier')}</button><div class="sub">${esc(itemsOf(x.u))} · expected ${dmy(x.u.eta)}</div>`,`<span class="pill bad">${x.d.lateBy} day${x.d.lateBy===1?'':'s'} late</span>`)).join('') + L.transitNoDate.map(x=>li(`<button type="button" class="linkbtn" data-edit="purchases" data-id="${x.u.id}">${esc(x.u.supplier||'Supplier')}</button><div class="sub">${esc(itemsOf(x.u))} · ordered ${dmy(x.u.date)}</div>`,`<span class="pill warn">${x.d.waited} days, no arrival date</span>`)).join('') : '<p class="sub">All goods on the way are on time.</p>'}
+    <div><h4>Purchase delays &amp; claims</h4><div class="list">${(L.transitLate.length||L.transitNoDate.length||L.claims.length)? L.claims.map(x=>li(`<button type="button" class="linkbtn" data-edit="damages" data-id="${x.d.id}">${esc(x.d.supplier||'Supplier')}</button><div class="sub">damage claim · ${x.c.pcs} pcs</div>`,`<span class="pill bad">${rs(x.c.pending)} · ${x.age} days</span>`)).join('') +  L.transitLate.map(x=>li(`<button type="button" class="linkbtn" data-edit="purchases" data-id="${x.u.id}">${esc(x.u.supplier||'Supplier')}</button><div class="sub">${esc(itemsOf(x.u))} · expected ${dmy(x.u.eta)}</div>`,`<span class="pill bad">${x.d.lateBy} day${x.d.lateBy===1?'':'s'} late</span>`)).join('') + L.transitNoDate.map(x=>li(`<button type="button" class="linkbtn" data-edit="purchases" data-id="${x.u.id}">${esc(x.u.supplier||'Supplier')}</button><div class="sub">${esc(itemsOf(x.u))} · ordered ${dmy(x.u.date)}</div>`,`<span class="pill warn">${x.d.waited} days, no arrival date</span>`)).join('') : '<p class="sub">All goods on the way are on time.</p>'}
       ${L.transitSoon.map(x=>li(`<button type="button" class="linkbtn" data-edit="purchases" data-id="${x.u.id}">${esc(x.u.supplier||'Supplier')}</button><div class="sub">expected ${dmy(x.u.eta)}</div>`,'<span class="pill acc">Arriving soon</span>')).join('')}
       ${compact?'':'<p class="sub" style="margin:6px 0 0">Call the supplier for anything late. Goods without an expected date are flagged after a week: open the bill and add one.</p>'}</div></div>
     <div><h4>Reorder suggestions</h4><div class="list">${L.reorder.length? L.reorder.map(x=>li(`${esc(x.p.name)}<div class="sub">${x.perDay>0?`sells ${(x.perDay*7).toFixed(1)} a week · ${x.have<=0?'none free':Number.isFinite(x.cover)?`${Math.floor(x.cover)} days left`:''}`:`${x.p.booked} booked, only ${Math.max(x.p.qty,0)} in stock`}</div>`,`<span class="pill acc">Buy ${x.buy}</span>`)).join('') : '<p class="sub">Stock, orders and goods on the way cover the next 3 weeks of sales.</p>'}</div>
@@ -870,9 +920,9 @@ function ordersV(V,C){
 /* ---------- material flow: supplier order → transit → stock → customer order → delivered → paid ---------- */
 let flowSel = 'Ordered', traceProd = '';
 const FLOW = [
-  ['Ordered','Ordered from supplier','buy'],['In transit','On the way','buy'],['stock','In stock','stock'],
-  ['Taken','Customer order taken','sell'],['Packed','Packed','sell'],['Dispatched','Sent to customer','sell'],
-  ['due','Delivered, payment due','sell'],['paid','Paid (last 30 days)','sell']];
+  ['Ordered','Ordered from supplier','buy','Ordered'],['In transit','On the way','buy','On the way'],['stock','In stock','stock','In stock'],
+  ['Taken','Customer order taken','sell','Orders'],['Packed','Packed','sell','Packed'],['Dispatched','Sent to customer','sell','Sent'],
+  ['due','Delivered, payment due','sell','Payment due'],['paid','Paid (last 30 days)','sell','Paid']];
 /* for an open customer order: is every item covered by stock, arriving, or still to buy? */
 function orderCover(C,o){
   let worst = 'ok';
@@ -919,7 +969,8 @@ function flowList(V,C,k,st){
     const short = Object.values(C.P).filter(p=>p.booked>p.qty);
     return `<div class="fplaces">${rows.map(r=>`<button type="button" class="fplace" data-tab="godowns"><span class="pill ${r.x.kind==='reseller'?'gold':r.x.kind==='home'?'plain':'acc'}">${r.x.kind==='reseller'?'Reseller':r.x.kind==='home'?'Partner home':'Godown'}</span><b>${esc(r.x.name)}</b><span class="num">${r.q} pcs · ${rs(r.v)}</span></button>`).join('') || '<p class="sub">No stock anywhere yet.</p>'}</div>
       ${short.length?`<h4 style="margin:14px 0 6px">Booked more than you have</h4>${short.map(p=>row(esc(p.name), `${p.booked} booked · ${Math.max(p.qty,0)} in stock · ${p.transit} on the way`, p.qty+p.transit>=p.booked?'<span class="pill acc">Arriving covers it</span>':`<span class="pill bad">Buy ${p.booked-p.qty-p.transit}</span>`,'products',p.id)).join('')}`:''}
-      <p class="sub" style="margin:10px 0 0">Move stock between places, or give it to resellers, from the Godowns tab.</p>`;
+      ${(()=>{ const dm=(V.damages||[]).map(d=>C.dmgCalc(d)); const pcs=dm.reduce((a,x)=>a+(x.repaired?0:x.pcs),0); const pend=dm.reduce((a,x)=>a+x.pending,0); return pcs?`<div class="frow"><div class="fmain"><b>${pcs} pieces damaged</b><div class="sub">taken out of stock · loss ${rs(dm.reduce((a,x)=>a+x.loss,0))}${pend?` · ${rs(pend)} claim pending`:''}</div></div><div class="fact"><button type="button" class="btn small" data-tab="damaged">Damaged goods</button></div></div>`:''; })()}
+      <p class="sub" style="margin:10px 0 0">Move stock between places, or give it to resellers, from the Godowns tab. Record broken pieces in Damaged.</p>`;
   }
   if (['Taken','Packed','Dispatched'].includes(k)){
     const L = [...st[k].list].sort((a,b)=>(a.dueDate||'9').localeCompare(b.dueDate||'9'));
@@ -957,10 +1008,18 @@ function traceEvents(V,C,pid){
   });
   V.sales.forEach(s=>{ const q=qOf(s.items); if(!q) return; const c=C.saleCalc(s);
     ev.push({d:s.date, k:'out', q:-q, t:`${s.fromOrder?'Delivered':'Sold'} ${q} to ${esc(partyName(V,s.partyId))}`, s:`from ${esc(placeName(V,s.fromLoc||'godown'))} · ${c.due>0.5?`due ${rs(c.due)}`:'paid'}`, col:'sales', id:s.id}); });
-  const rank = {buy:0,way:1,in:2,move:3,order:4,out:5,paid:6};
+  (V.damages||[]).forEach(d=>{ const q=qOf(d.items); if(!q) return; const rep=d.action==='Repaired';
+    ev.push({d:d.date, k:'dmg', q:rep?undefined:-q, t:`${q} damaged`, s:`${esc(d.reason||'')} · ${esc(placeName(V,d.loc||'godown'))} · ${rep?'repaired':d.action==='Return to supplier'?'claimed from '+esc(d.supplier||'supplier'):'written off'}`, col:'damages', id:d.id}); });
+  const rank = {buy:0,way:1,in:2,move:3,order:4,out:5,dmg:5,paid:6};
   ev.sort((a,b)=>(a.d||'').localeCompare(b.d||'') || rank[a.k]-rank[b.k]);
   let bal = 0; ev.forEach(e=>{ if (e.q){ bal+=e.q; e.bal=bal; } });
   return ev;
+}
+function flowStrip(V,C){
+  const st = flowData(V,C); const dm = (V.damages||[]).map(d=>C.dmgCalc(d)); const open = dm.filter(x=>x.open).length;
+  return `<div class="panel"><div class="row-head" style="margin-bottom:10px"><h3 style="margin:0">Material flow</h3><button type="button" class="linkbtn" data-tab="flow">Open full view →</button></div>
+  <div class="fstrip">${FLOW.map(([k,l,g,sh])=>{ const x=st[k]; return `<button type="button" class="fmini ${g}" data-flow-go="${k}" title="${l}"><span>${sh}</span><b class="num">${x.pcs}</b>${x.bad?`<i class="dot" aria-label="${x.bad} need attention"></i>`:''}</button>`; }).join('')}
+  <button type="button" class="fmini dmg" data-tab="damaged"><span>Damaged</span><b class="num">${dm.reduce((a,x)=>a+(x.repaired?0:x.pcs),0)}</b>${open?'<i class="dot"></i>':''}</button></div></div>`;
 }
 function flowV(V,C){
   const st = flowData(V,C);
@@ -989,6 +1048,40 @@ function flowV(V,C){
   </div>`;
 }
 
+/* ---------- damaged goods ---------- */
+const DMG_REASONS = ['Broken in transit','Defective from supplier','Broken in godown','Broken at reseller','Customer returned damaged','Polish / colour gone','Other'];
+const DMG_ACTIONS = [['Write off','Write off (thrown away or kept as scrap)'],['Return to supplier','Claim from supplier (return / credit / replacement)'],['Repaired','Repaired, back in stock']];
+let dmgFilter = 'all';
+function dmgItems(C,d){ const it=d.items||[]; return it.slice(0,3).map(i=>`${esc(prodName(C,i.productId))} × ${n(i.qty)}`).join(', ') + (it.length>3?` +${it.length-3} more`:''); }
+function damagedV(V,C){
+  const all = [...(V.damages||[])].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const t = toDay(today());
+  const list = all.filter(d=>{ const c=C.dmgCalc(d); return dmgFilter==='all' || (dmgFilter==='open'&&c.open) || (dmgFilter===d.action); });
+  let pcs=0, loss=0, pend=0, rec=0, openN=0; const byR={};
+  all.forEach(d=>{ const c=C.dmgCalc(d); if(!c.repaired) pcs+=c.pcs; loss+=c.loss; pend+=c.pending; rec+=n(d.recovered); if(c.open) openN++; byR[d.reason||'Other']=(byR[d.reason||'Other']||0)+c.pcs; });
+  const maxR = Math.max(1,...Object.values(byR));
+  return `<div class="row-head"><div><h2>Damaged goods</h2><p>Broken or defective pieces leave stock, their cost counts as a loss in profit, and supplier claims are tracked until the money comes back.</p></div>
+  <div class="controls"><select class="sel" id="dmgSel" aria-label="Show">${[['all','All damage'],['open','Claims pending'],['Return to supplier','Claimed from supplier'],['Write off','Written off'],['Repaired','Repaired']].map(([k,l])=>`<option value="${k}" ${k===dmgFilter?'selected':''}>${l}</option>`).join('')}</select>
+  <button class="btn primary" data-add="damages">+ Damaged goods</button></div></div>
+  <div class="kpis">
+    <div class="kpi"><span>Pieces damaged</span><b>${pcs}</b><em>taken out of stock</em></div>
+    <div class="kpi"><span>Loss</span><b style="color:${loss?'var(--bad)':'inherit'}">${rs(loss)}</b><em>landed cost less money recovered</em></div>
+    <div class="kpi"><span>Claims pending</span><b style="color:${pend?'var(--warn)':'inherit'}">${rs(pend)}</b><em>${openN} claim${openN===1?'':'s'} with suppliers</em></div>
+    <div class="kpi"><span>Recovered</span><b style="color:${rec?'var(--good)':'inherit'}">${rs(rec)}</b><em>paid back by suppliers</em></div>
+  </div>
+  ${Object.keys(byR).length?`<div class="panel"><h3>Why pieces get damaged</h3><div class="bars">${Object.entries(byR).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="bar"><span>${esc(k)}</span><i style="width:${v/maxR*100}%"></i><b class="num">${v}</b></div>`).join('')}</div>
+    ${(byR['Broken in transit']||0)+(byR['Defective from supplier']||0) >= pcs/2 && pcs>2 ? `<p class="sub" style="margin:8px 0 0">Most damage happens before goods reach you. Ask suppliers for better packing, and claim every broken piece.</p>`:''}</div>`:''}
+  ${list.length?`<div class="lcards">${list.map(d=>{ const c=C.dmgCalc(d); const age = t-toDay(d.date);
+    const st = c.repaired?'<span class="pill good">Repaired</span>': d.action==='Return to supplier' ? (c.open?`<span class="pill ${age>=15?'bad':'warn'}">Claim ${rs(c.pending)} pending${age>=15?` · ${age} days`:''}</span>`:'<span class="pill good">Claim settled</span>') : '<span class="pill plain">Written off</span>';
+    return `<article class="lcard" data-edit="damages" data-id="${d.id}" role="button" tabindex="0">
+      <div class="lhead"><div><b>${dmgItems(C,d)}</b><div class="sub">${dmy(d.date)} · ${esc(placeName(V,d.loc||'godown'))}</div></div>${st}</div>
+      <div class="lmeta"><span class="pill bad">${esc(d.reason||'Other')}</span>${d.supplier?`<span class="sub">Supplier: <b>${esc(d.supplier)}</b></span>`:''}</div>
+      <div class="sfig"><div><span>Pieces</span><b class="num">${c.pcs}</b></div><div><span>Cost</span><b class="num">${rs(c.cost)}</b></div><div><span>Loss</span><b class="num" style="color:${c.loss?'var(--bad)':'var(--good)'}">${rs(c.loss)}</b></div></div>
+      ${d.note?`<p class="sub" style="margin:0">${esc(d.note)}</p>`:''}
+      <div class="lacts">${c.open?`<button type="button" class="btn small primary" data-dmg-recover="${d.id}">Money received</button><button type="button" class="btn small wa" data-pdf="claim" data-id="${d.id}">Claim PDF / WhatsApp</button>`:''}</div>
+    </article>`; }).join('')}</div>`
+  : `<div class="panel empty">${all.length?'Nothing matches this filter.':'No damaged goods recorded. When a piece arrives broken or gets damaged, record it here so stock and profit stay right.'}</div>`}`;
+}
 /* ---------- godowns: stock by place ---------- */
 let placeSel = 'godown', newPlaceOpen = false;
 function heldSince(V, key, P){
@@ -1208,6 +1301,171 @@ async function purchasesExcel(btn){
   try { await downloads.save({filename:name, data:new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})}); toast('Excel file saved'); }
   catch(e){ if (!(e && e.code==='declined')) toast('The Excel file could not be saved.'); }
 }
+/* ---------- bills as PDF, sent on WhatsApp ---------- */
+const PDF_C = {teal:[13,106,98], ink:[27,38,39], muted:[91,104,104], line:[216,222,219], soft:[236,244,242], bad:[176,48,48]};
+const rsP = v => 'Rs ' + fmt.format(Math.round(n(v)));
+function pdfHead(doc, W, M, title, sub){
+  const c = PDF_C;
+  doc.setFillColor(...c.teal); doc.rect(0,0,W,3,'F');
+  doc.setFont('times','normal'); doc.setFontSize(20); doc.setTextColor(...c.teal); doc.text('Prime Home Decor', M, M+8);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...c.muted);
+  doc.text('German silver decor, pooja and gifting', M, M+13);
+  doc.text('Anita Lath  94396 37396', W-M, M+5, {align:'right'}); doc.text('Neha Lath  99370 53113', W-M, M+10, {align:'right'});
+  doc.setDrawColor(...c.line); doc.line(M, M+17, W-M, M+17);
+  doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(...c.ink); doc.text(title, M, M+25);
+  if (sub){ doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...c.muted); doc.text(sub, W-M, M+25, {align:'right'}); }
+  return M+31;
+}
+/* rows: [[cells...]], cols: [{h, w, a}] ; returns new y */
+function pdfTable(doc, y, M, W, H, cols, rows, onNewPage){
+  const c = PDF_C, x0 = M; const tw = W-2*M; const tot = cols.reduce((a,k)=>a+k.w,0); cols.forEach(k=>k.mm=k.w/tot*tw);
+  const head = () => { doc.setFillColor(...c.soft); doc.rect(x0, y, tw, 7, 'F'); doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...c.muted);
+    let x=x0; cols.forEach(k=>{ doc.text(k.h.toUpperCase(), k.a==='r'?x+k.mm-2:x+2, y+4.8, {align:k.a==='r'?'right':'left'}); x+=k.mm; }); y+=7; };
+  head();
+  doc.setFont('helvetica','normal'); doc.setFontSize(9);
+  rows.forEach(r=>{
+    const lines = r.map((v,i)=>doc.splitTextToSize(String(v??''), cols[i].mm-4));
+    const h = Math.max(...lines.map(l=>l.length))*4.2 + 3;
+    if (y + h > H-M-22){ doc.addPage(); y = onNewPage(); head(); doc.setFont('helvetica','normal'); doc.setFontSize(9); }
+    let x=x0; doc.setTextColor(...c.ink);
+    lines.forEach((l,i)=>{ doc.text(l, cols[i].a==='r'?x+cols[i].mm-2:x+2, y+4.5, {align:cols[i].a==='r'?'right':'left'}); x+=cols[i].mm; });
+    y += h; doc.setDrawColor(...c.line); doc.line(x0, y, x0+tw, y);
+  });
+  return y;
+}
+function pdfTotals(doc, y, M, W, H, pairs){
+  const c = PDF_C; y += 6;
+  pairs.forEach(([k,v,strong,col])=>{
+    if (y > H-M-14){ doc.addPage(); y = M+10; }
+    doc.setFont('helvetica', strong?'bold':'normal'); doc.setFontSize(strong?11:9); doc.setTextColor(...(col||c.ink));
+    doc.text(k, W-M-48, y, {align:'right'}); doc.text(v, W-M-2, y, {align:'right'}); y += strong?7:5.2;
+  });
+  return y;
+}
+function pdfFoot(doc, W, H, M, note){
+  const pages = doc.getNumberOfPages(), c = PDF_C;
+  for (let i=1;i<=pages;i++){ doc.setPage(i); doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(...c.muted);
+    doc.text(note, M, H-7); doc.text(`Page ${i} of ${pages}`, W-M, H-7, {align:'right'}); }
+}
+function billNoOf(rec){ return rec.billNo || ('PHD-' + String(rec.date||today()).replace(/-/g,'').slice(2) + '-' + String(rec.id||'').slice(-4).toUpperCase()); }
+function makePdf(kind, id){
+  const V = view(), C = calc(V); const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({unit:'mm', format:'a5'}); const W=148, H=210, M=10;
+  const c = PDF_C;
+  if (kind==='sale'){
+    const s = V.sales.find(x=>x.id===id); if (!s) return null; const sc = C.saleCalc(s);
+    const party = V.parties.find(p=>p.id===s.partyId) || {};
+    let y = pdfHead(doc, W, M, 'BILL', `No. ${billNoOf(s)}   ·   ${dmy(s.date)}`);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...c.muted); doc.text('BILL TO', M, y);
+    doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(...c.ink); doc.text(party.name || 'Walk-in customer', M, y+5);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...c.muted); doc.text([party.phone, party.city].filter(Boolean).join('  ·  ') || ' ', M, y+9.5);
+    y += 15;
+    y = pdfTable(doc, y, M, W, H, [{h:'#',w:6},{h:'Item',w:44},{h:'Qty',w:10,a:'r'},{h:'Rate',w:18,a:'r'},{h:'Amount',w:20,a:'r'}],
+      (s.items||[]).map((it,i)=>[i+1, prodName(C,it.productId), n(it.qty), rsP(it.rate), rsP(n(it.qty)*n(it.rate))]), ()=>M+8);
+    const pairs = [['Total', rsP(sc.gross)]];
+    if (n(s.discount)) pairs.push(['Discount', '- '+rsP(s.discount)]);
+    pairs.push(['Net amount', rsP(sc.net), true]);
+    if (n(s.received)) pairs.push([`Received${s.mode?` (${s.mode})`:''}`, rsP(s.received)]);
+    pairs.push(sc.due>0.5 ? ['Balance due', rsP(sc.due), true, c.bad] : ['Fully paid', 'Thank you', true, c.teal]);
+    y = pdfTotals(doc, y, M, W, H, pairs);
+    if (s.note){ doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...c.muted); doc.text(doc.splitTextToSize('Note: '+s.note, W-2*M), M, y+4); }
+    pdfFoot(doc, W, H, M, 'Thank you for shopping with Prime Home Decor. WhatsApp 94396 37396 to order.');
+    const msg = `Prime Home Decor bill ${billNoOf(s)} dated ${dmy(s.date)}: ${rsP(sc.net)}${sc.due>0.5?`, balance due ${rsP(sc.due)}`:', fully paid'}. Thank you!`;
+    return {doc, filename:`PHD-bill-${(party.name||'customer').replace(/[^\w]+/g,'-')}-${s.date}.pdf`, text:msg, phone:party.phone};
+  }
+  if (kind==='purchase'){
+    const u = C.purchases.find(x=>x.id===id); if (!u) return null; const pc = purchCalc(u); const dl = purchDelay(u);
+    let y = pdfHead(doc, W, M, 'PURCHASE', `${u.billNo?`Bill ${u.billNo}   ·   `:''}${dmy(u.date)}`);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...c.muted); doc.text('SUPPLIER', M, y);
+    doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(...c.ink); doc.text(u.supplier || 'Supplier', M, y+5);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...c.muted);
+    doc.text(onWay(u) ? `${u.status==='Ordered'?'Ordered, not dispatched':'On the way'}${u.eta?` · expected ${dmy(u.eta)}`:''}${dl.late?` · ${dl.lateBy} days late`:''}` : `Received ${dmy(u.receivedOn||u.date)} into ${placeName(V,u.location||'godown')}${dl.cameLate?` · ${dl.cameLate} days late`:''}`, M, y+9.5);
+    y += 15;
+    y = pdfTable(doc, y, M, W, H, [{h:'#',w:6},{h:'Item',w:44},{h:'Qty',w:10,a:'r'},{h:'Rate',w:18,a:'r'},{h:'Amount',w:20,a:'r'}],
+      (u.items||[]).map((it,i)=>[i+1, prodName(C,it.productId), n(it.qty), rsP(it.rate), rsP(n(it.qty)*n(it.rate))]), ()=>M+8);
+    const pairs = [['Items value', rsP(pc.itemsVal)]];
+    [['transport','Shipping'],['handling','Packing'],['gst','GST'],['other','Other']].forEach(([k,l])=>{ if(n(u[k])) pairs.push([l, rsP(u[k])]); });
+    pairs.push(['Bill total', rsP(pc.total), true]);
+    Object.entries(u.payments||{}).forEach(([k,v])=>{ if(n(v)) pairs.push([`Paid by ${k==='Firm'?'firm':k}`, rsP(v)]); });
+    pairs.push(pc.due>0.5 ? ['Still to pay', rsP(pc.due), true, c.bad] : ['Fully paid', '', true, c.teal]);
+    pdfTotals(doc, y, M, W, H, pairs);
+    pdfFoot(doc, W, H, M, 'Prime Home Decor · purchase record');
+    return {doc, filename:`PHD-purchase-${(u.supplier||'supplier').replace(/[^\w]+/g,'-')}-${u.date}.pdf`, text:`Prime Home Decor purchase from ${u.supplier||'supplier'} on ${dmy(u.date)}${u.billNo?` (bill ${u.billNo})`:''}: ${rsP(pc.total)}${pc.due>0.5?`, ${rsP(pc.due)} still to pay`:', fully paid'}.`, phone:''};
+  }
+  if (kind==='claim'){
+    const d = (V.damages||[]).find(x=>x.id===id); if (!d) return null; const dc = C.dmgCalc(d);
+    const u = d.purchaseId ? C.purchases.find(x=>x.id===d.purchaseId) : null;
+    let y = pdfHead(doc, W, M, 'DAMAGE CLAIM', dmy(today()));
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...c.muted); doc.text('TO', M, y);
+    doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(...c.ink); doc.text(d.supplier || 'Supplier', M, y+5);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...c.ink);
+    const body = `The pieces below ${u?`from your bill${u.billNo?` ${u.billNo}`:''} dated ${dmy(u.date)} `:''}were found damaged on ${dmy(d.date)} (${String(d.reason||'damaged').toLowerCase()}). Please send a replacement or credit the amount below.`;
+    doc.text(doc.splitTextToSize(body, W-2*M), M, y+11); y += 24;
+    y = pdfTable(doc, y, M, W, H, [{h:'#',w:6},{h:'Item',w:50},{h:'Qty',w:10,a:'r'},{h:'Cost / pc',w:16,a:'r'},{h:'Amount',w:16,a:'r'}],
+      (d.items||[]).map((it,i)=>{ const pc=C.P[it.productId]?.avgCost||0; return [i+1, prodName(C,it.productId), n(it.qty), rsP(pc), rsP(n(it.qty)*pc)]; }), ()=>M+8);
+    const claim = n(d.claim)||dc.cost;
+    const pairs = [['Claim amount', rsP(claim), true]]; if (n(d.recovered)) pairs.push(['Received so far', rsP(d.recovered)], ['Balance', rsP(Math.max(claim-n(d.recovered),0)), true, c.bad]);
+    y = pdfTotals(doc, y, M, W, H, pairs);
+    if (d.note){ doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...c.muted); doc.text(doc.splitTextToSize('Note: '+d.note, W-2*M), M, y+4); }
+    pdfFoot(doc, W, H, M, 'Prime Home Decor · Anita Lath 94396 37396 · Neha Lath 99370 53113');
+    return {doc, filename:`PHD-damage-claim-${(d.supplier||'supplier').replace(/[^\w]+/g,'-')}-${d.date}.pdf`, text:`Damage claim from Prime Home Decor: ${dc.pcs} piece${dc.pcs===1?'':'s'} damaged (${d.reason||'damaged'}). Claim ${rsP(claim)}. Details attached.`, phone:''};
+  }
+  return null;
+}
+/* a statement of the bills currently shown in Sales or Purchases */
+function makeListPdf(kind){
+  const V = view(), C = calc(V); const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({unit:'mm', format:'a4'}); const W=210, H=297, M=12;
+  if (kind==='sales'){
+    const rows = [...V.sales].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).filter(x=> recvFilter==='all' || (recvFilter==='none' ? (n(x.received)>0 && !x.receivedBy) : x.receivedBy===recvFilter));
+    let y = pdfHead(doc, W, M, 'SALES STATEMENT', `${rows.length} bills · made ${dmy(today())}`);
+    let net=0, due=0;
+    y = pdfTable(doc, y, M, W, H, [{h:'Date',w:16},{h:'Bill no',w:22},{h:'Party',w:30},{h:'Items',w:52},{h:'Net',w:18,a:'r'},{h:'Due',w:16,a:'r'},{h:'Money with',w:18}],
+      rows.map(s=>{ const sc=C.saleCalc(s); net+=sc.net; due+=Math.max(sc.due,0); return [dmy(s.date), billNoOf(s), partyName(V,s.partyId), (s.items||[]).map(i=>`${prodName(C,i.productId)} x ${n(i.qty)}`).join(', '), rsP(sc.net), sc.due>0.5?rsP(sc.due):'-', s.receivedBy||(n(s.received)?'Not marked':'-')]; }), ()=>M+8);
+    pdfTotals(doc, y, M, W, H, [['Net sales', rsP(net), true], ['To collect', rsP(due), true, due>0.5?PDF_C.bad:PDF_C.teal]]);
+    pdfFoot(doc, W, H, M, 'Prime Home Decor · sales statement');
+    return {doc, filename:`PHD-sales-${today()}.pdf`, text:`Prime Home Decor sales statement, ${rows.length} bills, net ${rsP(net)}.`, phone:''};
+  }
+  const rows = currentPurchaseRows(C).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  let y = pdfHead(doc, W, M, 'PURCHASE STATEMENT', `${rows.length} bills · made ${dmy(today())}`);
+  let tot=0, due=0;
+  y = pdfTable(doc, y, M, W, H, [{h:'Date',w:16},{h:'Supplier',w:28},{h:'Items',w:56},{h:'Total',w:18,a:'r'},{h:'Paid by',w:28},{h:'Due',w:16,a:'r'},{h:'Status',w:18}],
+    rows.map(u=>{ const pc=purchCalc(u); tot+=pc.total; due+=Math.max(pc.due,0); return [dmy(u.date), u.supplier||'', (u.items||[]).map(i=>`${prodName(C,i.productId)} x ${n(i.qty)}`).join(', '), rsP(pc.total), Object.entries(u.payments||{}).filter(([k,v])=>n(v)).map(([k,v])=>`${k} ${rsP(v)}`).join(', ')||'-', pc.due>0.5?rsP(pc.due):'-', onWay(u)?(u.status==='Ordered'?'Ordered':'On the way'):'Received']; }), ()=>M+8);
+  pdfTotals(doc, y, M, W, H, [['Bills total', rsP(tot), true], ['Still to pay', rsP(due), true, due>0.5?PDF_C.bad:PDF_C.teal]]);
+  pdfFoot(doc, W, H, M, 'Prime Home Decor · purchase statement');
+  return {doc, filename:`PHD-purchases-${today()}.pdf`, text:`Prime Home Decor purchase statement, ${rows.length} bills, total ${rsP(tot)}.`, phone:''};
+}
+function waNumber(p){ const d = String(p||'').replace(/\D/g,''); return d.length===10 ? '91'+d : d.length===12 && d.startsWith('91') ? d : ''; }
+/* phones: the share sheet sends the PDF straight into WhatsApp. Computers: the PDF downloads and WhatsApp opens with the message, ready to attach. */
+function sharePdf(out){
+  if (!out) { toast('That record was not found.'); return; }
+  const blob = out.doc.output('blob'); const file = new File([blob], out.filename, {type:'application/pdf'});
+  const canShare = !!(navigator.canShare && navigator.canShare({files:[file]}));
+  const num = waNumber(out.phone);
+  current = null;
+  form.innerHTML = `<div class="dlg-head"><h3>PDF ready</h3><button type="button" class="btn small" id="dlCancel">Close</button></div>
+    <div class="dlg-body"><p style="margin:0"><b>${esc(out.filename)}</b> · ${Math.max(1,Math.round(blob.size/1024))} KB</p>
+    <p class="sub" style="margin:0">${canShare ? 'Tap <b>Send on WhatsApp</b>, then pick WhatsApp and the chat.' : `The PDF downloads and WhatsApp opens${num?` for ${esc(out.phone)}`:''} with a message. Attach the downloaded PDF there.`}</p>
+    <div class="calc" style="grid-template-columns:1fr"><span>${esc(out.text)}</span></div></div>
+    <div class="dlg-foot"><button type="button" class="btn" id="pdfSave">Download</button><button type="button" class="btn primary wa" id="pdfWa">Send on WhatsApp</button></div>`;
+  if (!dlg.open) dlg.showModal();
+  const download = () => { const a=document.createElement('a'); a.href=URL.createObjectURL(file); a.download=out.filename; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();}, 4000); };
+  form.querySelector('#dlCancel').onclick = () => dlg.close();
+  form.querySelector('#pdfSave').onclick = async () => {
+    try { if (canShare && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) await navigator.share({files:[file]}); else download(); dlg.close(); toast('PDF saved'); } catch(e){ if (e?.name!=='AbortError') toast('Could not save the PDF.'); }
+  };
+  form.querySelector('#pdfWa').onclick = async () => {
+    try {
+      if (canShare) await navigator.share({files:[file], text:out.text, title:out.filename});
+      else { download(); window.open(`https://wa.me/${num}?text=${encodeURIComponent(out.text)}`, '_blank', 'noopener'); }
+      dlg.close();
+    } catch(e){ if (e?.name!=='AbortError') toast('Sharing did not work. Use Download instead.'); }
+  };
+}
+function pdfAction(kind, id){
+  if (!window.jspdf){ toast('The PDF maker did not load. Check your connection and reload.'); return; }
+  try { sharePdf(id ? makePdf(kind, id) : makeListPdf(kind)); } catch(e){ console.error(e); toast('PDF could not be made. Try again.'); }
+}
 function currentPurchaseRows(C){
   return C.purchases.filter(u=>{
     if (supFilter!=='all' && supKey(u.supplier)!==supFilter) return false;
@@ -1220,6 +1478,21 @@ function currentPurchaseRows(C){
     if (payFilter!=='all') return n(p[payFilter])>0;
     return true;
   });
+}
+function purchCards(V,C,rows){
+  if (!rows.length) return `<div class="panel empty">No purchase bills match these filters.</div>`;
+  const dmgBy = {}; (V.damages||[]).forEach(d=>{ if(d.purchaseId) dmgBy[d.purchaseId]=(dmgBy[d.purchaseId]||0)+C.dmgCalc(d).pcs; });
+  return `<div class="lcards">${rows.map(u=>{ const pc=purchCalc(u), it=u.items||[], dl=purchDelay(u);
+    const way = onWay(u) ? `<span class="pill ${dl.late?'bad':dl.noDate?'warn':'acc'}">${dl.late?`${dl.lateBy}d late`:dl.noDate?`${dl.waited} days, no date`:u.status==='Ordered'?'Ordered':'On the way'}</span>` : '';
+    const pay = pc.due>0.5?`<span class="pill warn">Due ${rs(pc.due)}</span>`: pc.due<-0.5?`<span class="pill bad">Overpaid ${rs(-pc.due)}</span>`:`<span class="pill good">Paid</span>`;
+    return `<article class="lcard" data-edit="purchases" data-id="${u.id}" role="button" tabindex="0" aria-label="Purchase from ${esc(u.supplier||'supplier')} on ${dmy(u.date)}">
+      <div class="lhead"><div><b>${esc(u.supplier||'No supplier name')}</b><div class="sub">${dmy(u.date)}${u.billNo?` · Bill ${esc(u.billNo)}`:''} · into ${esc(placeName(V,u.location||'godown'))}</div></div><div class="lpills">${way}${pay}</div></div>
+      <ul class="sitems">${it.slice(0,3).map(i=>`<li><span>${esc(prodName(C,i.productId))}</span><b class="num">${n(i.qty)} × ${rs(i.rate)}</b></li>`).join('')}${it.length>3?`<li class="sub">+ ${it.length-3} more item${it.length>4?'s':''}</li>`:''}</ul>
+      ${onWay(u)?`<p class="sub" style="margin:0">${u.status==='Ordered'?'Ordered':'Dispatched'}${u.dispatchedOn?` ${dmy(u.dispatchedOn)}`:''}${u.eta?` · expected ${dmy(u.eta)}`:' · no arrival date'}</p>`: dl.cameLate?`<p class="sub" style="margin:0">Arrived ${dl.cameLate} days late</p>`:''}
+      <div class="sfig"><div><span>Bill total</span><b class="num">${rs(pc.total)}</b></div><div><span>Charges</span><b class="num">${rs(pc.charges)}</b></div><div><span>Pieces</span><b class="num">${pc.qty}</b></div></div>
+      <div class="sfoot"><span class="sub">Paid by</span><span>${payPills(u)}</span></div>
+      <div class="lacts">${u.status==='Ordered'?`<button type="button" class="btn small" data-mark-disp="${u.id}">Mark dispatched</button>`:''}${onWay(u)?`<button type="button" class="btn small primary" data-mark-recv="${u.id}">Mark received</button>`:`<button type="button" class="btn small" data-dmg-from="${u.id}">${dmgBy[u.id]?`${dmgBy[u.id]} damaged · add more`:'Report damage'}</button>`}<button type="button" class="btn small wa" data-pdf="purchase" data-id="${u.id}">PDF / WhatsApp</button></div>
+    </article>`; }).join('')}</div>`;
 }
 function purchasesV(V,C){
   const sups = supplierList(C);
@@ -1245,8 +1518,8 @@ function purchasesV(V,C){
     <select class="sel" id="purchPeriodSel" aria-label="Period">${Object.entries(PERIODS).map(([k,l])=>`<option value="${k}" ${k===purchPeriod?'selected':''}>${l}</option>`).join('')}</select>
     <button class="btn primary" data-add="purchases">+ Purchase bill</button></div></div>
   <div class="controls">
-    <div class="seg" role="group" aria-label="View">${[['bills','Bills'],['sheet','Statement']].map(([k,l])=>`<button type="button" class="segb" data-pview="${k}" aria-pressed="${purchView===k}">${l}</button>`).join('')}</div>
-    ${rows.length?`<button type="button" class="btn" id="xlsPurch">Download Excel</button>`:''}
+    <div class="seg" role="group" aria-label="View"><button type="button" class="segb" data-lview="cards" aria-pressed="${purchView==='list'&&listView==='cards'}">Cards</button><button type="button" class="segb" data-lview="table" aria-pressed="${purchView==='list'&&listView==='table'}">Table</button><button type="button" class="segb" data-pview="sheet" aria-pressed="${purchView==='sheet'}">Statement</button></div>
+    ${rows.length?`<button type="button" class="btn" id="xlsPurch">Download Excel</button><button type="button" class="btn wa" data-pdf="purchases">PDF / WhatsApp</button>`:''}
   </div>
   <div class="kpis">
     <div class="kpi hero"><span>Bills total</span><b>${rs(S.total)}</b><em>incl. ${rs(S.charges)} shipping, packing &amp; GST</em></div>
@@ -1256,7 +1529,7 @@ function purchasesV(V,C){
     <div class="kpi"><span>Unpaid to supplier</span><b style="color:${S.due>0.5?'var(--warn)':'inherit'}">${rs(S.due)}</b></div>
     ${(()=>{ const L=C.purchases.filter(u=>{const d=purchDelay(u); return d.late||d.noDate;}).length, T=C.purchases.filter(onWay).length; return T?`<div class="kpi"><span>Late deliveries</span><b style="color:${L?'var(--bad)':'inherit'}">${L}</b><em>${T} bill${T===1?'':'s'} on the way</em></div>`:''; })()}
   </div>
-  ${purchView==='sheet' ? statementHTML(rows,C,S) : table(['Date','Supplier','Items','Items value','Charges','Bill total','Paid by','Status'],
+  ${purchView==='sheet' ? statementHTML(rows,C,S) : listView==='cards' ? purchCards(V,C,rows) : table(['Date','Supplier','Items','Items value','Charges','Bill total','Paid by','Status'],
     rows.map(u=>{ const pc=purchCalc(u); const it=u.items||[];
       const list = it.slice(0,3).map(i=>`${esc(prodName(C,i.productId))} <span class="sub">${n(i.qty)} × ${rs(i.rate)}</span>`).join('<br>') + (it.length>3?`<div class="sub">and ${it.length-3} more</div>`:'');
       const dl = purchDelay(u); const status = (onWay(u)?`<span class="pill ${dl.late?'bad':dl.noDate?'warn':'acc'}">${dl.late?`${dl.lateBy} day${dl.lateBy===1?'':'s'} late`:dl.noDate?`${u.status==='Ordered'?'Ordered':'In transit'} ${dl.waited} days, no date`:`${u.status==='Ordered'?'Ordered, not dispatched':'In transit'}${u.eta?` · due ${dmy(u.eta)}`:''}`}</span> ${u.status==='Ordered'?`<button type="button" class="btn small" data-mark-disp="${u.id}">Mark dispatched</button> `:''}<button type="button" class="btn small" data-mark-recv="${u.id}">Mark received</button><br>`:'') + (dl.cameLate?`<span class="pill plain">Came ${dl.cameLate}d late</span> `:'') + (pc.due>0.5?`<span class="pill warn">Due ${rs(pc.due)}</span>`: pc.due<-0.5?`<span class="pill bad">Overpaid ${rs(-pc.due)}</span>`:`<span class="pill good">Paid</span>`);
@@ -1276,7 +1549,8 @@ function salesV(V,C){
   const rows = all.filter(x=> recvFilter==='all' || (recvFilter==='none' ? (n(x.received)>0 && !x.receivedBy) : x.receivedBy===recvFilter));
   return `<div class="row-head"><div><h2>Sales</h2><p>Profit on each bill is after landed cost, discount and delivery</p></div><div class="controls">
     <select class="sel" id="recvSel" aria-label="Money received by">${[['all','Money with anyone'],['Anita','Money with Anita'],['Neha','Money with Neha'],['Firm','Money in firm account'],['none','Not marked']].map(([k,l])=>`<option value="${k}" ${k===recvFilter?'selected':''}>${l}</option>`).join('')}</select>
-    <div class="seg" role="group" aria-label="View">${[['cards','Cards'],['table','Table']].map(([k,l])=>`<button type="button" class="segb" data-sview="${k}" aria-pressed="${salesView===k}">${l}</button>`).join('')}</div>
+    <div class="seg" role="group" aria-label="View">${[['cards','Cards'],['table','Table']].map(([k,l])=>`<button type="button" class="segb" data-lview="${k}" aria-pressed="${listView===k}">${l}</button>`).join('')}</div>
+    ${rows.length?`<button type="button" class="btn wa" data-pdf="sales">PDF / WhatsApp</button>`:''}
     <button class="btn primary" data-add="sales">+ Sale</button></div></div>
   <div class="kpis">
     <div class="kpi"><span>Received by Anita</span><b>${rs(tot.Anita)}</b></div>
@@ -1284,7 +1558,7 @@ function salesV(V,C){
     <div class="kpi"><span>Firm account</span><b>${rs(tot.Firm)}</b></div>
     ${tot.none>0.5?`<div class="kpi"><span>Not marked yet</span><b style="color:var(--warn)">${rs(tot.none)}</b><em>open these sales and choose who got the money</em></div>`:''}
   </div>
-  ${salesView==='table' ? table(['Date','Party','Items','Net amount','Discount','Profit','Money with','Status'],
+  ${listView==='table' ? table(['Date','Party','Items','Net amount','Discount','Profit','Money with','Status'],
     rows.map(s=>{ const c=C.saleCalc(s); const t=partyType(V,s.partyId);
       const status = c.due>0.5?`<span class="pill warn">Due ${rs(c.due)}</span>`:`<span class="pill good">Paid</span>`;
       return `<tr class="click" data-edit="sales" data-id="${s.id}"><td>${dmy(s.date)}</td><td>${esc(partyName(V,s.partyId))}<div class="sub">${t}</div></td><td>${(s.items||[]).map(it=>`${esc(prodName(C,it.productId))} × ${n(it.qty)}`).join('<br>')}</td><td class="n"><b>${rs(c.net)}</b></td><td class="n">${rs(s.discount)}</td><td class="n" style="color:${c.profit<0?'var(--bad)':'var(--good)'}">${rs(c.profit)}</td><td>${recvPill(s)}</td><td>${status}</td></tr>`; }),
@@ -1293,12 +1567,13 @@ function salesV(V,C){
       const items=s.items||[]; const p0=C.P[items[0]?.productId]||{};
       const status = c.due>0.5?`<span class="pill warn">Due ${rs(c.due)}</span>`:`<span class="pill good">Paid</span>`;
       const qty = items.reduce((a,it)=>a+n(it.qty),0);
-      return `<button type="button" class="scard" data-edit="sales" data-id="${s.id}" aria-label="Sale to ${esc(partyName(V,s.partyId))} on ${dmy(s.date)}">
+      return `<article class="scard" data-edit="sales" data-id="${s.id}" role="button" tabindex="0" aria-label="Sale to ${esc(partyName(V,s.partyId))} on ${dmy(s.date)}">
         <div class="shead"><div class="pimg sthumb" data-img="${esc(p0.imageId||'')}" data-src="${esc(p0.img||'')}">${esc((String(p0.name||'?').trim()||'?')[0])}</div>
           <div class="swho"><b>${esc(partyName(V,s.partyId))}</b><span class="sub">${t} · ${dmy(s.date)}</span></div>${status}</div>
         <ul class="sitems">${items.slice(0,3).map(it=>`<li><span>${esc(prodName(C,it.productId))}</span><b class="num">× ${n(it.qty)}</b></li>`).join('')}${items.length>3?`<li class="sub">+ ${items.length-3} more item${items.length>4?'s':''}</li>`:''}</ul>
         <div class="sfig"><div><span>Net amount</span><b class="num">${rs(c.net)}</b></div><div><span>Profit</span><b class="num" style="color:${c.profit<0?'var(--bad)':'var(--good)'}">${rs(c.profit)}</b></div>${n(s.discount)?`<div><span>Discount</span><b class="num">${rs(s.discount)}</b></div>`:`<div><span>Pieces</span><b class="num">${qty}</b></div>`}</div>
-        <div class="sfoot"><span class="sub">Money with</span>${recvPill(s)}</div></button>`; }).join('')}</div>`
+        <div class="sfoot"><span class="sub">Money with</span>${recvPill(s)}</div>
+        <div class="lacts"><button type="button" class="btn small wa" data-pdf="sale" data-id="${s.id}">Bill PDF / WhatsApp</button></div></article>`; }).join('')}</div>`
   : `<div class="panel empty">${recvFilter==='all'?'No sales yet.':'No sales match this filter.'}</div>`}`;
 }
 function partiesV(V,C){
@@ -1313,7 +1588,7 @@ function partiesV(V,C){
 }
 function partnerBooks(V,C){
   let net=0,cogs=0,costs=0; V.sales.forEach(s=>{const c=C.saleCalc(s); net+=c.net; cogs+=c.cogs; costs+=c.costs;});
-  const exp = V.expenses.reduce((a,e)=>a+n(e.amount),0);
+  const exp = V.expenses.reduce((a,e)=>a+n(e.amount),0) + (V.damages||[]).reduce((a,d)=>a+C.dmgCalc(d).loss,0);
   const profit = net-cogs-costs-exp;
   const shareA = n(settings.shareAnita)/100;
   return PARTNERS.map(pt=>{
@@ -1359,7 +1634,8 @@ function expensesV(V){
     'No expenses in this period.',[2])}`;
 }
 function table(heads, rows, emptyMsg, numCols=[]){
-  return `<div class="tbl-wrap"><table><thead><tr>${heads.map((h,i)=>`<th class="${numCols.includes(i)?'n':''}">${h}</th>`).join('')}</tr></thead><tbody>${rows.length?rows.join(''):`<tr><td colspan="${heads.length}" class="empty">${emptyMsg}</td></tr>`}</tbody></table></div>`;
+  if (listView==='cards' && rows.length) rows = rows.map(r=>{ let i=0; return r.replace(/<td(?=[\s>])/g, ()=>`<td data-label="${esc(String(heads[i++]||'').replace(/<[^>]+>/g,''))}"`); });
+  return `<div class="tbl-wrap ${listView==='cards'?'as-cards':''}"><table><thead><tr>${heads.map((h,i)=>`<th class="${numCols.includes(i)?'n':''}">${h}</th>`).join('')}</tr></thead><tbody>${rows.length?rows.join(''):`<tr><td colspan="${heads.length}" class="empty">${emptyMsg}</td></tr>`}</tbody></table></div>`;
 }
 
 /* ---------- promote ---------- */
@@ -1582,13 +1858,29 @@ function openForm(col, id, presetStage, preset){
       <div class="norate"><div class="row-head"><b style="font-size:13px;color:var(--muted)">ITEMS TO MOVE</b><button type="button" class="btn small" id="addItem">+ Item</button></div><div class="items" id="items">${items.map(it=>itemRow(it,prodOpts)).join('')}</div></div>
       <p class="sub" style="margin:0">Stock given to a reseller stays yours until they sell it. When they sell, use <b>Record sold</b> on their card in Godowns. To take unsold pieces back, move them from the reseller to your godown.</p>
       ${field('note','Notes','textarea',rec.note)}<div class="calc" id="calcBox"></div>`;
+  } else if (col==='damages'){ title = id?'Edit damaged goods':'Record damaged goods';
+    if(!prodOpts.length) return needProducts();
+    const items = rec.items?.length ? rec.items : [{productId:prodOpts[0][0],qty:1}];
+    const sups = supplierList(C);
+    body = `<div class="fgrid">${field('date','Date','date',rec.date||today())}
+      ${field('loc','Where it was','select',rec.loc||'godown',{options:places(V).map(x=>[x.key,x.name])})}
+      ${field('reason','What happened','select',rec.reason||DMG_REASONS[0],{options:DMG_REASONS})}
+      ${field('action','What you will do','select',rec.action||'Write off',{options:DMG_ACTIONS})}</div>
+      <div class="norate"><div class="row-head"><b style="font-size:13px;color:var(--muted)">DAMAGED PIECES</b><button type="button" class="btn small" id="addItem">+ Item</button></div><div class="items" id="items">${items.map(it=>itemRow(it,prodOpts)).join('')}</div></div>
+      <div class="fgrid" id="dmgClaim">
+      <label class="f">Supplier (for a claim)<input name="supplier" list="supList2" value="${esc(rec.supplier||'')}" placeholder="Pick or type a name" autocomplete="off"></label>
+      <datalist id="supList2">${sups.filter(s=>s.key).map(s=>`<option value="${esc(s.name)}"></option>`).join('')}</datalist>
+      ${field('claim','Claim amount ₹','number',rec.claim,{ph:'blank = landed cost'})}
+      ${field('recovered','Money recovered ₹','number',rec.recovered)}</div>
+      <div class="fgrid" id="dmgRepair">${field('repairCost','Repair cost ₹','number',rec.repairCost)}</div>
+      ${field('note','Notes','textarea',rec.note)}<div class="calc" id="calcBox"></div>`;
   } else if (col==='ideas'){ title = id?'Edit idea':'New idea';
     body = `<div class="fgrid">${field('text','Idea','textarea',rec.text)}
       ${field('owner','Who will do it','select',rec.owner||'',{options:[['','Not assigned'],...PARTNERS.map(p=>[p.key,p.name])]})}</div>`;
   }
   form.innerHTML = `<div class="dlg-head"><h3>${title}</h3><button type="button" class="btn small" id="dlgClose">Close</button></div>
     <div class="dlg-body">${body}<p class="sub" id="formErr" style="color:var(--bad);margin:0" hidden></p></div>
-    <div class="dlg-foot"><div>${id?`<button type="button" class="btn danger" id="delBtn">Delete</button>`:''}</div><button type="submit" class="btn primary" id="saveBtn">Save</button></div>`;
+    <div class="dlg-foot"><div class="controls">${id?`<button type="button" class="btn danger" id="delBtn">Delete</button>`:''}${id && ({sales:'sale',purchases:'purchase'})[col] ? `<button type="button" class="btn wa" data-pdf="${({sales:'sale',purchases:'purchase'})[col]}" data-id="${id}">PDF / WhatsApp</button>`:''}${id && col==='products' ? `<button type="button" class="btn" data-journey="${id}">Journey</button>`:''}${id && col==='damages' && rec.action==='Return to supplier' ? `<button type="button" class="btn wa" data-pdf="claim" data-id="${id}">Claim PDF</button>`:''}</div><button type="submit" class="btn primary" id="saveBtn">Save</button></div>`;
   dlg.showModal();
   const ip = document.getElementById('imgPrev');
   if (ip && ip.dataset.img) getPhotoUrl(ip.dataset.img).then(u=>{ if (!ip.isConnected || pendingImg) return; ip.innerHTML = u ? `<img src="${u}" alt="">` : ''; });
@@ -1618,7 +1910,7 @@ function readForm(){
     [['Anita','payAnita'],['Neha','payNeha'],['Firm','payFirm']].forEach(([k,f])=>{ if(n(o[f])>0) o.payments[k]=n(o[f]); delete o[f]; });
     ['productId','qty','rate','paidBy'].forEach(k=>delete o[k]);
   }
-  if (current.col==='sales' || current.col==='purchases' || current.col==='orders' || current.col==='moves'){
+  if (current.col==='sales' || current.col==='purchases' || current.col==='orders' || current.col==='moves' || current.col==='damages'){
     o.items = [...form.querySelectorAll('.item-row')].map(r=>({productId:r.querySelector('[data-k=productId]').value, qty:n(r.querySelector('[data-k=qty]').value), rate:n(r.querySelector('[data-k=rate]').value)})).filter(i=>i.qty>0);
   }
   return o;
@@ -1646,6 +1938,11 @@ function updateCalc(){
   } else if (current.col==='moves'){
     const short = shortAt(o, o.from, 'moves');
     box.innerHTML = `<span>Pieces moving</span><b>${(o.items||[]).reduce((a,i)=>a+n(i.qty),0)}</b><span>${esc(placeName(data,o.from))} → ${esc(placeName(data,o.to))}</span><b></b>${short.map(x=>`<span style="color:var(--bad)">Only ${x.have} of ${esc(x.name)} at ${esc(placeName(data,o.from))}</span><b style="color:var(--bad)">need ${x.want}</b>`).join('')}`;
+  } else if (current.col==='damages'){
+    const C = calc({...data, damages:(data.damages||[]).filter(x=>x.id!==o.id)}); const c = C.dmgCalc(o);
+    const cl = form.querySelector('#dmgClaim'), rp = form.querySelector('#dmgRepair'); if (cl) cl.hidden = o.action!=='Return to supplier'; if (rp) rp.hidden = o.action!=='Repaired';
+    const short = o.action==='Repaired' ? [] : shortAt(o, o.loc||'godown', 'damages');
+    box.innerHTML = short.map(x=>`<span style="color:var(--bad)">Only ${x.have} of ${esc(x.name)} at ${esc(placeName(data,o.loc||'godown'))}</span><b style="color:var(--bad)">damaged ${x.want}</b>`).join('') + `<span>Landed cost of these pieces</span><b>${rs(c.cost)}</b>${o.action==='Return to supplier'?`<span>Still to get from supplier</span><b style="color:var(--warn)">${rs(c.pending)}</b>`:''}<span>Loss counted in profit</span><b style="color:var(--bad)">${rs(c.loss)}</b><span class="sub">${o.action==='Repaired'?'Repaired pieces stay in stock. Only the repair cost is a loss.':'These pieces are taken out of stock.'}</span><span></span>`;
   } else if (current.col==='orders'){
     const tot = orderTotal(o);
     box.innerHTML = `<span>Order value</span><b>${rs(tot)}</b><span>Received so far</span><b>${rs(o.received)}</b><span>Still to collect</span><b>${rs(Math.max(tot-n(o.received),0))}</b>`;
@@ -1726,6 +2023,7 @@ form.addEventListener('submit', async e=>{
     purchases:()=>!o.items.length?'Add at least 1 item with a quantity.': purchCalc(o).due<-0.5?'Payments add up to more than the bill total. Check the amounts.':'', sales:()=>!o.items.length?'Add at least 1 item with a quantity.': n(o.received)>0 && !o.receivedBy ? 'Choose who received the money: Anita, Neha or the firm account.':'',
     moves:()=>!o.items.length?'Add at least 1 item with a quantity.': o.from===o.to?'Choose two different places.': (s=>s.length?`Only ${s[0].have} ${s[0].name} at ${placeName(data,o.from)}. Reduce the quantity or move from another place.`:'')(shortAt(o,o.from,'moves')),
     orders:()=>!o.items.length?'Add at least 1 item with a quantity.': !o.dueDate?'Choose the promised delivery date.': (o.stage==='Paid' && !(n(o.received)>0))?'Enter the amount received to mark this order Paid.': n(o.received)>0 && !o.receivedBy ? 'Choose who received the money: Anita, Neha or the firm account.':'',
+    damages:()=>!o.items.length?'Add at least 1 item with a quantity.': o.action!=='Repaired' && shortAt(o,o.loc||'godown','damages').length ? (x=>`Only ${x.have} ${x.name} at ${placeName(data,o.loc||'godown')}. Choose where the damaged pieces were.`)(shortAt(o,o.loc||'godown','damages')[0]) : '',
     ledger:()=>n(o.amount)>0?'':'Enter an amount.', expenses:()=>n(o.amount)>0?'':'Enter an amount.', ideas:()=>o.text?.trim()?'':'Write the idea.'}[current.col]();
   if (need){ err.textContent=need; err.hidden=false; return; }
   if (current.col==='ideas' && current.isNew) o.created = new Date().toISOString();
@@ -1745,8 +2043,9 @@ form.addEventListener('submit', async e=>{
 });
 
 /* ---------- page events ---------- */
+document.addEventListener('keydown', e=>{ if ((e.key==='Enter'||e.key===' ') && e.target.matches && e.target.matches('[role=button][tabindex]:not(button)')){ e.preventDefault(); e.target.click(); } });
 document.addEventListener('click', async e=>{
-  const t = e.target.closest('button,tr.click,.gtrack,.place'); if(!t) return;
+  const t = e.target.closest('button,tr.click,.gtrack,.place,.lcard,.scard'); if(!t) return;
   if (t.dataset.tab){ tab=t.dataset.tab; try{localStorage.setItem('phd-tab',tab);}catch(er){} render(); window.scrollTo({top:0}); return; }
   if (t.id==='startOwn'){ demo=false; render(); return; }
   if (t.id==='quickSale') return openForm('sales');
@@ -1755,7 +2054,8 @@ document.addEventListener('click', async e=>{
   if (t.id==='photoZipBtn') return photoZip(t);
   if (t.id==='catPdfBtn') return catalogPdf(t);
   if (t.dataset.catauto){ const p=data.products.find(x=>x.id===t.dataset.catauto); if(p && await saveDoc('products',{...p,catRate:''})) toast('Rate set back to automatic'); return; }
-  if (t.dataset.sview){ salesView = t.dataset.sview; try{localStorage.setItem('phd-sview',salesView);}catch(er){} render(); return; }
+  if (t.dataset.lview){ setListView(t.dataset.lview); if (tab==='purchases'){ purchView='list'; try{localStorage.setItem('phd-pview','list');}catch(er){} } render(); return; }
+  if (t.id==='viewBtn'){ setListView(listView==='cards'?'table':'cards'); render(); return; }
   if (t.dataset.pview){ purchView = t.dataset.pview; try{localStorage.setItem('phd-pview',purchView);}catch(er){} render(); return; }
   if (t.id==='xlsPurch') return purchasesExcel(t);
   if (t.dataset.place!=null && !t.dataset.soldAt && !t.dataset.moveFrom){ placeSel = t.dataset.place; render(); return; }
@@ -1769,7 +2069,12 @@ document.addEventListener('click', async e=>{
   if (t.id==='saveGodownName'){ const nm=(document.getElementById('godownNameInp').value||'').trim(); if(nm){ settings={...settings, godownName:nm}; await saveSettings(); render(); toast('Renamed'); } return; }
   if (t.dataset.advance){ if(demo){ toast('This is example data. Start your own books to edit.'); return; } return advanceOrder(t.dataset.advance); }
   if (t.dataset.markDisp){ const u=data.purchases.find(x=>x.id===t.dataset.markDisp); if(u && await saveDoc('purchases',{...u,status:'In transit',dispatchedOn:today()})) toast('Dispatched by supplier. Now on the way.'); return; }
+  if (t.dataset.pdf){ return pdfAction(t.dataset.pdf, t.dataset.id); }
+  if (t.dataset.dmgRecover){ const d=data.damages.find(x=>x.id===t.dataset.dmgRecover); if(!d) return; const c=calc(data).dmgCalc(d); if(await saveDoc('damages',{...d,recovered:n(d.claim)||Math.round(c.cost),recoveredOn:today()})) toast('Claim settled. Loss updated.'); return; }
+  if (t.dataset.dmgFrom){ if(demo){ toast('This is example data. Start your own books to edit.'); return; } const u=data.purchases.map(normPurchase).find(x=>x.id===t.dataset.dmgFrom); if(!u) return; return openForm('damages', null, null, {loc:u.location||'godown', reason:'Broken in transit', action:'Return to supplier', supplier:u.supplier||'', purchaseId:u.id, items:(u.items||[]).map(i=>({productId:i.productId,qty:1}))}); }
   if (t.dataset.flow){ flowSel = t.dataset.flow; render(); return; }
+  if (t.dataset.flowGo){ flowSel = t.dataset.flowGo; tab='flow'; try{localStorage.setItem('phd-tab',tab);}catch(er){} render(); window.scrollTo({top:0}); return; }
+  if (t.dataset.journey){ traceProd = t.dataset.journey; flowSel='stock'; tab='flow'; if (dlg.open) dlg.close(); render(); setTimeout(()=>document.getElementById('traceSel')?.scrollIntoView({block:'center'}),50); return; }
   if (t.dataset.markRecv){ const u=data.purchases.find(x=>x.id===t.dataset.markRecv); if(u && await saveDoc('purchases',{...u,status:'Received',receivedOn:today()})){ const d=purchDelay(u); toast(d.late?`Received ${d.lateBy} day${d.lateBy===1?'':'s'} late. Stock updated.`:'Received. Stock updated.'); } return; }
   if (t.dataset.gnav!=null){ const k=+t.dataset.gnav; ganttStart = k===0 ? null : (ganttStart??(toDay(today())-Math.round(ganttDays*0.3))) + k*Math.round(ganttDays/2); render(); return; }
   if (t.dataset.add) return openForm(t.dataset.add);
@@ -1785,6 +2090,7 @@ document.addEventListener('change', e=>{
   if (e.target.id==='partySel'){ partyFilter=e.target.value; render(); }
   if (e.target.id==='recvSel'){ recvFilter=e.target.value; render(); }
   if (e.target.id==='orderSel'){ orderFilter=e.target.value; render(); }
+  if (e.target.id==='dmgSel'){ dmgFilter=e.target.value; render(); }
   if (e.target.id==='traceSel'){ traceProd=e.target.value; render(); }
   if (e.target.id==='gDays'){ ganttDays=+e.target.value; ganttStart=null; try{localStorage.setItem('phd-gdays',ganttDays);}catch(er){} render(); }
   if (e.target.id==='supSel'){ supFilter=e.target.value; render(); }
@@ -1865,7 +2171,7 @@ async function runImport(btn){
       else { p.img = await shrinkDataUrl(d, 480, .7); delete p.imageId; photoOk++; }
     } catch(e){ photoSkip++; }
   }
-  const all = []; COLS.forEach(c=>(c==='products' ? prods : c==='purchases' ? groupRows(j[c]||[]) : (j[c]||[])).forEach(x=>{ if(x&&x.id) all.push([c,x]); })); (j.orders||[]).forEach(x=>{ if(x&&x.id) all.push(['orders',x]); }); (j.moves||[]).forEach(x=>{ if(x&&x.id) all.push(['moves',x]); });
+  const all = []; COLS.forEach(c=>(c==='products' ? prods : c==='purchases' ? groupRows(j[c]||[]) : (j[c]||[])).forEach(x=>{ if(x&&x.id) all.push([c,x]); })); (j.orders||[]).forEach(x=>{ if(x&&x.id) all.push(['orders',x]); }); (j.moves||[]).forEach(x=>{ if(x&&x.id) all.push(['moves',x]); }); (j.damages||[]).forEach(x=>{ if(x&&x.id) all.push(['damages',x]); });
   let done = 0;
   for (const [c,x] of all){
     if (!(await saveDoc(c,x))) { prog.textContent = `Stopped after ${done} of ${all.length}. Try again to finish.`; btn.disabled=false; return; }
@@ -2121,7 +2427,7 @@ function startBooks(){
   const seen = new Set();
   const done = () => { if (seen.size >= COLS.length+1 && loadedCount===0){ loadedCount=1; demo = COLS.every(c=>!data[c].length); } render(); };
   const onErr = c => e => { seen.add(c); lastErr = (e && e.code) || 'error'; syncLight(); if (e && e.code==='permission-denied' && !isOwnerUser){ stopBooks(); showGate('notmember', me); } else done(); };
-  COLS.forEach(c => unsubs.push(db.collection(c).onSnapshot(snap=>{ const docs=snap.docs.map(d=>({...d.data(),id:d.id})); if (c==='sales'){ data.sales=docs.filter(x=>x.type!=='order'&&x.type!=='move'); data.orders=docs.filter(x=>x.type==='order'); data.moves=docs.filter(x=>x.type==='move'); } else data[c]=docs; if (docs.length) demo=false; seen.add(c); done(); }, onErr(c))));
+  COLS.forEach(c => unsubs.push(db.collection(c).onSnapshot(snap=>{ const docs=snap.docs.map(d=>({...d.data(),id:d.id})); if (c==='sales'){ data.sales=docs.filter(x=>!x.type); data.orders=docs.filter(x=>x.type==='order'); data.moves=docs.filter(x=>x.type==='move'); data.damages=docs.filter(x=>x.type==='damage'); } else data[c]=docs; if (docs.length) demo=false; seen.add(c); done(); }, onErr(c))));
   unsubs.push(db.doc('config/settings').onSnapshot(s=>{ if(s.exists) settings={shareAnita:50,...s.data()}; seen.add('settings'); done(); }, onErr('settings')));
   if (isOwnerUser) unsubs.push(onSnapshot(collection(fs,'members'), s=>{ members = s.docs.map(d=>({id:d.id,...d.data()})); render(); }, ()=>{}));
 }
