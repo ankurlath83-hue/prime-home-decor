@@ -122,6 +122,20 @@ tr.click:hover td{background:var(--surface2)}
 .list .li{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);align-items:center}
 .list .li:last-child{border-bottom:0}
 
+/* sales cards */
+.scards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:14px}
+.scard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;grid-template-rows:auto 1fr auto auto;gap:12px;align-items:start;text-align:left;cursor:pointer;font:inherit;color:inherit;min-width:0}
+.scard:hover,.scard:focus-visible{border-color:var(--faint);outline:none}
+.shead{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center}
+.sthumb{width:44px;height:44px;aspect-ratio:auto;border-radius:10px;font-size:18px}
+.swho{display:grid;min-width:0}.swho b{font-weight:600;overflow-wrap:anywhere;line-height:1.3}
+.sitems{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:14px}
+.sitems li{display:flex;justify-content:space-between;gap:8px}.sitems li span{min-width:0;overflow-wrap:anywhere}
+.sfig{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:10px 0;border-block:1px dashed var(--line)}
+.sfig div{display:grid;gap:2px}.sfig span{font-size:12px;color:var(--muted)}.sfig b{font-size:16px;font-weight:700}
+.sfig div:first-child b{font-size:18px}
+.sfoot{display:flex;justify-content:space-between;align-items:center;gap:8px}
+
 /* products */
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:14px}
 .pcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;text-align:left;padding:0}
@@ -363,7 +377,8 @@ let tab = 'dash';
 try { const t = localStorage.getItem('phd-tab'); if (t && TABS.some(x=>x[0]===t)) tab = t; } catch(e){}
 if (location.hash && TABS.some(x=>x[0]===location.hash.slice(1))) tab = location.hash.slice(1);
 let period = 'month', partyFilter = 'all', stockQ = '';
-let supFilter = 'all', payFilter = 'all', purchPeriod = 'all', purchView = 'bills';
+let supFilter = 'all', payFilter = 'all', purchPeriod = 'all', purchView = 'bills', salesView = 'cards';
+try { if (localStorage.getItem('phd-sview')==='table') salesView = 'table'; } catch(e){}
 let fixPending = false, isOwnerUser = false;
 try { if (localStorage.getItem('phd-pview')==='sheet') purchView = 'sheet'; } catch(e){}
 
@@ -549,7 +564,7 @@ function render(){
   const V = view(), C = calc(V);
   const fn = {dash,stock,godowns:godownsV,catalogue:catalogueV,orders:ordersV,purchases:purchasesV,sales:salesV,parties:partiesV,partners:partnersV,expenses:expensesV,promote:promoteV}[tab];
   main.innerHTML = `<section class="view">${fn(V,C)}</section>`;
-  if (tab==='stock' || tab==='catalogue') hydrateImages();
+  if (tab==='stock' || tab==='catalogue' || tab==='sales') hydrateImages();
 }
 
 function periodSelect(){ return `<select class="sel" id="periodSel" aria-label="Period">${Object.entries(PERIODS).map(([k,l])=>`<option value="${k}" ${k===period?'selected':''}>${l}</option>`).join('')}</select>`; }
@@ -1109,6 +1124,7 @@ function salesV(V,C){
   const rows = all.filter(x=> recvFilter==='all' || (recvFilter==='none' ? (n(x.received)>0 && !x.receivedBy) : x.receivedBy===recvFilter));
   return `<div class="row-head"><div><h2>Sales</h2><p>Profit on each bill is after landed cost, discount and delivery</p></div><div class="controls">
     <select class="sel" id="recvSel" aria-label="Money received by">${[['all','Money with anyone'],['Anita','Money with Anita'],['Neha','Money with Neha'],['Firm','Money in firm account'],['none','Not marked']].map(([k,l])=>`<option value="${k}" ${k===recvFilter?'selected':''}>${l}</option>`).join('')}</select>
+    <div class="seg" role="group" aria-label="View">${[['cards','Cards'],['table','Table']].map(([k,l])=>`<button type="button" class="segb" data-sview="${k}" aria-pressed="${salesView===k}">${l}</button>`).join('')}</div>
     <button class="btn primary" data-add="sales">+ Sale</button></div></div>
   <div class="kpis">
     <div class="kpi"><span>Received by Anita</span><b>${rs(tot.Anita)}</b></div>
@@ -1116,11 +1132,22 @@ function salesV(V,C){
     <div class="kpi"><span>Firm account</span><b>${rs(tot.Firm)}</b></div>
     ${tot.none>0.5?`<div class="kpi"><span>Not marked yet</span><b style="color:var(--warn)">${rs(tot.none)}</b><em>open these sales and choose who got the money</em></div>`:''}
   </div>
-  ${table(['Date','Party','Items','Net amount','Discount','Profit','Money with','Status'],
+  ${salesView==='table' ? table(['Date','Party','Items','Net amount','Discount','Profit','Money with','Status'],
     rows.map(s=>{ const c=C.saleCalc(s); const t=partyType(V,s.partyId);
       const status = c.due>0.5?`<span class="pill warn">Due ${rs(c.due)}</span>`:`<span class="pill good">Paid</span>`;
       return `<tr class="click" data-edit="sales" data-id="${s.id}"><td>${dmy(s.date)}</td><td>${esc(partyName(V,s.partyId))}<div class="sub">${t}</div></td><td>${(s.items||[]).map(it=>`${esc(prodName(C,it.productId))} × ${n(it.qty)}`).join('<br>')}</td><td class="n"><b>${rs(c.net)}</b></td><td class="n">${rs(s.discount)}</td><td class="n" style="color:${c.profit<0?'var(--bad)':'var(--good)'}">${rs(c.profit)}</td><td>${recvPill(s)}</td><td>${status}</td></tr>`; }),
-    recvFilter==='all'?'No sales yet.':'No sales match this filter.',[3,4,5])}`;
+    recvFilter==='all'?'No sales yet.':'No sales match this filter.',[3,4,5])
+  : rows.length ? `<div class="scards">${rows.map(s=>{ const c=C.saleCalc(s); const t=partyType(V,s.partyId);
+      const items=s.items||[]; const p0=C.P[items[0]?.productId]||{};
+      const status = c.due>0.5?`<span class="pill warn">Due ${rs(c.due)}</span>`:`<span class="pill good">Paid</span>`;
+      const qty = items.reduce((a,it)=>a+n(it.qty),0);
+      return `<button type="button" class="scard" data-edit="sales" data-id="${s.id}" aria-label="Sale to ${esc(partyName(V,s.partyId))} on ${dmy(s.date)}">
+        <div class="shead"><div class="pimg sthumb" data-img="${esc(p0.imageId||'')}" data-src="${esc(p0.img||'')}">${esc((String(p0.name||'?').trim()||'?')[0])}</div>
+          <div class="swho"><b>${esc(partyName(V,s.partyId))}</b><span class="sub">${t} · ${dmy(s.date)}</span></div>${status}</div>
+        <ul class="sitems">${items.slice(0,3).map(it=>`<li><span>${esc(prodName(C,it.productId))}</span><b class="num">× ${n(it.qty)}</b></li>`).join('')}${items.length>3?`<li class="sub">+ ${items.length-3} more item${items.length>4?'s':''}</li>`:''}</ul>
+        <div class="sfig"><div><span>Net amount</span><b class="num">${rs(c.net)}</b></div><div><span>Profit</span><b class="num" style="color:${c.profit<0?'var(--bad)':'var(--good)'}">${rs(c.profit)}</b></div>${n(s.discount)?`<div><span>Discount</span><b class="num">${rs(s.discount)}</b></div>`:`<div><span>Pieces</span><b class="num">${qty}</b></div>`}</div>
+        <div class="sfoot"><span class="sub">Money with</span>${recvPill(s)}</div></button>`; }).join('')}</div>`
+  : `<div class="panel empty">${recvFilter==='all'?'No sales yet.':'No sales match this filter.'}</div>`}`;
 }
 function partiesV(V,C){
   const stats={}; V.sales.forEach(s=>{ const c=C.saleCalc(s); const k=s.partyId||'_'; stats[k]=stats[k]||{bought:0,due:0,bills:0,last:''}; stats[k].bought+=c.net; stats[k].due+=c.due; stats[k].bills++; if((s.date||'')>stats[k].last) stats[k].last=s.date; });
@@ -1576,6 +1603,7 @@ document.addEventListener('click', async e=>{
   if (t.id==='photoZipBtn') return photoZip(t);
   if (t.id==='catPdfBtn') return catalogPdf(t);
   if (t.dataset.catauto){ const p=data.products.find(x=>x.id===t.dataset.catauto); if(p && await saveDoc('products',{...p,catRate:''})) toast('Rate set back to automatic'); return; }
+  if (t.dataset.sview){ salesView = t.dataset.sview; try{localStorage.setItem('phd-sview',salesView);}catch(er){} render(); return; }
   if (t.dataset.pview){ purchView = t.dataset.pview; try{localStorage.setItem('phd-pview',purchView);}catch(er){} render(); return; }
   if (t.id==='xlsPurch') return purchasesExcel(t);
   if (t.dataset.place!=null && !t.dataset.soldAt && !t.dataset.moveFrom){ placeSel = t.dataset.place; render(); return; }
