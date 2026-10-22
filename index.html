@@ -136,6 +136,35 @@ tr.click:hover td{background:var(--surface2)}
 .sfig div:first-child b{font-size:18px}
 .sfoot{display:flex;justify-content:space-between;align-items:center;gap:8px}
 
+/* material flow */
+.flow{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;counter-reset:f}
+.fstep{position:relative;display:grid;gap:4px;align-content:start;text-align:left;font:inherit;color:inherit;background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:12px;padding:10px 10px 12px;cursor:pointer;min-width:0}
+.fstep.buy{--c:var(--gold)}.fstep.stock{--c:var(--accent)}.fstep.sell{--c:var(--good)}
+.fstep.on{border-color:var(--c);box-shadow:0 0 0 2px var(--c) inset}
+.fstep:hover{border-color:var(--c)}
+.fstep:not(:last-child)::after{content:"";position:absolute;right:-7px;top:50%;width:6px;height:2px;background:var(--line)}
+.fno{font-size:11px;font-weight:700;color:var(--c)}.flabel{font-size:12.5px;font-weight:600;line-height:1.25;min-height:2.5em}
+.fstep b{font-size:20px;font-weight:700}.fstep b small{font-size:12px;font-weight:500;color:var(--muted)}
+.fstep .pill{justify-self:start;white-space:normal}
+.flegend{display:flex;gap:16px;font-size:12.5px;color:var(--muted);margin:-4px 0 0}
+.flegend i{display:inline-block;width:12px;height:4px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.flegend .buy{background:var(--gold)}.flegend .stock{background:var(--accent)}.flegend .sell{background:var(--good)}
+.frow{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line);align-items:center;flex-wrap:wrap}
+.frow:last-child{border-bottom:0}.fmain{min-width:0;flex:1 1 260px}
+.fact{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.fplaces{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,180px),1fr));gap:10px}
+.fplace{display:grid;gap:4px;text-align:left;font:inherit;color:inherit;background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:10px;cursor:pointer}
+.fplace .pill{justify-self:start}
+.trace{list-style:none;margin:0;padding:0;position:relative}
+.trace::before{content:"";position:absolute;left:79px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.trace li{display:grid;grid-template-columns:70px 1fr auto;gap:22px;align-items:baseline;padding:7px 0;position:relative}
+.trace li::before{content:"";position:absolute;left:75px;top:12px;width:10px;height:10px;border-radius:50%;background:var(--surface);border:2px solid var(--c,var(--muted))}
+.trace .buy,.trace .way{--c:var(--gold)}.trace .in,.trace .move{--c:var(--accent)}.trace .order,.trace .out,.trace .paid{--c:var(--good)}
+.trace .tdate{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.trace .tbody{min-width:0;overflow-wrap:anywhere}
+.tbal{font-size:13px;font-weight:600;white-space:nowrap}
+@media (max-width:1100px){.flow{grid-template-columns:repeat(4,minmax(0,1fr))}.fstep::after{display:none}}
+@media (max-width:560px){.kpis.k4{grid-template-columns:repeat(2,minmax(0,1fr))}.flow{grid-template-columns:repeat(2,minmax(0,1fr))}.trace li{grid-template-columns:58px 1fr;gap:4px 18px}.trace::before{left:67px}.trace li::before{left:63px}.tbal{grid-column:2}}
 /* products */
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:14px}
 .pcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;text-align:left;padding:0}
@@ -353,7 +382,7 @@ const PARTNERS = [
 ];
 const COLS = ['products','purchases','sales','parties','ledger','expenses','ideas'];
 const TABS = [
-  ['dash','Dashboard'],['stock','Stock'],['godowns','Godowns'],['catalogue','Catalogue'],['purchases','Purchases'],['orders','Orders'],['sales','Sales'],
+  ['dash','Dashboard'],['stock','Stock'],['godowns','Godowns'],['flow','Material flow'],['catalogue','Catalogue'],['purchases','Purchases'],['orders','Orders'],['sales','Sales'],
   ['parties','Customers & Resellers'],['partners','Partners'],['expenses','Expenses'],['promote','Promote']
 ];
 const CATS = ['Pooja set','Bowl set','Jaali box','Inlay table','Diwali hamper','Other'];
@@ -469,6 +498,7 @@ function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg
 /* ---------- calculations ---------- */
 /* A purchase is a bill: several items, bill-level charges, and payments split between payers.
    Older single-item rows (productId/qty/rate/paidBy) are read as one-item bills. */
+const onWay = u => u.status==='In transit' || u.status==='Ordered';
 function normPurchase(u){
   if (Array.isArray(u.items)) return {...u, payments: u.payments || {}};
   const t = n(u.qty)*n(u.rate)+n(u.transport)+n(u.handling)+n(u.other);
@@ -502,7 +532,7 @@ function calc(V){
   V.products.forEach(p=>P[p.id]={...p,inQty:0,inCost:0,soldQty:0,soldVal:0});
   const purchases = V.purchases.map(normPurchase);
   Object.values(P).forEach(p=>{ p.transit=0; p.booked=0; p.sold30=0; });
-  purchases.forEach(u=>{ const pc=purchCalc(u); const moving = u.status==='In transit'; (u.items||[]).forEach(it=>{ const p=P[it.productId]; if(!p) return; if (moving){ p.transit+=n(it.qty); return; } p.inQty+=n(it.qty); p.inCost+=pc.landed(it); }); });
+  purchases.forEach(u=>{ const pc=purchCalc(u); const moving = onWay(u); (u.items||[]).forEach(it=>{ const p=P[it.productId]; if(!p) return; if (moving){ p.transit+=n(it.qty); return; } p.inQty+=n(it.qty); p.inCost+=pc.landed(it); }); });
   const since30 = (()=>{ const x=new Date(); x.setDate(x.getDate()-30); return x.toISOString().slice(0,10); })();
   V.sales.forEach(s=>{ if ((s.date||'')>=since30) (s.items||[]).forEach(it=>{ const p=P[it.productId]; if(p) p.sold30+=n(it.qty); }); });
   (V.orders||[]).forEach(o=>{ if (stageIdx(o.stage)<STAGE_DELIVERED) (o.items||[]).forEach(it=>{ const p=P[it.productId]; if(p) p.booked+=n(it.qty); }); });
@@ -512,7 +542,7 @@ function calc(V){
   // where each piece is: opening stock and received purchases start in a place, sales leave from one, moves shift between two
   Object.values(P).forEach(p=>{ p.loc = {godown: n(p.opening)}; });
   const add = (pid,k,q) => { const p=P[pid]; if(!p) return; p.loc[k] = (p.loc[k]||0) + q; };
-  purchases.forEach(u=>{ if (u.status==='In transit') return; (u.items||[]).forEach(it=>add(it.productId, u.location||'godown', n(it.qty))); });
+  purchases.forEach(u=>{ if (onWay(u)) return; (u.items||[]).forEach(it=>add(it.productId, u.location||'godown', n(it.qty))); });
   V.sales.forEach(s=>(s.items||[]).forEach(it=>add(it.productId, s.fromLoc||'godown', -n(it.qty))));
   (V.moves||[]).forEach(m=>(m.items||[]).forEach(it=>{ add(it.productId, m.from||'godown', -n(it.qty)); add(it.productId, m.to||'godown', n(it.qty)); }));
   const saleCalc = s => {
@@ -562,7 +592,7 @@ function render(){
   const main = document.getElementById('main');
   if (mode==='loading'){ main.innerHTML = `<section class="view"><div class="panel empty">Opening the books…</div></section>`; return; }
   const V = view(), C = calc(V);
-  const fn = {dash,stock,godowns:godownsV,catalogue:catalogueV,orders:ordersV,purchases:purchasesV,sales:salesV,parties:partiesV,partners:partnersV,expenses:expensesV,promote:promoteV}[tab];
+  const fn = {dash,stock,godowns:godownsV,flow:flowV,catalogue:catalogueV,orders:ordersV,purchases:purchasesV,sales:salesV,parties:partiesV,partners:partnersV,expenses:expensesV,promote:promoteV}[tab];
   main.innerHTML = `<section class="view">${fn(V,C)}</section>`;
   if (tab==='stock' || tab==='catalogue' || tab==='sales') hydrateImages();
 }
@@ -694,7 +724,7 @@ function itemsShort(C,o){ const it=o.items||[]; return it.slice(0,2).map(x=>`${p
 /* how late a purchase is: in transit past its expected date, or waiting a week with no date */
 function purchDelay(u){
   const t = toDay(today());
-  if (u.status==='In transit'){
+  if (onWay(u)){
     if (u.eta){ const d = t - toDay(u.eta); return {open:true, late:d>0, lateBy:Math.max(d,0), soon:d<=0 && d>=-2, noDate:false, waited:t-(toDay(u.date)??t)}; }
     const w = t-(toDay(u.date)??t); return {open:true, late:false, lateBy:0, soon:false, noDate:w>=7, waited:w};
   }
@@ -835,6 +865,128 @@ function ordersV(V,C){
     <select class="sel" id="gDays" aria-label="Show period">${[[14,'2 weeks'],[30,'1 month'],[90,'3 months']].map(([v,l])=>`<option value="${v}" ${v===ganttDays?'selected':''}>${l}</option>`).join('')}</select></div></div>
     ${ganttHtml(V,C,list)}</div>
   ${smartPanel(V,C,false)}`;
+}
+
+/* ---------- material flow: supplier order → transit → stock → customer order → delivered → paid ---------- */
+let flowSel = 'Ordered', traceProd = '';
+const FLOW = [
+  ['Ordered','Ordered from supplier','buy'],['In transit','On the way','buy'],['stock','In stock','stock'],
+  ['Taken','Customer order taken','sell'],['Packed','Packed','sell'],['Dispatched','Sent to customer','sell'],
+  ['due','Delivered, payment due','sell'],['paid','Paid (last 30 days)','sell']];
+/* for an open customer order: is every item covered by stock, arriving, or still to buy? */
+function orderCover(C,o){
+  let worst = 'ok';
+  (o.items||[]).forEach(it=>{ const p=C.P[it.productId]; if(!p) return;
+    if (p.qty >= p.booked) return;
+    worst = (p.qty + p.transit >= p.booked && worst!=='buy') ? 'coming' : 'buy'; });
+  return worst;
+}
+function flowData(V,C){
+  const t = toDay(today()), since30 = t-30;
+  const pcs = items => (items||[]).reduce((a,i)=>a+n(i.qty),0);
+  const val = items => (items||[]).reduce((a,i)=>a+n(i.qty)*n(i.rate),0);
+  const st = {};
+  ['Ordered','In transit'].forEach(k=>{ const L = C.purchases.filter(u=>(u.status||'Received')===k);
+    st[k] = {list:L, pcs:L.reduce((a,u)=>a+pcs(u.items),0), val:L.reduce((a,u)=>a+val(u.items),0), n:L.length, bad:L.filter(u=>{const d=purchDelay(u); return d.late||d.noDate;}).length}; });
+  let sq=0, sv=0; const kinds={godown:0,home:0,reseller:0};
+  const PL = places(V);
+  Object.values(C.P).forEach(p=>{ Object.entries(p.loc||{}).forEach(([k,q])=>{ if(q<=0) return; sq+=q; sv+=q*p.avgCost; const pl=PL.find(x=>x.key===k); kinds[pl?.kind||'godown']+=q; }); });
+  const short = Object.values(C.P).filter(p=>p.booked>p.qty).length;
+  st.stock = {pcs:sq, val:sv, kinds, n:Object.values(C.P).filter(p=>p.qty>0).length, bad:short};
+  ['Taken','Packed','Dispatched'].forEach(k=>{ const L=(V.orders||[]).filter(o=>(o.stage||'Taken')===k);
+    st[k] = {list:L, pcs:L.reduce((a,o)=>a+pcs(o.items),0), val:L.reduce((a,o)=>a+orderTotal(o),0), n:L.length, bad:L.filter(o=>orderInfo(o).late || (k!=='Dispatched' && orderCover(C,o)!=='ok')).length}; });
+  const dueL = V.sales.filter(s=>C.saleCalc(s).due>0.5);
+  st.due = {list:dueL, pcs:dueL.reduce((a,s)=>a+pcs(s.items),0), val:dueL.reduce((a,s)=>a+C.saleCalc(s).due,0), n:dueL.length, bad:dueL.filter(s=>t-toDay(s.date)>=15).length};
+  const paidL = V.sales.filter(s=>C.saleCalc(s).due<=0.5 && toDay(s.date)>=since30);
+  st.paid = {list:paidL, pcs:paidL.reduce((a,s)=>a+pcs(s.items),0), val:paidL.reduce((a,s)=>a+C.saleCalc(s).net,0), n:paidL.length, bad:0};
+  return st;
+}
+function flowList(V,C,k,st){
+  const t = toDay(today());
+  const items = it => (it||[]).slice(0,3).map(i=>`${esc(prodName(C,i.productId))} × ${n(i.qty)}`).join(', ') + ((it||[]).length>3?` +${it.length-3} more`:'');
+  const row = (title,sub,right,col,id) => `<div class="frow"><div class="fmain"><button type="button" class="linkbtn" data-edit="${col}" data-id="${id}"><b>${title}</b></button><div class="sub">${sub}</div></div><div class="fact">${right}</div></div>`;
+  if (k==='Ordered' || k==='In transit'){
+    const L = [...st[k].list].sort((a,b)=>(a.eta||a.date||'').localeCompare(b.eta||b.date||''));
+    if (!L.length) return `<p class="sub">${k==='Ordered'?'Nothing ordered from suppliers right now. When you place an order, add a purchase with Goods: "Ordered, not dispatched yet".':'Nothing on the way.'}</p>`;
+    return L.map(u=>{ const d=purchDelay(u);
+      const tag = d.late?`<span class="pill bad">${d.lateBy}d late</span>`: d.noDate?`<span class="pill warn">${d.waited} days, no date</span>`: d.soon?'<span class="pill acc">Arriving soon</span>':'';
+      return row(esc(u.supplier||'Supplier'), `${items(u.items)}<br>Ordered ${dmy(u.date)}${u.dispatchedOn?` · dispatched ${dmy(u.dispatchedOn)}`:''}${u.eta?` · expected ${dmy(u.eta)}`:''} · into ${esc(placeName(V,u.location||'godown'))}`,
+        `${tag}${k==='Ordered'?`<button type="button" class="btn small" data-mark-disp="${u.id}">→ Dispatched</button>`:''}<button type="button" class="btn small primary" data-mark-recv="${u.id}">→ Received</button>`, 'purchases', u.id); }).join('');
+  }
+  if (k==='stock'){
+    const PL = places(V);
+    const rows = PL.map(x=>{ let q=0,v=0; Object.values(C.P).forEach(p=>{ const z=p.loc?.[x.key]||0; if(z>0){q+=z; v+=z*p.avgCost;} }); return {x,q,v}; }).filter(r=>r.q);
+    const short = Object.values(C.P).filter(p=>p.booked>p.qty);
+    return `<div class="fplaces">${rows.map(r=>`<button type="button" class="fplace" data-tab="godowns"><span class="pill ${r.x.kind==='reseller'?'gold':r.x.kind==='home'?'plain':'acc'}">${r.x.kind==='reseller'?'Reseller':r.x.kind==='home'?'Partner home':'Godown'}</span><b>${esc(r.x.name)}</b><span class="num">${r.q} pcs · ${rs(r.v)}</span></button>`).join('') || '<p class="sub">No stock anywhere yet.</p>'}</div>
+      ${short.length?`<h4 style="margin:14px 0 6px">Booked more than you have</h4>${short.map(p=>row(esc(p.name), `${p.booked} booked · ${Math.max(p.qty,0)} in stock · ${p.transit} on the way`, p.qty+p.transit>=p.booked?'<span class="pill acc">Arriving covers it</span>':`<span class="pill bad">Buy ${p.booked-p.qty-p.transit}</span>`,'products',p.id)).join('')}`:''}
+      <p class="sub" style="margin:10px 0 0">Move stock between places, or give it to resellers, from the Godowns tab.</p>`;
+  }
+  if (['Taken','Packed','Dispatched'].includes(k)){
+    const L = [...st[k].list].sort((a,b)=>(a.dueDate||'9').localeCompare(b.dueDate||'9'));
+    if (!L.length) return `<p class="sub">No customer order is at this step.</p>`;
+    const next = STAGES[STAGES.indexOf(k)+1];
+    return L.map(o=>{ const f=orderInfo(o), cv = k==='Dispatched'?'ok':orderCover(C,o);
+      const tag = (f.late?`<span class="pill bad">${f.lateBy}d late</span>`: f.soon?'<span class="pill warn">Due soon</span>':'') + (cv==='buy'?'<span class="pill bad">Need to buy stock</span>': cv==='coming'?'<span class="pill acc">Waiting for goods on the way</span>':'');
+      return row(esc(orderName(V,o)), `${items(o.items)} · ${rs(orderTotal(o))}<br>Taken ${dmy(o.orderDate)}${o.dueDate?` · promised ${dmy(o.dueDate)}`:''} · from ${esc(placeName(V,o.fromLoc||'godown'))}`,
+        `${tag}<button type="button" class="btn small primary" data-advance="${o.id}">→ ${STAGE_LABEL[next]}</button>`, 'orders', o.id); }).join('');
+  }
+  const L = [...st[k].list].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  if (!L.length) return `<p class="sub">${k==='due'?'Every sale is fully paid.':'No fully paid sale in the last 30 days.'}</p>`;
+  return L.slice(0,40).map(s=>{ const c=C.saleCalc(s), days=t-toDay(s.date);
+    return row(esc(partyName(V,s.partyId)), `${items(s.items)}<br>${dmy(s.date)} · ${rs(c.net)}${s.fromOrder?' · from an order':''}`,
+      k==='due' ? `<span class="pill ${days>=15?'bad':'warn'}">Due ${rs(c.due)}${days>=15?` · ${days} days`:''}</span>` : `${recvPill(s)}`, 'sales', s.id); }).join('');
+}
+/* every movement of one product, oldest first, with the stock in hand after each step */
+function traceEvents(V,C,pid){
+  const ev = [];
+  const qOf = it => (it||[]).filter(i=>i.productId===pid).reduce((a,i)=>a+n(i.qty),0);
+  const p = C.P[pid]; if (!p) return ev;
+  if (n(p.opening)) ev.push({d:'', k:'in', q:n(p.opening), t:'Opening stock', s:'Main godown'});
+  C.purchases.forEach(u=>{ const q=qOf(u.items); if(!q) return; const who=esc(u.supplier||'supplier');
+    ev.push({d:u.date, k:'buy', t:`Ordered ${q} from ${who}`, s:u.billNo?`Bill ${esc(u.billNo)}`:'', col:'purchases', id:u.id});
+    if (u.dispatchedOn) ev.push({d:u.dispatchedOn, k:'way', t:`${who} dispatched ${q}`, s:u.eta?`expected ${dmy(u.eta)}`:'', col:'purchases', id:u.id});
+    else if (u.status==='In transit') ev.push({d:u.date, k:'way', t:`${q} on the way from ${who}`, s:u.eta?`expected ${dmy(u.eta)}`:'', col:'purchases', id:u.id});
+    if (!onWay(u)) ev.push({d:u.receivedOn||u.date, k:'in', q, t:`Received ${q}`, s:`into ${esc(placeName(V,u.location||'godown'))}${purchDelay(u).cameLate?` · ${purchDelay(u).cameLate} days late`:''}`, col:'purchases', id:u.id});
+  });
+  (V.moves||[]).forEach(m=>{ const q=qOf(m.items); if(q) ev.push({d:m.date, k:'move', t:`Moved ${q}`, s:`${esc(placeName(V,m.from))} → ${esc(placeName(V,m.to))}`, col:'moves', id:m.id}); });
+  (V.orders||[]).forEach(o=>{ const q=qOf(o.items); if(!q) return; const sd=o.stageDates||{}, who=esc(orderName(V,o));
+    ev.push({d:o.orderDate, k:'order', t:`${who} ordered ${q}`, s:o.dueDate?`promised ${dmy(o.dueDate)}`:'', col:'orders', id:o.id});
+    if (sd.Packed) ev.push({d:sd.Packed, k:'order', t:`Packed ${q} for ${who}`, s:'', col:'orders', id:o.id});
+    if (sd.Dispatched) ev.push({d:sd.Dispatched, k:'order', t:`Sent ${q} to ${who}`, s:'', col:'orders', id:o.id});
+    if (sd.Paid) ev.push({d:sd.Paid, k:'paid', t:`${who} paid`, s:'', col:'orders', id:o.id});
+  });
+  V.sales.forEach(s=>{ const q=qOf(s.items); if(!q) return; const c=C.saleCalc(s);
+    ev.push({d:s.date, k:'out', q:-q, t:`${s.fromOrder?'Delivered':'Sold'} ${q} to ${esc(partyName(V,s.partyId))}`, s:`from ${esc(placeName(V,s.fromLoc||'godown'))} · ${c.due>0.5?`due ${rs(c.due)}`:'paid'}`, col:'sales', id:s.id}); });
+  const rank = {buy:0,way:1,in:2,move:3,order:4,out:5,paid:6};
+  ev.sort((a,b)=>(a.d||'').localeCompare(b.d||'') || rank[a.k]-rank[b.k]);
+  let bal = 0; ev.forEach(e=>{ if (e.q){ bal+=e.q; e.bal=bal; } });
+  return ev;
+}
+function flowV(V,C){
+  const st = flowData(V,C);
+  if (!FLOW.some(f=>f[0]===flowSel)) flowSel='Ordered';
+  const cur = FLOW.find(f=>f[0]===flowSel);
+  const prods = [...V.products].sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+  if (!traceProd || !C.P[traceProd]){ const busy=[...prods].sort((a,b)=>{ const A=C.P[a.id],B=C.P[b.id]; return (B.qty+B.transit+B.booked+B.soldQty)-(A.qty+A.transit+A.booked+A.soldQty); }); traceProd = busy[0]?.id || ''; }
+  const ev = traceProd ? traceEvents(V,C,traceProd) : [];
+  const tp = C.P[traceProd];
+  const KIND = {buy:'Ordered',way:'On the way',in:'In stock',move:'Moved',order:'Customer order',out:'Delivered',paid:'Paid'};
+  return `<div class="row-head"><div><h2>Material flow</h2><p>Every piece from the supplier order to the customer's payment. Tap a step to see what is waiting there and move it on.</p></div>
+  <div class="controls"><button class="btn" data-add="purchases">+ Supplier order</button><button class="btn primary" data-add="orders">+ Customer order</button></div></div>
+  <div class="flow" role="list">${FLOW.map(([k,l,g],i)=>{ const x=st[k];
+    return `<button type="button" role="listitem" class="fstep ${g} ${k===flowSel?'on':''}" data-flow="${k}" aria-pressed="${k===flowSel}">
+      <span class="fno">${i+1}</span><span class="flabel">${l}</span>
+      <b class="num">${x.pcs} <small>pcs</small></b>
+      <span class="sub num">${k==='stock'?`${x.n} product${x.n===1?'':'s'} · ${rs(x.val)}`:`${x.n} ${k==='due'||k==='paid'?'sale':k==='Ordered'||k==='In transit'?'bill':'order'}${x.n===1?'':'s'} · ${rs(x.val)}`}</span>
+      ${x.bad?`<span class="pill ${k==='due'||k==='stock'?'warn':'bad'}">${x.bad} ${k==='stock'?'short':k==='due'?'15+ days':'need attention'}</span>`:''}
+    </button>`; }).join('')}</div>
+  <div class="flegend"><span><i class="buy"></i>Buying</span><span><i class="stock"></i>Holding</span><span><i class="sell"></i>Selling</span></div>
+  <div class="panel"><h3>${cur[1]}</h3>${flowList(V,C,flowSel,st)}</div>
+  <div class="panel"><div class="row-head" style="margin-bottom:10px"><div><h3 style="margin:0">Product journey</h3><p class="sub" style="margin:2px 0 0">Every movement of one product, with the pieces in hand after each step</p></div>
+    <select class="sel" id="traceSel" aria-label="Product">${prods.map(p=>`<option value="${p.id}" ${p.id===traceProd?'selected':''}>${esc(p.name)}</option>`).join('')}</select></div>
+    ${tp?`<div class="kpis k4" style="margin-bottom:12px"><div class="kpi"><span>In stock</span><b>${tp.qty}</b></div><div class="kpi"><span>On the way</span><b>${tp.transit}</b></div><div class="kpi"><span>Booked</span><b>${tp.booked}</b></div><div class="kpi"><span>Free to sell</span><b style="color:${tp.free<0?'var(--bad)':'inherit'}">${tp.free}</b></div></div>`:''}
+    ${ev.length?`<ol class="trace">${ev.map(e=>`<li class="${e.k}"><span class="tdate">${e.d?dmy(e.d):'Start'}</span><div class="tbody">${e.col?`<button type="button" class="linkbtn" data-edit="${e.col}" data-id="${e.id}">${e.t}</button>`:e.t}${e.s?`<div class="sub">${e.s}</div>`:''}</div>${e.bal!=null?`<span class="tbal num">${e.q>0?'+':''}${e.q} → ${e.bal}</span>`:''}</li>`).join('')}</ol>`:'<p class="sub">Nothing recorded for this product yet.</p>'}
+  </div>`;
 }
 
 /* ---------- godowns: stock by place ---------- */
@@ -1064,7 +1216,7 @@ function currentPurchaseRows(C){
     if (payFilter==='shared') return n(p.Anita)>0 && n(p.Neha)>0;
     if (payFilter==='due') return pc.due>0.5;
     if (payFilter==='late'){ const d=purchDelay(u); return d.late||d.noDate; }
-    if (payFilter==='transit') return u.status==='In transit';
+    if (payFilter==='transit') return onWay(u);
     if (payFilter!=='all') return n(p[payFilter])>0;
     return true;
   });
@@ -1079,7 +1231,7 @@ function purchasesV(V,C){
     if (payFilter==='shared') return n(p.Anita)>0 && n(p.Neha)>0;
     if (payFilter==='due') return pc.due>0.5;
     if (payFilter==='late'){ const d=purchDelay(u); return d.late||d.noDate; }
-    if (payFilter==='transit') return u.status==='In transit';
+    if (payFilter==='transit') return onWay(u);
     if (payFilter!=='all') return n(p[payFilter])>0;
     return true;
   }).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
@@ -1102,12 +1254,12 @@ function purchasesV(V,C){
     <div class="kpi"><span>Paid by Neha</span><b>${rs(S.N)}</b></div>
     ${S.F>0.5?`<div class="kpi"><span>Paid by firm</span><b>${rs(S.F)}</b></div>`:''}
     <div class="kpi"><span>Unpaid to supplier</span><b style="color:${S.due>0.5?'var(--warn)':'inherit'}">${rs(S.due)}</b></div>
-    ${(()=>{ const L=C.purchases.filter(u=>{const d=purchDelay(u); return d.late||d.noDate;}).length, T=C.purchases.filter(u=>u.status==='In transit').length; return T?`<div class="kpi"><span>Late deliveries</span><b style="color:${L?'var(--bad)':'inherit'}">${L}</b><em>${T} bill${T===1?'':'s'} in transit</em></div>`:''; })()}
+    ${(()=>{ const L=C.purchases.filter(u=>{const d=purchDelay(u); return d.late||d.noDate;}).length, T=C.purchases.filter(onWay).length; return T?`<div class="kpi"><span>Late deliveries</span><b style="color:${L?'var(--bad)':'inherit'}">${L}</b><em>${T} bill${T===1?'':'s'} on the way</em></div>`:''; })()}
   </div>
   ${purchView==='sheet' ? statementHTML(rows,C,S) : table(['Date','Supplier','Items','Items value','Charges','Bill total','Paid by','Status'],
     rows.map(u=>{ const pc=purchCalc(u); const it=u.items||[];
       const list = it.slice(0,3).map(i=>`${esc(prodName(C,i.productId))} <span class="sub">${n(i.qty)} × ${rs(i.rate)}</span>`).join('<br>') + (it.length>3?`<div class="sub">and ${it.length-3} more</div>`:'');
-      const dl = purchDelay(u); const status = (u.status==='In transit'?`<span class="pill ${dl.late?'bad':dl.noDate?'warn':'acc'}">${dl.late?`${dl.lateBy} day${dl.lateBy===1?'':'s'} late`:dl.noDate?`In transit ${dl.waited} days, no date`:`In transit${u.eta?` · due ${dmy(u.eta)}`:''}`}</span> <button type="button" class="btn small" data-mark-recv="${u.id}">Mark received</button><br>`:'') + (dl.cameLate?`<span class="pill plain">Came ${dl.cameLate}d late</span> `:'') + (pc.due>0.5?`<span class="pill warn">Due ${rs(pc.due)}</span>`: pc.due<-0.5?`<span class="pill bad">Overpaid ${rs(-pc.due)}</span>`:`<span class="pill good">Paid</span>`);
+      const dl = purchDelay(u); const status = (onWay(u)?`<span class="pill ${dl.late?'bad':dl.noDate?'warn':'acc'}">${dl.late?`${dl.lateBy} day${dl.lateBy===1?'':'s'} late`:dl.noDate?`${u.status==='Ordered'?'Ordered':'In transit'} ${dl.waited} days, no date`:`${u.status==='Ordered'?'Ordered, not dispatched':'In transit'}${u.eta?` · due ${dmy(u.eta)}`:''}`}</span> ${u.status==='Ordered'?`<button type="button" class="btn small" data-mark-disp="${u.id}">Mark dispatched</button> `:''}<button type="button" class="btn small" data-mark-recv="${u.id}">Mark received</button><br>`:'') + (dl.cameLate?`<span class="pill plain">Came ${dl.cameLate}d late</span> `:'') + (pc.due>0.5?`<span class="pill warn">Due ${rs(pc.due)}</span>`: pc.due<-0.5?`<span class="pill bad">Overpaid ${rs(-pc.due)}</span>`:`<span class="pill good">Paid</span>`);
       return `<tr class="click" data-edit="purchases" data-id="${u.id}"><td>${dmy(u.date)}</td><td><b>${esc(u.supplier||'')}</b>${u.billNo?`<div class="sub">Bill ${esc(u.billNo)}</div>`:''}</td><td>${list}</td><td class="n">${rs(pc.itemsVal)}</td><td class="n">${rs(pc.charges)}</td><td class="n"><b>${rs(pc.total)}</b><div class="sub">${pc.qty} pcs</div></td><td>${payPills(u)}</td><td>${status}</td></tr>`; }),
     'No purchase bills match these filters.',[3,4,5])}`;
 }
@@ -1355,7 +1507,7 @@ function openForm(col, id, presetStage, preset){
       <label class="f">Supplier<input name="supplier" id="f-supplier" list="supList" value="${esc(supPre)}" placeholder="Pick or type a name" autocomplete="off"></label>
       <datalist id="supList">${sups.filter(s=>s.key).map(s=>`<option value="${esc(s.name)}"></option>`).join('')}</datalist>
       ${field('billNo','Bill no. (optional)','text',b.billNo)}
-      ${field('status','Goods','select',b.status||'Received',{options:[['Received','Received in godown'],['In transit','On the way (in transit)']]})}
+      ${field('status','Goods','select',b.status||'Received',{options:[['Received','Received in godown'],['In transit','On the way (in transit)'],['Ordered','Ordered, not dispatched yet']]})}
       ${field('eta','Expected to arrive','date',b.eta)}
       ${field('location','Goes into','select',b.location||'godown',{options:places(V).filter(x=>x.kind!=='reseller').map(x=>[x.key,x.name])})}</div>
       <div><div class="row-head"><b style="font-size:13px;color:var(--muted)">ITEMS ON THIS BILL</b><button type="button" class="btn small" id="addItem">+ Item</button></div><div class="items" id="items">${items.map(it=>itemRow(it,prodOpts)).join('')}</div></div>
@@ -1584,7 +1736,7 @@ form.addEventListener('submit', async e=>{
       catch(er){ toast(er?.code==='too_large'?'Photo is too large.':'Photo could not be uploaded. The product is saved without it.'); }
     } else if (pendingImg.small){ o.img = pendingImg.small; }
   }
-  if (current.col==='purchases'){ if (o.status==='Received' && current.rec.status==='In transit' && !o.receivedOn) o.receivedOn = today(); if (o.status==='In transit') delete o.receivedOn; }
+  if (current.col==='purchases'){ if (o.status==='Received' && onWay(current.rec||{}) && !o.receivedOn) o.receivedOn = today(); if (onWay(o)) delete o.receivedOn; if (o.status==='In transit' && !o.dispatchedOn) o.dispatchedOn = current.rec?.status==='Ordered' ? today() : (o.date||today()); if (o.status==='Ordered') delete o.dispatchedOn; }
   if (current.col==='orders'){ o.stageDates = {...(o.stageDates||{})}; STAGES.slice(0, stageIdx(o.stage)+1).forEach(x=>{ if(!o.stageDates[x]) o.stageDates[x] = x==='Taken' ? (o.orderDate||today()) : today(); }); STAGES.slice(stageIdx(o.stage)+1).forEach(x=>delete o.stageDates[x]); }
   const ok = await saveDoc(current.col, o);
   if (ok && current.col==='orders') await syncOrderSale(o);
@@ -1616,6 +1768,8 @@ document.addEventListener('click', async e=>{
   if (t.id==='renameGodown'){ const cur = settings.godownName||'Main godown'; const pnl = t.closest('.panel'); pnl.querySelector('.row-head').innerHTML = `<div class="controls" style="flex:1"><input class="search" id="godownNameInp" value="${esc(cur)}" aria-label="Main godown name" style="flex:1;min-width:180px"><button type="button" class="btn small primary" id="saveGodownName">Save</button></div>`; document.getElementById('godownNameInp').focus(); return; }
   if (t.id==='saveGodownName'){ const nm=(document.getElementById('godownNameInp').value||'').trim(); if(nm){ settings={...settings, godownName:nm}; await saveSettings(); render(); toast('Renamed'); } return; }
   if (t.dataset.advance){ if(demo){ toast('This is example data. Start your own books to edit.'); return; } return advanceOrder(t.dataset.advance); }
+  if (t.dataset.markDisp){ const u=data.purchases.find(x=>x.id===t.dataset.markDisp); if(u && await saveDoc('purchases',{...u,status:'In transit',dispatchedOn:today()})) toast('Dispatched by supplier. Now on the way.'); return; }
+  if (t.dataset.flow){ flowSel = t.dataset.flow; render(); return; }
   if (t.dataset.markRecv){ const u=data.purchases.find(x=>x.id===t.dataset.markRecv); if(u && await saveDoc('purchases',{...u,status:'Received',receivedOn:today()})){ const d=purchDelay(u); toast(d.late?`Received ${d.lateBy} day${d.lateBy===1?'':'s'} late. Stock updated.`:'Received. Stock updated.'); } return; }
   if (t.dataset.gnav!=null){ const k=+t.dataset.gnav; ganttStart = k===0 ? null : (ganttStart??(toDay(today())-Math.round(ganttDays*0.3))) + k*Math.round(ganttDays/2); render(); return; }
   if (t.dataset.add) return openForm(t.dataset.add);
@@ -1631,6 +1785,7 @@ document.addEventListener('change', e=>{
   if (e.target.id==='partySel'){ partyFilter=e.target.value; render(); }
   if (e.target.id==='recvSel'){ recvFilter=e.target.value; render(); }
   if (e.target.id==='orderSel'){ orderFilter=e.target.value; render(); }
+  if (e.target.id==='traceSel'){ traceProd=e.target.value; render(); }
   if (e.target.id==='gDays'){ ganttDays=+e.target.value; ganttStart=null; try{localStorage.setItem('phd-gdays',ganttDays);}catch(er){} render(); }
   if (e.target.id==='supSel'){ supFilter=e.target.value; render(); }
   if (e.target.id==='paySel'){ payFilter=e.target.value; render(); }
