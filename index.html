@@ -202,7 +202,10 @@ tr.click:hover td{background:var(--surface2)}
 @media (max-width:560px){.kpis.k4{grid-template-columns:repeat(2,minmax(0,1fr))}.flow{grid-template-columns:repeat(2,minmax(0,1fr))}.trace li{grid-template-columns:58px 1fr;gap:4px 18px}.trace::before{left:67px}.trace li::before{left:63px}.tbal{grid-column:2}}
 /* products */
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:14px}
-.pcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;text-align:left;padding:0}
+.pcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;text-align:left;padding:0;color:inherit}
+.pcard .lacts{margin-top:4px}.pcard:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.li.buyer{align-items:flex-start;flex-wrap:wrap}.li.buyer>span:first-child{flex:1 1 200px;min-width:0}.li.buyer .controls{gap:6px}
+a.btn{text-decoration:none}
 .pcard:hover{border-color:var(--faint)}
 .pimg{aspect-ratio:4/3;max-width:100%;background:linear-gradient(135deg,var(--surface2),var(--line));display:grid;place-items:center;color:var(--faint);font-family:var(--display);font-size:30px;overflow:hidden}
 .pimg img{width:100%;height:100%;object-fit:cover}
@@ -443,7 +446,7 @@ let tab = 'dash';
 try { const t = localStorage.getItem('phd-tab'); if (t && TABS.some(x=>x[0]===t)) tab = t; } catch(e){}
 if (location.hash && TABS.some(x=>x[0]===location.hash.slice(1))) tab = location.hash.slice(1);
 let period = 'month', partyFilter = 'all', stockQ = '';
-let supFilter = 'all', payFilter = 'all', purchPeriod = 'all', purchView = 'list', listView = 'cards';
+let supFilter = 'all', payFilter = 'all', purchPeriod = 'all', purchView = 'list', listView = 'cards', partySalesFilter = '';
 try { if (localStorage.getItem('phd-view')==='table') listView = 'table'; } catch(e){}
 let fixPending = false, isOwnerUser = false;
 try { if (localStorage.getItem('phd-pview')==='sheet') purchView = 'sheet'; } catch(e){}
@@ -729,15 +732,54 @@ function stock(V,C){
   <div class="controls"><input class="search" id="stockQ" placeholder="Search products" value="${esc(stockQ)}" aria-label="Search products">${downloads && !demo ? `<button class="btn" id="photoZipBtn">Download all photos</button>`:''}<button class="btn primary" data-add="products">+ Product</button></div></div>
   ${list.length? `<div class="cards">${list.map(p=>{
     const m = n(p.price)>0 ? Math.round((n(p.price)-p.avgCost)/n(p.price)*100) : 0;
-    return `<button type="button" class="pcard" data-edit="products" data-id="${p.id}">
+    const nb = new Set(V.sales.filter(s=>(s.items||[]).some(i=>i.productId===p.id)).map(s=>s.partyId||'_')).size;
+    return `<article class="pcard" data-edit="products" data-id="${p.id}" role="button" tabindex="0" aria-label="Edit ${esc(p.name)}">
       <div class="pimg" data-img="${esc(p.imageId||'')}" data-src="${esc(p.img||'')}">${esc((p.name||'?')[0])}</div>
       <div class="pbody"><div class="pmeta"><span class="pill plain">${esc(p.category||'Other')}</span>${stockPill(p)}</div>
       <h4>${esc(p.name)}</h4>
       <div class="pmeta"><span>Retail <b>${rs(p.price)}</b></span><span>Reseller <b>${rs(p.resellerPrice)}</b></span></div>
       <div class="pmeta"><span>Landed cost <b>${rs(p.avgCost)}</b></span><span>Margin <b>${m}%</b></span></div>
       ${(()=>{ const at = Object.entries(p.loc||{}).filter(([k,q])=>q); if (!at.length || (at.length===1 && at[0][0]==='godown')) return ''; return `<div class="sub">${at.map(([k,q])=>`${esc(placeName(V,k))} ${q}`).join(' · ')}</div>`; })()}
-      ${(p.booked||p.transit)?`<div class="pmeta">${p.booked?`<span class="pill gold">${p.booked} booked</span>`:'<span></span>'}${p.transit?`<span class="pill acc">${p.transit} in transit</span>`:''}</div>`:''}</div></button>`; }).join('')}</div>`
+      ${(p.booked||p.transit)?`<div class="pmeta">${p.booked?`<span class="pill gold">${p.booked} booked</span>`:'<span></span>'}${p.transit?`<span class="pill acc">${p.transit} in transit</span>`:''}</div>`:''}
+      <div class="lacts"><button type="button" class="btn small" data-buyers="${p.id}">Who bought${nb?` (${nb})`:''}</button><button type="button" class="btn small" data-journey="${p.id}">Journey</button></div></div></article>`; }).join('')}</div>`
   : `<div class="panel empty">No products yet. Add your first product with a photo, price and reseller price.</div>`}`;
+}
+/* ---------- who bought a product ---------- */
+function buyersOf(V,C,pid){
+  const by = {}, bills = [];
+  V.sales.forEach(s=>{ const its=(s.items||[]).filter(i=>i.productId===pid); if(!its.length) return;
+    const q=its.reduce((a,i)=>a+n(i.qty),0), amt=its.reduce((a,i)=>a+n(i.qty)*n(i.rate),0);
+    const k=s.partyId||'_'; const b=by[k]=by[k]||{partyId:s.partyId||'',qty:0,amt:0,bills:0,last:'',due:0};
+    b.qty+=q; b.amt+=amt; b.bills++; if((s.date||'')>b.last) b.last=s.date||''; const d=C.saleCalc(s).due; if(d>0.5) b.due+=d;
+    bills.push({s,q,rate:q?amt/q:0}); });
+  const list = Object.values(by).sort((a,b)=>b.qty-a.qty || (b.last||'').localeCompare(a.last||''));
+  bills.sort((a,b)=>(b.s.date||'').localeCompare(a.s.date||''));
+  const booked = (V.orders||[]).filter(o=>stageIdx(o.stage)<STAGE_DELIVERED).map(o=>({o,q:(o.items||[]).filter(i=>i.productId===pid).reduce((a,i)=>a+n(i.qty),0)})).filter(x=>x.q);
+  const held = places(V).filter(x=>x.kind==='reseller').map(x=>({x,q:C.P[pid]?.loc?.[x.key]||0})).filter(r=>r.q>0);
+  return {list,bills,booked,held};
+}
+function showBuyers(pid){
+  const V = view(), C = calc(V), p = C.P[pid]; if (!p) return;
+  const B = buyersOf(V,C,pid);
+  const pq = B.list.reduce((a,b)=>a+b.qty,0), amt = B.list.reduce((a,b)=>a+b.amt,0);
+  const party = id => V.parties.find(x=>x.id===id) || {};
+  const wa = (ph, txt) => { const num = waNumber(ph); return num ? `<a class="btn small wa" href="https://wa.me/${num}?text=${encodeURIComponent(txt)}" target="_blank" rel="noopener">WhatsApp</a>` : ''; };
+  current = null;
+  form.innerHTML = `<div class="dlg-head"><h3>Who bought ${esc(p.name)}</h3><button type="button" class="btn small" id="dlgClose">Close</button></div>
+  <div class="dlg-body">
+    <div class="kpis k4"><div class="kpi"><span>Buyers</span><b>${B.list.length}</b></div><div class="kpi"><span>Pieces sold</span><b>${pq}</b></div><div class="kpi"><span>Sales value</span><b>${rs(amt)}</b></div><div class="kpi"><span>In stock</span><b>${p.qty}</b></div></div>
+    ${B.list.length ? `<div class="list">${B.list.map(b=>{ const pt=party(b.partyId); const nm = b.partyId ? (pt.name||'Deleted party') : 'Walk-in customers';
+      return `<div class="li buyer"><span><b>${esc(nm)}</b>${pt.type?` <span class="pill ${pt.type==='Reseller'?'gold':'acc'}">${pt.type}</span>`:''}
+        <div class="sub">${b.qty} pcs · ${rs(b.amt)} · ${b.bills} bill${b.bills===1?'':'s'} · last ${dmy(b.last)}${pt.phone?` · <span class="num">${esc(pt.phone)}</span>`:''}</div>
+        ${b.due>0.5?`<span class="pill warn">Due ${rs(b.due)} on these bills</span>`:''}</span>
+        <span class="controls">${wa(pt.phone, `Namaste ${pt.name||''}, ${p.name} from Prime Home Decor is available again. Reply to order.`)}${b.partyId?`<button type="button" class="btn small" data-party-sales="${b.partyId}">Their bills</button>`:''}</span></div>`; }).join('')}</div>`
+      : `<p class="sub">Nobody has bought this item yet.</p>`}
+    ${B.booked.length?`<h4 style="margin:6px 0 0">Booked, not delivered yet</h4><div class="list">${B.booked.map(x=>`<div class="li"><span><button type="button" class="linkbtn" data-edit="orders" data-id="${x.o.id}">${esc(orderName(V,x.o))}</button><div class="sub">${STAGE_LABEL[x.o.stage||'Taken']}${x.o.dueDate?` · promised ${dmy(x.o.dueDate)}`:''}</div></span><b>${x.q} pcs</b></div>`).join('')}</div>`:''}
+    ${B.held.length?`<h4 style="margin:6px 0 0">With resellers, not sold yet</h4><div class="list">${B.held.map(r=>`<div class="li"><span>${esc(r.x.name)}</span><b>${r.q} pcs</b></div>`).join('')}</div>`:''}
+    ${B.bills.length?`<h4 style="margin:6px 0 0">Every bill</h4><div class="list">${B.bills.map(x=>`<div class="li"><span><button type="button" class="linkbtn" data-edit="sales" data-id="${x.s.id}">${esc(partyName(V,x.s.partyId))}</button><div class="sub">${dmy(x.s.date)}${x.s.fromOrder?' · from an order':''}</div></span><span class="num">${x.q} × ${rs(x.rate)}</span></div>`).join('')}</div>`:''}
+  </div>
+  <div class="dlg-foot"><button type="button" class="btn" data-journey="${pid}">Journey</button><button type="button" class="btn primary" data-edit="products" data-id="${pid}">Edit product</button></div>`;
+  if (!dlg.open) dlg.showModal();
 }
 function hydrateImages(){
   document.querySelectorAll('.pimg').forEach(el=>{
@@ -1417,7 +1459,7 @@ function makeListPdf(kind){
   const V = view(), C = calc(V); const {jsPDF} = window.jspdf;
   const doc = new jsPDF({unit:'mm', format:'a4'}); const W=210, H=297, M=12;
   if (kind==='sales'){
-    const rows = [...V.sales].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).filter(x=> recvFilter==='all' || (recvFilter==='none' ? (n(x.received)>0 && !x.receivedBy) : x.receivedBy===recvFilter));
+    const rows = [...V.sales].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).filter(x=> (!partySalesFilter || x.partyId===partySalesFilter) && (recvFilter==='all' || (recvFilter==='none' ? (n(x.received)>0 && !x.receivedBy) : x.receivedBy===recvFilter)));
     let y = pdfHead(doc, W, M, 'SALES STATEMENT', `${rows.length} bills · made ${dmy(today())}`);
     let net=0, due=0;
     y = pdfTable(doc, y, M, W, H, [{h:'Date',w:16},{h:'Bill no',w:22},{h:'Party',w:30},{h:'Items',w:52},{h:'Net',w:18,a:'r'},{h:'Due',w:16,a:'r'},{h:'Money with',w:18}],
@@ -1546,12 +1588,13 @@ function recvPill(s){
 function salesV(V,C){
   const all=[...V.sales].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   const tot={Anita:0,Neha:0,Firm:0,none:0}; all.forEach(x=>{ if(n(x.received)>0) tot[x.receivedBy||'none']+=n(x.received); });
-  const rows = all.filter(x=> recvFilter==='all' || (recvFilter==='none' ? (n(x.received)>0 && !x.receivedBy) : x.receivedBy===recvFilter));
+  const rows = all.filter(x=> (!partySalesFilter || x.partyId===partySalesFilter) && (recvFilter==='all' || (recvFilter==='none' ? (n(x.received)>0 && !x.receivedBy) : x.receivedBy===recvFilter)));
   return `<div class="row-head"><div><h2>Sales</h2><p>Profit on each bill is after landed cost, discount and delivery</p></div><div class="controls">
     <select class="sel" id="recvSel" aria-label="Money received by">${[['all','Money with anyone'],['Anita','Money with Anita'],['Neha','Money with Neha'],['Firm','Money in firm account'],['none','Not marked']].map(([k,l])=>`<option value="${k}" ${k===recvFilter?'selected':''}>${l}</option>`).join('')}</select>
     <div class="seg" role="group" aria-label="View">${[['cards','Cards'],['table','Table']].map(([k,l])=>`<button type="button" class="segb" data-lview="${k}" aria-pressed="${listView===k}">${l}</button>`).join('')}</div>
     ${rows.length?`<button type="button" class="btn wa" data-pdf="sales">PDF / WhatsApp</button>`:''}
     <button class="btn primary" data-add="sales">+ Sale</button></div></div>
+  ${partySalesFilter?`<div class="banner"><p>Showing only the bills of <b>${esc(partyName(V,partySalesFilter))}</b> (${rows.length}).</p><button type="button" class="btn small" id="clearPartySales">Show all sales</button></div>`:''}
   <div class="kpis">
     <div class="kpi"><span>Received by Anita</span><b>${rs(tot.Anita)}</b></div>
     <div class="kpi"><span>Received by Neha</span><b>${rs(tot.Neha)}</b></div>
@@ -1880,7 +1923,7 @@ function openForm(col, id, presetStage, preset){
   }
   form.innerHTML = `<div class="dlg-head"><h3>${title}</h3><button type="button" class="btn small" id="dlgClose">Close</button></div>
     <div class="dlg-body">${body}<p class="sub" id="formErr" style="color:var(--bad);margin:0" hidden></p></div>
-    <div class="dlg-foot"><div class="controls">${id?`<button type="button" class="btn danger" id="delBtn">Delete</button>`:''}${id && ({sales:'sale',purchases:'purchase'})[col] ? `<button type="button" class="btn wa" data-pdf="${({sales:'sale',purchases:'purchase'})[col]}" data-id="${id}">PDF / WhatsApp</button>`:''}${id && col==='products' ? `<button type="button" class="btn" data-journey="${id}">Journey</button>`:''}${id && col==='damages' && rec.action==='Return to supplier' ? `<button type="button" class="btn wa" data-pdf="claim" data-id="${id}">Claim PDF</button>`:''}</div><button type="submit" class="btn primary" id="saveBtn">Save</button></div>`;
+    <div class="dlg-foot"><div class="controls">${id?`<button type="button" class="btn danger" id="delBtn">Delete</button>`:''}${id && ({sales:'sale',purchases:'purchase'})[col] ? `<button type="button" class="btn wa" data-pdf="${({sales:'sale',purchases:'purchase'})[col]}" data-id="${id}">PDF / WhatsApp</button>`:''}${id && col==='products' ? `<button type="button" class="btn" data-buyers="${id}">Who bought</button><button type="button" class="btn" data-journey="${id}">Journey</button>`:''}${id && col==='damages' && rec.action==='Return to supplier' ? `<button type="button" class="btn wa" data-pdf="claim" data-id="${id}">Claim PDF</button>`:''}</div><button type="submit" class="btn primary" id="saveBtn">Save</button></div>`;
   dlg.showModal();
   const ip = document.getElementById('imgPrev');
   if (ip && ip.dataset.img) getPhotoUrl(ip.dataset.img).then(u=>{ if (!ip.isConnected || pendingImg) return; ip.innerHTML = u ? `<img src="${u}" alt="">` : ''; });
@@ -2045,7 +2088,7 @@ form.addEventListener('submit', async e=>{
 /* ---------- page events ---------- */
 document.addEventListener('keydown', e=>{ if ((e.key==='Enter'||e.key===' ') && e.target.matches && e.target.matches('[role=button][tabindex]:not(button)')){ e.preventDefault(); e.target.click(); } });
 document.addEventListener('click', async e=>{
-  const t = e.target.closest('button,tr.click,.gtrack,.place,.lcard,.scard'); if(!t) return;
+  const t = e.target.closest('button,tr.click,.gtrack,.place,.lcard,.scard,.pcard'); if(!t) return;
   if (t.dataset.tab){ tab=t.dataset.tab; try{localStorage.setItem('phd-tab',tab);}catch(er){} render(); window.scrollTo({top:0}); return; }
   if (t.id==='startOwn'){ demo=false; render(); return; }
   if (t.id==='quickSale') return openForm('sales');
@@ -2069,6 +2112,9 @@ document.addEventListener('click', async e=>{
   if (t.id==='saveGodownName'){ const nm=(document.getElementById('godownNameInp').value||'').trim(); if(nm){ settings={...settings, godownName:nm}; await saveSettings(); render(); toast('Renamed'); } return; }
   if (t.dataset.advance){ if(demo){ toast('This is example data. Start your own books to edit.'); return; } return advanceOrder(t.dataset.advance); }
   if (t.dataset.markDisp){ const u=data.purchases.find(x=>x.id===t.dataset.markDisp); if(u && await saveDoc('purchases',{...u,status:'In transit',dispatchedOn:today()})) toast('Dispatched by supplier. Now on the way.'); return; }
+  if (t.id==='clearPartySales'){ partySalesFilter=''; render(); return; }
+  if (t.dataset.buyers){ return showBuyers(t.dataset.buyers); }
+  if (t.dataset.partySales){ const pid=t.dataset.partySales; if (dlg.open) dlg.close(); tab='sales'; recvFilter='all'; partySalesFilter=pid; render(); window.scrollTo({top:0}); return; }
   if (t.dataset.pdf){ return pdfAction(t.dataset.pdf, t.dataset.id); }
   if (t.dataset.dmgRecover){ const d=data.damages.find(x=>x.id===t.dataset.dmgRecover); if(!d) return; const c=calc(data).dmgCalc(d); if(await saveDoc('damages',{...d,recovered:n(d.claim)||Math.round(c.cost),recoveredOn:today()})) toast('Claim settled. Loss updated.'); return; }
   if (t.dataset.dmgFrom){ if(demo){ toast('This is example data. Start your own books to edit.'); return; } const u=data.purchases.map(normPurchase).find(x=>x.id===t.dataset.dmgFrom); if(!u) return; return openForm('damages', null, null, {loc:u.location||'godown', reason:'Broken in transit', action:'Return to supplier', supplier:u.supplier||'', purchaseId:u.id, items:(u.items||[]).map(i=>({productId:i.productId,qty:1}))}); }
