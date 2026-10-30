@@ -1459,7 +1459,7 @@ function makeListPdf(kind){
   const V = view(), C = calc(V); const {jsPDF} = window.jspdf;
   const doc = new jsPDF({unit:'mm', format:'a4'}); const W=210, H=297, M=12;
   if (kind==='sales'){
-    const rows = [...V.sales].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).filter(x=> (!partySalesFilter || x.partyId===partySalesFilter) && (recvFilter==='all' || (recvFilter==='none' ? (n(x.received)>0 && !x.receivedBy) : x.receivedBy===recvFilter)));
+    const rows = sortSales([...V.sales].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).filter(x=> (!partySalesFilter || x.partyId===partySalesFilter) && saleMatch(x,C)),C);
     let y = pdfHead(doc, W, M, 'SALES STATEMENT', `${rows.length} bills · made ${dmy(today())}`);
     let net=0, due=0;
     y = pdfTable(doc, y, M, W, H, [{h:'Date',w:16},{h:'Bill no',w:22},{h:'Party',w:30},{h:'Items',w:52},{h:'Net',w:18,a:'r'},{h:'Due',w:16,a:'r'},{h:'Money with',w:18}],
@@ -1579,6 +1579,14 @@ function purchasesV(V,C){
     'No purchase bills match these filters.',[3,4,5])}`;
 }
 let recvFilter = 'all';
+function saleMatch(x,C){
+  if (recvFilter==='all') return true;
+  if (recvFilter==='due') return C.saleCalc(x).due>0.5;
+  if (recvFilter==='paid') return C.saleCalc(x).due<=0.5;
+  if (recvFilter==='none') return n(x.received)>0 && !x.receivedBy;
+  return x.receivedBy===recvFilter;
+}
+function sortSales(rows,C){ return recvFilter==='due' ? rows.sort((a,b)=>C.saleCalc(b).due-C.saleCalc(a).due) : rows; }
 function recvPill(s){
   if (!(n(s.received)>0)) return '<span class="sub">Nothing received</span>';
   const k = s.receivedBy;
@@ -1588,14 +1596,17 @@ function recvPill(s){
 function salesV(V,C){
   const all=[...V.sales].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   const tot={Anita:0,Neha:0,Firm:0,none:0}; all.forEach(x=>{ if(n(x.received)>0) tot[x.receivedBy||'none']+=n(x.received); });
-  const rows = all.filter(x=> (!partySalesFilter || x.partyId===partySalesFilter) && (recvFilter==='all' || (recvFilter==='none' ? (n(x.received)>0 && !x.receivedBy) : x.receivedBy===recvFilter)));
+  const rows = sortSales(all.filter(x=> (!partySalesFilter || x.partyId===partySalesFilter) && saleMatch(x,C)),C);
+  const dueBy={}; all.forEach(x=>{ const d=C.saleCalc(x).due; if(d>0.5) dueBy[x.partyId||'_']=(dueBy[x.partyId||'_']||0)+d; });
+  const dueTot=Object.values(dueBy).reduce((a,b)=>a+b,0), dueParties=Object.keys(dueBy).length;
   return `<div class="row-head"><div><h2>Sales</h2><p>Profit on each bill is after landed cost, discount and delivery</p></div><div class="controls">
-    <select class="sel" id="recvSel" aria-label="Money received by">${[['all','Money with anyone'],['Anita','Money with Anita'],['Neha','Money with Neha'],['Firm','Money in firm account'],['none','Not marked']].map(([k,l])=>`<option value="${k}" ${k===recvFilter?'selected':''}>${l}</option>`).join('')}</select>
+    <select class="sel" id="recvSel" aria-label="Money received by">${[['all','All sales'],['due','Due bills (highest first)'],['paid','Fully paid'],['Anita','Money with Anita'],['Neha','Money with Neha'],['Firm','Money in firm account'],['none','Not marked']].map(([k,l])=>`<option value="${k}" ${k===recvFilter?'selected':''}>${l}</option>`).join('')}</select>
     <div class="seg" role="group" aria-label="View">${[['cards','Cards'],['table','Table']].map(([k,l])=>`<button type="button" class="segb" data-lview="${k}" aria-pressed="${listView===k}">${l}</button>`).join('')}</div>
     ${rows.length?`<button type="button" class="btn wa" data-pdf="sales">PDF / WhatsApp</button>`:''}
     <button class="btn primary" data-add="sales">+ Sale</button></div></div>
   ${partySalesFilter?`<div class="banner"><p>Showing only the bills of <b>${esc(partyName(V,partySalesFilter))}</b> (${rows.length}).</p><button type="button" class="btn small" id="clearPartySales">Show all sales</button></div>`:''}
   <div class="kpis">
+    <div class="kpi"><span>Due from parties</span><b style="color:${dueTot>0.5?'var(--warn)':'inherit'}">${rs(dueTot)}</b><em>${dueParties} part${dueParties===1?'y':'ies'} owe money</em></div>
     <div class="kpi"><span>Received by Anita</span><b>${rs(tot.Anita)}</b></div>
     <div class="kpi"><span>Received by Neha</span><b>${rs(tot.Neha)}</b></div>
     <div class="kpi"><span>Firm account</span><b>${rs(tot.Firm)}</b></div>
