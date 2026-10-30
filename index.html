@@ -422,7 +422,7 @@ const PARTNERS = [
 const COLS = ['products','purchases','sales','parties','ledger','expenses','ideas'];
 const TABS = [
   ['dash','Dashboard'],['stock','Stock'],['godowns','Godowns'],['flow','Material flow'],['damaged','Damaged'],['catalogue','Catalogue'],['purchases','Purchases'],['orders','Orders'],['sales','Sales'],
-  ['parties','Customers & Resellers'],['partners','Partners'],['expenses','Expenses'],['promote','Promote']
+  ['parties','All parties'],['partners','Partners'],['expenses','Expenses'],['promote','Promote']
 ];
 const CATS = ['Pooja set','Bowl set','Jaali box','Inlay table','Diwali hamper','Other'];
 const EXP_CATS = ['Transport','Handling','Packaging','Promotion','Rent','Travel','Other'];
@@ -1267,6 +1267,16 @@ function supplierList(C){
   C.purchases.forEach(u=>{ const k=supKey(u.supplier); const e=m.get(k)||{key:k,names:{},bills:0,total:0}; const nm=String(u.supplier||'').trim(); e.names[nm]=(e.names[nm]||0)+1; e.bills++; e.total+=purchCalc(u).total; m.set(k,e); });
   return [...m.values()].map(e=>({...e,name:Object.entries(e.names).sort((a,b)=>b[1]-a[1])[0][0]||'No supplier name'})).sort((a,b)=>a.name.localeCompare(b.name));
 }
+/* every party in one list: saved customers, resellers and suppliers, plus suppliers known only from purchase bills */
+const PTYPE_ORDER = {Customer:0, Reseller:1, Supplier:2};
+function allParties(V,C){
+  const out=(V.parties||[]).map(p=>({...p,type:p.type||'Customer',saved:true}));
+  const have=new Set(out.map(p=>supKey(p.name)));
+  supplierList(C).filter(x=>x.key && !have.has(x.key)).forEach(x=>out.push({id:'sup:'+x.name,name:x.name,type:'Supplier',saved:false}));
+  return out.sort((a,b)=>(PTYPE_ORDER[a.type]??3)-(PTYPE_ORDER[b.type]??3)||String(a.name).localeCompare(String(b.name)));
+}
+function partyOptsAll(V,C){ return [['','Walk-in customer'],...allParties(V,C).map(p=>[p.id,`${p.name} (${p.type})`])]; }
+function partyDatalist(V,C,id){ const L=allParties(V,C); return `<datalist id="${id}">${[...L.filter(p=>p.type==='Supplier'),...L.filter(p=>p.type!=='Supplier')].map(p=>`<option value="${esc(p.name)}" label="${esc(p.type)}"></option>`).join('')}</datalist>`; }
 const PAY_FILTERS = [['all','All bills'],['late','Late deliveries'],['transit','In transit'],['Anita','Anita paid'],['Neha','Neha paid'],['Firm','Firm paid'],['shared','Both partners paid'],['due','Not fully paid']];
 function payPills(u){
   const p=u.payments||{}; const out=PAYERS.filter(k=>n(p[k])>0).map(k=>`<span class="pill ${k==='Anita'?'acc':k==='Neha'?'gold':'plain'}">${k} ${rs(p[k])}</span>`);
@@ -1630,15 +1640,28 @@ function salesV(V,C){
         <div class="lacts"><button type="button" class="btn small wa" data-pdf="sale" data-id="${s.id}">Bill PDF / WhatsApp</button></div></article>`; }).join('')}</div>`
   : `<div class="panel empty">${recvFilter==='all'?'No sales yet.':'No sales match this filter.'}</div>`}`;
 }
+let partyQ = '';
 function partiesV(V,C){
-  const stats={}; V.sales.forEach(s=>{ const c=C.saleCalc(s); const k=s.partyId||'_'; stats[k]=stats[k]||{bought:0,due:0,bills:0,last:''}; stats[k].bought+=c.net; stats[k].due+=c.due; stats[k].bills++; if((s.date||'')>stats[k].last) stats[k].last=s.date; });
-  const rows = V.parties.filter(p=>partyFilter==='all'||p.type===partyFilter).sort((a,b)=>(stats[b.id]?.bought||0)-(stats[a.id]?.bought||0));
-  return `<div class="row-head"><div><h2>Customers &amp; resellers</h2><p>${V.parties.filter(p=>p.type==='Customer').length} customers · ${V.parties.filter(p=>p.type==='Reseller').length} resellers</p></div>
-  <div class="controls"><select class="sel" id="partySel" aria-label="Filter">${[['all','Everyone'],['Customer','Customers'],['Reseller','Resellers']].map(([k,l])=>`<option value="${k}" ${k===partyFilter?'selected':''}>${l}</option>`).join('')}</select><button class="btn primary" data-add="parties">+ Party</button></div></div>
-  ${table(['Name','Type','Phone','City','Bills','Total bought','Due','Last bought'],
-    rows.map(p=>{ const s=stats[p.id]||{bought:0,due:0,bills:0,last:''};
-      return `<tr class="click" data-edit="parties" data-id="${p.id}"><td><b>${esc(p.name)}</b>${p.note?`<div class="sub">${esc(p.note)}</div>`:''}</td><td><span class="pill ${p.type==='Reseller'?'gold':'acc'}">${p.type}</span></td><td class="num">${esc(p.phone||'')}</td><td>${esc(p.city||'')}</td><td class="n">${s.bills}</td><td class="n">${rs(s.bought)}</td><td class="n" style="color:${s.due>0.5?'var(--warn)':'inherit'}">${rs(Math.max(s.due,0))}</td><td>${dmy(s.last)}</td></tr>`; }),
-    'No customers or resellers yet.',[4,5,6])}`;
+  const stats={}, st=k=>stats[k]=stats[k]||{sold:0,due:0,bills:0,last:'',bought:0,owe:0};
+  V.sales.forEach(x=>{ const c=C.saleCalc(x); const e=st('id:'+(x.partyId||'_')); e.sold+=c.net; e.due+=c.due; e.bills++; if((x.date||'')>e.last) e.last=x.date; });
+  C.purchases.forEach(u=>{ const k=supKey(u.supplier); if(!k) return; const pc=purchCalc(u); const e=st('sup:'+k); e.bought+=pc.total; e.owe+=Math.max(pc.due,0); e.bills++; if((u.date||'')>e.last) e.last=u.date; });
+  const all = allParties(V,C).map(p=>{ const a=stats['id:'+p.id]||{}, b=stats['sup:'+supKey(p.name)]||{};
+    return {...p, sold:a.sold||0, due:Math.max(a.due||0,0), bought:b.bought||0, owe:b.owe||0, bills:(a.bills||0)+(b.bills||0), last:[a.last||'',b.last||''].sort().pop()}; });
+  const cnt=t=>all.filter(p=>p.type===t).length;
+  const q=partyQ.trim().toLowerCase();
+  const rows = all.filter(p=> (partyFilter==='all' || p.type===partyFilter || (partyFilter==='due'&&p.due>0.5) || (partyFilter==='owe'&&p.owe>0.5))
+      && (!q || `${p.name} ${p.phone||''} ${p.city||''}`.toLowerCase().includes(q)))
+    .sort((a,b)=> partyFilter==='due' ? b.due-a.due : partyFilter==='owe' ? b.owe-a.owe : (b.sold+b.bought)-(a.sold+a.bought));
+  const dueT=all.reduce((x,p)=>x+p.due,0), oweT=all.reduce((x,p)=>x+p.owe,0);
+  const pill={Customer:'acc',Reseller:'gold',Supplier:'plain'};
+  return `<div class="row-head"><div><h2>All parties</h2><p>${cnt('Customer')} customers · ${cnt('Reseller')} resellers · ${cnt('Supplier')} suppliers</p></div>
+  <div class="controls"><input class="search" id="partyQ" placeholder="Search name, phone, city" value="${esc(partyQ)}" aria-label="Search parties">
+  <select class="sel" id="partySel" aria-label="Show">${[['all','All parties'],['Customer','Customers'],['Reseller','Resellers'],['Supplier','Suppliers'],['due','They owe us (highest first)'],['owe','We owe them (highest first)']].map(([k,l])=>`<option value="${k}" ${k===partyFilter?'selected':''}>${l}</option>`).join('')}</select><button class="btn primary" data-add="parties">+ Party</button></div></div>
+  <div class="kpis"><div class="kpi"><span>Parties owe us</span><b style="color:${dueT>0.5?'var(--warn)':'inherit'}">${rs(dueT)}</b><em>${all.filter(p=>p.due>0.5).length} with unpaid sales</em></div>
+    <div class="kpi"><span>We owe suppliers</span><b style="color:${oweT>0.5?'var(--warn)':'inherit'}">${rs(oweT)}</b><em>${all.filter(p=>p.owe>0.5).length} with unpaid purchase bills</em></div></div>
+  ${table(['Name','Type','Phone','City','Bills','Sold to them','Bought from them','They owe us','We owe them','Last deal'],
+    rows.map(p=>`<tr class="click" ${p.saved?`data-edit="parties" data-id="${p.id}"`:`data-newparty="${esc(p.name)}"`}><td><b>${esc(p.name)}</b>${p.note?`<div class="sub">${esc(p.note)}</div>`:''}${p.saved?'':'<div class="sub">From purchase bills · tap to add phone &amp; city</div>'}</td><td><span class="pill ${pill[p.type]||'plain'}">${p.type}</span></td><td class="num">${esc(p.phone||'')}</td><td>${esc(p.city||'')}</td><td class="n">${p.bills}</td><td class="n">${rs(p.sold)}</td><td class="n">${rs(p.bought)}</td><td class="n" style="color:${p.due>0.5?'var(--warn)':'inherit'}">${rs(p.due)}</td><td class="n" style="color:${p.owe>0.5?'var(--warn)':'inherit'}">${rs(p.owe)}</td><td>${dmy(p.last)}</td></tr>`),
+    q||partyFilter!=='all'?'No parties match.':'No parties yet.',[4,5,6,7,8])}`;
 }
 function partnerBooks(V,C){
   let net=0,cogs=0,costs=0; V.sales.forEach(s=>{const c=C.saleCalc(s); net+=c.net; cogs+=c.cogs; costs+=c.costs;});
@@ -1835,7 +1858,7 @@ function openForm(col, id, presetStage, preset){
     const supPre = b.supplier ?? (supFilter!=='all' ? (sups.find(s=>s.key===supFilter)?.name||'') : '');
     body = `<div class="fgrid">${field('date','Date','date',b.date||today())}
       <label class="f">Supplier<input name="supplier" id="f-supplier" list="supList" value="${esc(supPre)}" placeholder="Pick or type a name" autocomplete="off"></label>
-      <datalist id="supList">${sups.filter(s=>s.key).map(s=>`<option value="${esc(s.name)}"></option>`).join('')}</datalist>
+      ${partyDatalist(V,C,'supList')}
       ${field('billNo','Bill no. (optional)','text',b.billNo)}
       ${field('status','Goods','select',b.status||'Received',{options:[['Received','Received in godown'],['In transit','On the way (in transit)'],['Ordered','Ordered, not dispatched yet']]})}
       ${field('eta','Expected to arrive','date',b.eta)}
@@ -1852,10 +1875,10 @@ function openForm(col, id, presetStage, preset){
       <div class="fgrid">${field('note','Notes','textarea',b.note)}</div><div class="calc" id="calcBox"></div>`;
   } else if (col==='sales'){ title = id?'Edit sale':'New sale';
     if(!prodOpts.length) return needProducts();
-    const partyOpts = [['','Walk-in customer'],...V.parties.map(p=>[p.id,`${p.name} (${p.type})`])];
+    const partyOpts = partyOptsAll(V,C);
     const items = rec.items?.length ? rec.items : [{productId:prodOpts[0][0],qty:1,rate:''}];
     body = `<div class="fgrid">${field('date','Date','date',rec.date||today())}
-      ${field('partyId','Customer / reseller','select',rec.partyId||'',{options:partyOpts})}
+      ${field('partyId','Party','select',rec.partyId||'',{options:partyOpts})}
       ${field('fromLoc','Stock goes out from','select',rec.fromLoc || resellerPlaceFor(V,rec.partyId) || 'godown',{options:places(V).map(x=>[x.key,x.name+(x.kind==='reseller'?' (reseller stock)':'')])})}</div>
       <div><div class="row-head"><b style="font-size:13px;color:var(--muted)">ITEMS</b><button type="button" class="btn small" id="addItem">+ Item</button></div><div class="items" id="items">${items.map(it=>itemRow(it,prodOpts)).join('')}</div></div>
       <div class="fgrid">${field('discount','Discount ₹','number',rec.discount)}
@@ -1865,9 +1888,9 @@ function openForm(col, id, presetStage, preset){
       ${field('receivedBy','Money received by (पैसा किसके पास आया)','select',rec.receivedBy||'',{options:[['','Choose who got the money'],...RECEIVERS.map(k=>[k,k==='Firm'?'Firm account':PARTNERS.find(p=>p.key===k).name])]})}
       ${field('mode','Payment mode','select',rec.mode||'UPI',{options:['UPI','Cash','Bank','Credit']})}
       ${field('note','Notes','textarea',rec.note)}</div><div class="calc" id="calcBox"></div>`;
-  } else if (col==='parties'){ title = id?'Edit party':'New customer or reseller';
+  } else if (col==='parties'){ title = id?'Edit party':'New party';
     body = `<div class="fgrid">${field('name','Name','text',rec.name,{wide:true,req:true})}
-      ${field('type','Type','select',rec.type||'Customer',{options:['Customer','Reseller']})}
+      ${field('type','Type','select',rec.type||'Customer',{options:['Customer','Reseller','Supplier']})}
       ${field('phone','Phone','tel',rec.phone)}
       ${field('city','City','text',rec.city)}
       ${field('note','Notes','textarea',rec.note)}</div>`;
@@ -1885,11 +1908,11 @@ function openForm(col, id, presetStage, preset){
       ${field('note','Notes','textarea',rec.note)}</div>`;
   } else if (col==='orders'){ title = id?'Edit order':'New customer order';
     if(!prodOpts.length) return needProducts();
-    const partyOpts = [['','Walk-in customer'],...V.parties.map(p=>[p.id,`${p.name} (${p.type})`])];
+    const partyOpts = partyOptsAll(V,C);
     const items = rec.items?.length ? rec.items : [{productId:prodOpts[0][0],qty:1,rate:''}];
     const st = presetStage || rec.stage || 'Taken';
     current.rec.stageDates = {...(rec.stageDates||{})};
-    body = `<div class="fgrid">${field('partyId','Customer / reseller','select',rec.partyId||'',{options:partyOpts})}
+    body = `<div class="fgrid">${field('partyId','Party','select',rec.partyId||'',{options:partyOpts})}
       ${field('orderDate','Order date','date',rec.orderDate||today())}
       ${field('dueDate','Promised delivery date','date',rec.dueDate||addDays(today(),5))}
       ${field('fromLoc','Stock goes out from','select',rec.fromLoc || resellerPlaceFor(V,rec.partyId) || 'godown',{options:places(V).map(x=>[x.key,x.name+(x.kind==='reseller'?' (reseller stock)':'')])})}</div>
@@ -1923,7 +1946,7 @@ function openForm(col, id, presetStage, preset){
       <div class="norate"><div class="row-head"><b style="font-size:13px;color:var(--muted)">DAMAGED PIECES</b><button type="button" class="btn small" id="addItem">+ Item</button></div><div class="items" id="items">${items.map(it=>itemRow(it,prodOpts)).join('')}</div></div>
       <div class="fgrid" id="dmgClaim">
       <label class="f">Supplier (for a claim)<input name="supplier" list="supList2" value="${esc(rec.supplier||'')}" placeholder="Pick or type a name" autocomplete="off"></label>
-      <datalist id="supList2">${sups.filter(s=>s.key).map(s=>`<option value="${esc(s.name)}"></option>`).join('')}</datalist>
+      ${partyDatalist(V,C,'supList2')}
       ${field('claim','Claim amount ₹','number',rec.claim,{ph:'blank = landed cost'})}
       ${field('recovered','Money recovered ₹','number',rec.recovered)}</div>
       <div class="fgrid" id="dmgRepair">${field('repairCost','Repair cost ₹','number',rec.repairCost)}</div>
@@ -2090,6 +2113,7 @@ form.addEventListener('submit', async e=>{
   }
   if (current.col==='purchases'){ if (o.status==='Received' && onWay(current.rec||{}) && !o.receivedOn) o.receivedOn = today(); if (onWay(o)) delete o.receivedOn; if (o.status==='In transit' && !o.dispatchedOn) o.dispatchedOn = current.rec?.status==='Ordered' ? today() : (o.date||today()); if (o.status==='Ordered') delete o.dispatchedOn; }
   if (current.col==='orders'){ o.stageDates = {...(o.stageDates||{})}; STAGES.slice(0, stageIdx(o.stage)+1).forEach(x=>{ if(!o.stageDates[x]) o.stageDates[x] = x==='Taken' ? (o.orderDate||today()) : today(); }); STAGES.slice(stageIdx(o.stage)+1).forEach(x=>delete o.stageDates[x]); }
+  if (/^sup:/.test(o.partyId||'')){ const np={id:uid(), name:o.partyId.slice(4), type:'Supplier'}; if (!await saveDoc('parties',np)){ btn.disabled=false; btn.textContent='Save'; return; } o.partyId=np.id; }
   const ok = await saveDoc(current.col, o);
   if (ok && current.col==='orders') await syncOrderSale(o);
   btn.disabled=false; btn.textContent='Save';
@@ -2102,6 +2126,7 @@ document.addEventListener('click', async e=>{
   const t = e.target.closest('button,tr.click,.gtrack,.place,.lcard,.scard,.pcard'); if(!t) return;
   if (t.dataset.tab){ tab=t.dataset.tab; try{localStorage.setItem('phd-tab',tab);}catch(er){} render(); window.scrollTo({top:0}); return; }
   if (t.id==='startOwn'){ demo=false; render(); return; }
+  if (t.dataset.newparty!==undefined) return openForm('parties', null, null, {name:t.dataset.newparty, type:'Supplier'});
   if (t.id==='quickSale') return openForm('sales');
   if (t.id==='quickPurchase') return openForm('purchases');
   if (t.id==='backupBtn') return backup();
@@ -2159,7 +2184,7 @@ document.addEventListener('change', e=>{
   if (e.target.id==='catRound'){ settings={...settings,catRound:n(e.target.value)}; saveSettings(); }
   if (e.target.id==='shareInp'){ const v=Math.min(100,Math.max(0,n(e.target.value))); settings={...settings,shareAnita:v}; saveSettings(); }
 });
-let qT; document.addEventListener('input', e=>{ if(e.target.id==='stockQ'){ stockQ=e.target.value; clearTimeout(qT); qT=setTimeout(()=>{ render(); const el=document.getElementById('stockQ'); el.focus(); el.setSelectionRange(stockQ.length,stockQ.length); },250);} });
+let qT; document.addEventListener('input', e=>{ if(e.target.id==='partyQ'){ partyQ=e.target.value; clearTimeout(qT); qT=setTimeout(()=>{ render(); const el=document.getElementById('partyQ'); if(el){ el.focus(); el.setSelectionRange(partyQ.length,partyQ.length); } },250); return; } if(e.target.id==='stockQ'){ stockQ=e.target.value; clearTimeout(qT); qT=setTimeout(()=>{ render(); const el=document.getElementById('stockQ'); el.focus(); el.setSelectionRange(stockQ.length,stockQ.length); },250);} });
 
 /* Old single-item purchase rows from the same date and supplier become one bill,
    with each partner's share kept as their payment. Same ids every time, so restoring twice replaces, not duplicates. */
