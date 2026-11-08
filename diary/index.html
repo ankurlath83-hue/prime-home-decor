@@ -482,6 +482,15 @@ nav.tabs button.on::after{transform:scaleX(1)}
 @media (min-width:780px){.deity-card.vid.tall{max-width:520px}}
 .deity-cap .kq{display:block;font-style:italic;font-size:.82rem;line-height:1.4;margin-top:2px}
 .still-art{display:block;width:100%;aspect-ratio:4/5;object-fit:cover}
+.simp{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.simp-row{display:grid;grid-template-columns:minmax(0,1.3fr) 1fr auto auto;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.simp-row.off .simp-l,.simp-row.off .simp-d{opacity:.45}
+.simp-l{font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.simp-bar{height:6px;border-radius:4px;background:var(--line);overflow:hidden}
+.simp-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--leaf),var(--marigold,#EE7A12))}
+.simp-d{font-size:.78rem;color:var(--muted);min-width:34px;text-align:right}
+.simp-b{min-width:58px;text-align:center}
+.simp-nudge{margin:14px 0}
 .wdeck{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 10px;margin:14px -2px 0;-webkit-overflow-scrolling:touch}
 .wcard{flex:0 0 min(62%,240px);scroll-snap-align:start;position:relative;border-radius:18px;overflow:hidden;margin:0;aspect-ratio:4/5;background:var(--peach);border:1px solid var(--line)}
 .wcard img{width:100%;height:100%;object-fit:cover;display:block}
@@ -2095,6 +2104,7 @@ function vToday(){
     <button class="now smart" data-a="${ns.id?'gEdit':'whatNow'}" ${ns.id?`data-id="${ns.id}"`:''}><span class="tag">${esc(ns.tag)}</span>
       <div class="nx"><h3>${ns.icon} ${esc(ns.title)}</h3><p class="small">${esc(ns.sub)}${ns.late?` · <b class="late">${ns.late} overdue</b>`:''}</p></div><span class="go">›</span></button>
   </section>
+  ${simplifyDue()?`<section class="card simp-nudge"><b>🧹 Three weeks in — time to lighten the app</b><p class="small muted">See which sections you actually opened and hide the rest. Less to carry, more to use.</p><div class="row" style="gap:8px;margin-top:8px"><button class="btn green sm" data-a="simplify">See what I use</button><button class="btn ghost sm" data-a="simpLater">Later</button></div></section>`:''}
   ${karmaScene()}
   <div class="sec-head"><h2>Top 3 today</h2></div>
   <div class="card">`;
@@ -2709,7 +2719,7 @@ function gitaListHTML(){
   const ch=ui.gCh||2,[nm,sub]=GITA_CH[ch-1],vs=GITA_ALL.filter(x=>x[0]===ch);
   return `<div class="card"><p class="small muted">Chapter ${ch} · ${vs.length} verses</p><h3 style="margin-top:2px">${nm}</h3><p class="small">${sub}</p></div><div class="card">${vs.map(x=>gitaVerse(...x)).join('')}</div>`}
 function vMind(){
-  let html=`<div class="seg mind-seg">${[['goals','🎯 Goals'],['ideas','💡 Ideas'],['dump','🧺 Brain dump'],['reflect','🌙 Reflect'],['week','📊 Week'],['library','📚 Library'],['wisdom','🪷 Wisdom'],['lab','🔬 Lab'],['tamil','🗣 Tamil']].map(([k,l])=>`<button class="${ui.mSub===k?'on':''}" data-a="sub" data-g="mSub" data-v="${k}">${l}</button>`).join('')}</div>`;
+  let html=`<div class="seg mind-seg">${visMind().map(([k,l])=>`<button class="${ui.mSub===k?'on':''}" data-a="sub" data-g="mSub" data-v="${k}">${l}</button>`).join('')}</div>`;
   if(ui.mSub==='lab')html+=vLab();
   if(ui.mSub==='week')html+=vWeek();
   if(ui.mSub==='tamil')html+=vTamil();
@@ -3383,9 +3393,27 @@ const GROUPS={
   shiv:{name:'Shiv',tabs:[['today','☀️ Today'],['god','🔱 God'],['exercise','💪 Exercise']]},
   vishnu:{name:'Vishnu',tabs:[['habits','🌿 Habits'],['plan','📋 Plan'],['money','💰 Money'],['media','🎬 Media']]},
   saraswati:{name:'Saraswati',tabs:[['mind','']]}};
+const MIND_SUBS=[['goals','🎯 Goals'],['ideas','💡 Ideas'],['dump','🧺 Brain dump'],['reflect','🌙 Reflect'],['week','📊 Week'],['library','📚 Library'],['wisdom','🪷 Wisdom'],['lab','🔬 Lab'],['tamil','🗣 Tamil']];
+const KEEP=['today','mind:goals'];  // never hidden, so the app always has a way in
+function hiddenSet(){return new Set((state.hide||[]).filter(k=>!KEEP.includes(k)))}
+function visTabs(g){const h=hiddenSet(),v=GROUPS[g].tabs.filter(([k])=>!h.has(k));return v.length?v:GROUPS[g].tabs}
+function visMind(){const h=hiddenSet(),v=MIND_SUBS.filter(([k])=>!h.has('mind:'+k));return v.length?v:MIND_SUBS}
+function useKey(){return ui.tab==='mind'?'mind:'+ui.mSub:ui.tab}
+/* counts the days each section is opened — once per section per day, kept for 60 days */
+function trackUse(){const k=useKey(),T=today();state.usage=state.usage||{start:T,d:{}};const u=state.usage;u.d=u.d||{};
+  const days=u.d[k]=u.d[k]||[];if(days[days.length-1]===T)return;days.push(T);
+  const cut=dk(addDays(new Date(),-60));for(const x in u.d)u.d[x]=u.d[x].filter(d=>d>=cut);save()}
+function useSections(){return [...Object.values(GROUPS).flatMap(g=>g.tabs).filter(([k])=>k!=='mind').map(([k,l])=>[k,l]),...MIND_SUBS.map(([k,l])=>['mind:'+k,l])]}
+function useDays(k,n){const cut=dk(addDays(new Date(),-(n-1)));return ((state.usage||{}).d?.[k]||[]).filter(d=>d>=cut).length}
+function trackedDays(){const st=(state.usage||{}).start;return st?Math.round((new Date(today())-new Date(st))/864e5)+1:0}
+function simplifyDue(){const u=state.usage||{};if(!u.start)return false;const since=u.reviewed||u.start;return Math.round((new Date(today())-new Date(since))/864e5)>=21}
+function simplifyHTML(){const n=Math.min(21,Math.max(1,trackedDays())),h=hiddenSet();
+  const rows=useSections().map(([k,l])=>[k,l,useDays(k,n)]).sort((a,b)=>a[2]-b[2]);
+  return `<h2>Simplify</h2><p class="small muted">Days you opened each section in the last ${n} day${n===1?'':'s'}${trackedDays()<21?` (counting since ${prettyDate(state.usage.start)} — the full picture needs 21 days)`:''}. Hide what you don't use; nothing is deleted and you can show it again any time.</p>
+  <div class="simp">${rows.map(([k,l,d])=>`<div class="simp-row${h.has(k)?' off':''}"><span class="simp-l">${l.trim()||'Saraswati'}</span><span class="simp-bar"><i style="width:${Math.round(100*d/n)}%"></i></span><span class="simp-d">${d}/${n}</span>${KEEP.includes(k)?'<span class="small muted simp-b">always</span>':`<button class="btn sm simp-b ${h.has(k)?'':'ghost'}" data-a="simpToggle" data-k="${k}">${h.has(k)?'Show':'Hide'}</button>`}</div>`).join('')}</div>`}
 function tabGroup(t){for(const k in GROUPS)if(GROUPS[k].tabs.some(x=>x[0]===t))return k;return 'shiv'}
 function groupSeg(){const g=tabGroup(ui.tab);if(g==='saraswati')return '';
-  return `<div class="seg grp-seg grp-${g}">${GROUPS[g].tabs.map(([k,l])=>`<button class="${ui.tab===k?'on':''}" data-a="tab" data-tab="${k}">${l}</button>`).join('')}</div>`}
+  return `<div class="seg grp-seg grp-${g}">${visTabs(g).map(([k,l])=>`<button class="${ui.tab===k?'on':''}" data-a="tab" data-tab="${k}">${l}</button>`).join('')}</div>`}
 
 /* ---------- Exercise (Shiv) ---------- */
 const EX_KINDS=[['walk','🚶','Walk','min'],['gym','🏋️','Gym','min'],['yoga','🧘','Yoga','min'],['surya','☀️','Surya namaskar','rounds'],['run','🏃','Run','min'],['sport','🏸','Sport','min'],['stretch','🤸','Stretch','min']];
@@ -4169,7 +4197,7 @@ function render(){
   const key=[ui.tab,ui.hSub,ui.mSub,ui.labId,ui.labSub,ui.labSec,ui.moSub,ui.gSub,ui.wSub,ui.openParty,(ui.tab==='mind'&&ui.mSub==='ideas')?ui.mmId:''].join('|'),entering=key!==lastViewKey;lastViewKey=key;
   view.classList.remove('enter');
   const PV='.stat b,.grand b,.score,.shrine b,.money-line b,.sadh b',prevT=entering?[]:[...view.querySelectorAll(PV)].map(x=>x.textContent),prevW=entering?[]:[...view.querySelectorAll('.bar>i')].map(x=>x.style.width);
-  ui.last=ui.last||{};ui.last[tabGroup(ui.tab)]=ui.tab;
+  ui.last=ui.last||{};ui.last[tabGroup(ui.tab)]=ui.tab;trackUse();
   view.innerHTML=groupSeg()+VIEWS[ui.tab]();
   view.dataset.dir=ui._dir||'';ui._dir='';
   if(!entering&&!reduceMotion()){
@@ -4322,7 +4350,7 @@ const A={
     let st=labStock(i.name);if(!st){st={id:uid(),name:i.name,qty:0,unit:i.unit||'',rate:+i.rate||0};LAB().stock.push(st)}st.qty=(+st.qty||0)+n;commit();SFX.play('done');toast(`${n} ${i.name} added to stock`)},
   labBuyShare:()=>{const L=LAB(),lines=[];L.projects.forEach(p=>(p.items||[]).forEach(i=>{const n=labNeed(i);if(n.need>0)lines.push(`• ${i.name} — ${n.need}${i.unit?' '+i.unit:''} (${p.name})`)}));shareText('🛒 Lab shopping list\n'+lines.join('\n'))},
   grp:el=>{const g=el.dataset.grp,cg=tabGroup(ui.tab),order=Object.keys(GROUPS),a=order.indexOf(cg),b=order.indexOf(g);ui.last=ui.last||{};
-    const t=cg===g?GROUPS[g].tabs[0][0]:(ui.last[g]||GROUPS[g].tabs[0][0]);ui._dir=b>a?'r':b<a?'l':'';ui.tab=t;render();window.scrollTo(0,0)},
+    const t=cg===g?visTabs(g)[0][0]:(ui.last[g]&&!hiddenSet().has(ui.last[g])?ui.last[g]:visTabs(g)[0][0]);ui._dir=b>a?'r':b<a?'l':'';ui.tab=t;render();window.scrollTo(0,0)},
   exKind:el=>{ui.exKind=el.dataset.v;render()},
   exPreset:el=>{const i=document.getElementById('exN');if(i)i.value=el.dataset.v},
   exAdd:()=>{const n=+((document.getElementById('exN')||{}).value||0);if(!(n>0)){toast('Enter minutes or rounds');return}
@@ -4373,6 +4401,11 @@ const A={
   deityArt:el=>{const k=el.dataset.k;state.deityMode=state.deityMode||{};state.deityMode[k]='art';commit()},
   deityPhoto:el=>{const k=el.dataset.k;state.deityMode=state.deityMode||{};state.deityMode[k]=DEITY_VIDEO[k]?'photo':undefined;if(!DEITY_VIDEO[k])delete state.deityMode[k];commit()},
   deityVideo:el=>{const k=el.dataset.k;state.deityMode=state.deityMode||{};state.deityMode[k]='video';commit()},
+  simplify:()=>openModal(simplifyHTML()),
+  simpToggle:el=>{const k=el.dataset.k,h=new Set(state.hide||[]);h.has(k)?h.delete(k):h.add(k);state.hide=[...h];
+    state.usage=state.usage||{start:today(),d:{}};state.usage.reviewed=today();
+    if(hiddenSet().has(useKey()))ui.tab='today';commit();openModal(simplifyHTML())},
+  simpLater:()=>{state.usage.reviewed=dk(addDays(new Date(),-14));commit();toast('I\'ll remind you in a week')},
   deityClip:el=>{const k=el.dataset.k;state.deityClip=state.deityClip||{};state.deityClip[k]=state.deityClip[k]==='classic'?'new':'classic';commit()},
   belOffer:()=>belOffer(),
   monkTick:el=>{const T=today();state.monk=state.monk||{};const d=state.monk[T]=state.monk[T]||{};d[el.dataset.k]=!d[el.dataset.k];commit();if(MONK_START.every(([k])=>d[k])){try{SFX.play('fanfare')}catch(e){}toast('All 5 done — a calmer mind today 🪷')}},
@@ -4525,6 +4558,9 @@ const A={
     <label class="lbl">Follow up parties owing at least</label><input class="field" type="number" inputmode="numeric" value="${state.followMin||1000}" data-bind="followMin">
     ${NATIVE?`<label class="lbl">Automatic backup</label><p class="small muted">Every night the app saves a copy to the folder you pick (for example Documents/LathDiary). The last 30 copies are kept. Android also backs the app up to your Google account automatically.</p>
     <div class="yn"><button class="btn sm" data-a="backupFolder">Choose folder</button><button class="btn sm" data-a="backupNow">Back up now</button></div><p class="small muted" style="margin-top:4px">${esc(NATIVE.backupInfo?NATIVE.backupInfo():'')}</p>`:''}
+    <label class="lbl">Simplify</label>
+    <button class="btn ghost block" data-a="simplify">🧹 See what I use · hide the rest</button>
+    <p class="small muted" style="margin-top:4px">${state.hide&&state.hide.length?`${state.hide.length} section${state.hide.length===1?'':'s'} hidden. `:''}Counting which sections you open${state.usage?.start?` since ${prettyDate(state.usage.start)}`:''}.</p>
     <label class="lbl">Animation</label><div class="yn">${[['full','Full'],['calm','Calm']].map(([v,l])=>`<button class="btn sm ${motionPref()===v?'on':''}" data-a="motion" data-v="${v}">${l}</button>`).join('')}</div>
     <label class="lbl">Saving</label>
     ${syncMode==='big'?'<p class="small" style="color:#C8452F">Your diary has grown past the account sync limit. It still saves on this device — take a backup, then clear old done tasks and cash entries.</p>':''}
