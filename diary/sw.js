@@ -1,6 +1,6 @@
 // Keeps the app opening without internet. The books themselves are kept offline by Firebase.
-const CACHE = 'diary-v6';
-const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png', 'media/krishna.jpg', 'media/saraswati.jpg'];
+const CACHE = 'diary-v7';
+const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'media/krishna.jpg', 'media/saraswati.jpg', 'media/vishnu.jpg', 'media/saraswati-river.jpg', 'media/shiv.jpg', 'media/karma.jpg', 'media/splash.jpg'];
 const LIBS = ['www.gstatic.com', 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 
 self.addEventListener('install', e => {
